@@ -1,0 +1,179 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Animated Red Wave Decoration</title>
+<style>
+  :root {
+    --wave-shift: 0px;
+    --wave-tilt: 0deg;
+    --wave-opacity: 1;
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    min-height: 180vh;
+    font-family: system-ui, sans-serif;
+    color: #241f22;
+    background:
+      linear-gradient(#fff 0 48%, #fff8f8 48% 100%);
+  }
+
+  .demo-copy {
+    width: min(900px, calc(100% - 40px));
+    margin: 0 auto;
+    padding: 72px 0 40px;
+  }
+
+  .wave-decoration {
+    position: relative;
+    width: 100%;
+    height: clamp(110px, 18vw, 210px);
+    overflow: hidden;
+    pointer-events: none;
+    user-select: none;
+    opacity: var(--wave-opacity);
+  }
+
+  .wave-decoration svg {
+    position: absolute;
+    inset: 50% auto auto 50%;
+    width: max(760px, 118vw);
+    height: 100%;
+    overflow: visible;
+    transform:
+      translate(-50%, -50%)
+      translateX(var(--wave-shift))
+      rotate(var(--wave-tilt));
+    transform-origin: 50% 50%;
+    will-change: transform, opacity;
+  }
+
+  .strand {
+    fill: none;
+    stroke-linecap: round;
+    vector-effect: non-scaling-stroke;
+    mix-blend-mode: multiply;
+  }
+
+  .soft {
+    filter: url(#softGlow);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .wave-decoration svg {
+      transform: translate(-50%, -50%);
+    }
+  }
+</style>
+</head>
+<body>
+  <main>
+    <section class="demo-copy">
+      <p>Scroll the page to see the decorative wave move subtly.</p>
+    </section>
+
+    <div class="wave-decoration" aria-hidden="true">
+      <svg viewBox="0 0 1200 220" preserveAspectRatio="none">
+        <defs>
+          <linearGradient id="redStrong" x1="0" y1="0" x2="1" y2="0">
+            <stop offset="0%" stop-color="#ff7d7d" stop-opacity=".18"/>
+            <stop offset="18%" stop-color="#ff3b30" stop-opacity=".70"/>
+            <stop offset="48%" stop-color="#ef1515" stop-opacity=".90"/>
+            <stop offset="78%" stop-color="#ff6262" stop-opacity=".48"/>
+            <stop offset="100%" stop-color="#ffb1b1" stop-opacity=".08"/>
+          </linearGradient>
+
+          <linearGradient id="redSoft" x1="0" y1="0" x2="1" y2="0">
+            <stop offset="0%" stop-color="#ffbcbc" stop-opacity=".08"/>
+            <stop offset="28%" stop-color="#ff7777" stop-opacity=".40"/>
+            <stop offset="58%" stop-color="#ff3c3c" stop-opacity=".30"/>
+            <stop offset="100%" stop-color="#ffdddd" stop-opacity=".03"/>
+          </linearGradient>
+
+          <filter id="softGlow" x="-10%" y="-70%" width="120%" height="240%">
+            <feGaussianBlur stdDeviation="2.6"/>
+          </filter>
+        </defs>
+
+        <!-- Broad translucent ribbons -->
+        <path class="strand soft"
+          d="M -30 126 C 120 56, 220 164, 360 106 S 600 62, 740 130 S 990 160, 1230 42"
+          stroke="url(#redSoft)" stroke-width="34" opacity=".60"/>
+
+        <path class="strand soft"
+          d="M -20 118 C 130 150, 245 40, 390 88 S 630 178, 795 110 S 1030 50, 1230 70"
+          stroke="url(#redSoft)" stroke-width="22" opacity=".46"/>
+
+        <!-- Main crisp flowing strands -->
+        <path class="strand"
+          d="M -20 126 C 120 60, 235 148, 360 92 S 606 66, 742 128 S 985 150, 1230 44"
+          stroke="url(#redStrong)" stroke-width="3.4" opacity=".88"/>
+
+        <path class="strand"
+          d="M -15 120 C 132 140, 238 43, 386 84 S 635 171, 786 112 S 1020 57, 1235 70"
+          stroke="url(#redStrong)" stroke-width="2.2" opacity=".76"/>
+
+        <path class="strand"
+          d="M 20 130 C 170 100, 246 65, 385 77 S 622 142, 775 126 S 1030 85, 1180 54"
+          stroke="url(#redStrong)" stroke-width="1.5" opacity=".52"/>
+
+        <path class="strand"
+          d="M 5 118 C 150 82, 266 131, 404 110 S 650 71, 804 118 S 1030 142, 1210 68"
+          stroke="url(#redStrong)" stroke-width="1.25" opacity=".44"/>
+
+        <path class="strand"
+          d="M 45 132 C 188 72, 292 70, 430 98 S 670 156, 822 110 S 1064 66, 1205 78"
+          stroke="url(#redSoft)" stroke-width="8" opacity=".24"/>
+
+        <path class="strand"
+          d="M 0 124 C 145 58, 280 157, 425 99 S 674 77, 830 131 S 1055 133, 1220 57"
+          stroke="#ff2c2c" stroke-width=".8" opacity=".34"/>
+      </svg>
+    </div>
+
+    <section class="demo-copy">
+      <h1>Content below the decoration</h1>
+      <p>
+        The wave is a responsive inline SVG, styled with CSS and moved with a tiny
+        scroll-linked JavaScript effect. It remains decorative and is ignored by
+        assistive technologies.
+      </p>
+    </section>
+  </main>
+
+<script>
+(() => {
+  const root = document.documentElement;
+  const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  if (reducedMotion) return;
+
+  let ticking = false;
+
+  function updateWave() {
+    const y = window.scrollY;
+    const shift = Math.max(-36, Math.min(36, y * 0.045));
+    const tilt = Math.max(-1.2, Math.min(1.2, (y - 250) * 0.0017));
+    const opacity = Math.max(0.78, 1 - y * 0.00016);
+
+    root.style.setProperty('--wave-shift', `${shift}px`);
+    root.style.setProperty('--wave-tilt', `${tilt}deg`);
+    root.style.setProperty('--wave-opacity', opacity.toFixed(3));
+    ticking = false;
+  }
+
+  addEventListener('scroll', () => {
+    if (!ticking) {
+      requestAnimationFrame(updateWave);
+      ticking = true;
+    }
+  }, { passive: true });
+
+  updateWave();
+})();
+</script>
+</body>
+</html>

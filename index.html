@@ -1,0 +1,323 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Red Veil Wave Decoration</title>
+<style>
+  :root {
+    color-scheme: light;
+    --ink: #241f22;
+    --paper: #fffafa;
+    --wave-shift: -48px;
+    --wave-rise: 18px;
+    --wave-tilt: -1.2deg;
+    --wave-scale: 0.985;
+    --wave-opacity: 0.62;
+    --wind-speed: 8s;
+    --wind-speed-b: 9.4s;
+  }
+
+  * { box-sizing: border-box; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    margin: 0;
+    min-height: 235vh;
+    font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    color: var(--ink);
+    background:
+      radial-gradient(circle at 18% 16%, rgba(255, 54, 54, 0.08), transparent 24rem),
+      linear-gradient(#fff 0 28%, var(--paper) 28% 66%, #fff 66% 100%);
+  }
+
+  main { overflow: clip; }
+
+  .spacer {
+    display: grid;
+    min-height: 82vh;
+    place-items: center;
+    padding: clamp(2rem, 7vw, 6rem);
+  }
+
+  .copy {
+    width: min(880px, 100%);
+  }
+
+  h1,
+  h2 {
+    margin: 0;
+    max-width: 13ch;
+    font-family: Georgia, "Times New Roman", serif;
+    font-size: clamp(3rem, 10vw, 8rem);
+    font-weight: 500;
+    line-height: 0.94;
+    letter-spacing: 0;
+  }
+
+  h2 { font-size: clamp(2.4rem, 7vw, 5.4rem); }
+
+  p {
+    max-width: 54ch;
+    margin: 1.2rem 0 0;
+    color: #6f6464;
+    font-size: clamp(1rem, 1.35vw, 1.12rem);
+    line-height: 1.65;
+  }
+
+  .wave-section {
+    position: relative;
+    display: grid;
+    min-height: 104vh;
+    place-items: center;
+    padding: 18vh 0;
+    isolation: isolate;
+  }
+
+  .wave-section::before,
+  .wave-section::after {
+    position: absolute;
+    z-index: -1;
+    width: min(44vw, 560px);
+    height: min(44vw, 560px);
+    min-width: 280px;
+    min-height: 280px;
+    content: "";
+    border-radius: 999px;
+    filter: blur(28px);
+  }
+
+  .wave-section::before {
+    top: 16%;
+    left: -19vw;
+    background: radial-gradient(circle, rgba(255, 61, 61, 0.12), transparent 70%);
+  }
+
+  .wave-section::after {
+    right: -20vw;
+    bottom: 16%;
+    background: radial-gradient(circle, rgba(180, 0, 18, 0.09), transparent 72%);
+  }
+
+  .wave-decoration {
+    position: relative;
+    width: 100%;
+    height: clamp(150px, 21vw, 260px);
+    overflow: visible;
+    pointer-events: none;
+    user-select: none;
+    opacity: var(--wave-opacity);
+    transform:
+      translate3d(var(--wave-shift), var(--wave-rise), 0)
+      rotate(var(--wave-tilt))
+      scale(var(--wave-scale));
+    transform-origin: 50% 50%;
+    animation: waveLoad 1200ms cubic-bezier(0.16, 1, 0.3, 1) both;
+    transition: opacity 140ms linear;
+    will-change: transform, opacity;
+  }
+
+  .wave-decoration svg {
+    position: absolute;
+    inset: 50% auto auto 50%;
+    width: max(920px, 126vw);
+    height: 100%;
+    overflow: visible;
+    transform: translate(-50%, -50%);
+  }
+
+  .strand {
+    fill: none;
+    stroke-linecap: round;
+    vector-effect: non-scaling-stroke;
+    mix-blend-mode: multiply;
+    transform-box: fill-box;
+    transform-origin: center;
+  }
+
+  .soft { filter: url(#softGlow); }
+  .haze { filter: url(#haze); }
+
+  .strand--broad-a { animation: broadA var(--wind-speed) ease-in-out infinite alternate; }
+  .strand--broad-b { animation: broadB var(--wind-speed-b) ease-in-out infinite alternate-reverse; }
+  .strand--fine-a { animation: fineA 5.4s ease-in-out infinite alternate; }
+  .strand--fine-b { animation: fineB 6.7s ease-in-out infinite alternate-reverse; }
+  .strand--fine-c { animation: fineC 7.8s ease-in-out infinite alternate; }
+  .strand--hair { animation: hairDrift 4.8s ease-in-out infinite alternate; }
+
+  @keyframes waveLoad {
+    from {
+      opacity: 0;
+      transform: translate3d(calc(var(--wave-shift) - 34px), calc(var(--wave-rise) + 16px), 0) rotate(-2deg) scale(0.96);
+      filter: blur(8px);
+    }
+  }
+
+  @keyframes broadA {
+    from { transform: translate3d(-12px, 6px, 0) rotate(-0.18deg) scaleX(0.995); }
+    to { transform: translate3d(18px, -8px, 0) rotate(0.22deg) scaleX(1.008); }
+  }
+
+  @keyframes broadB {
+    from { transform: translate3d(16px, -5px, 0) rotate(0.22deg) scaleX(1.006); }
+    to { transform: translate3d(-20px, 7px, 0) rotate(-0.26deg) scaleX(0.992); }
+  }
+
+  @keyframes fineA {
+    from { transform: translate3d(-16px, 5px, 0); }
+    to { transform: translate3d(16px, -6px, 0); }
+  }
+
+  @keyframes fineB {
+    from { transform: translate3d(10px, -8px, 0); }
+    to { transform: translate3d(-18px, 8px, 0); }
+  }
+
+  @keyframes fineC {
+    from { transform: translate3d(-8px, -5px, 0) scaleX(0.998); }
+    to { transform: translate3d(20px, 6px, 0) scaleX(1.01); }
+  }
+
+  @keyframes hairDrift {
+    from { transform: translate3d(-22px, 4px, 0); }
+    to { transform: translate3d(24px, -5px, 0); }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    html { scroll-behavior: auto; }
+
+    .wave-decoration,
+    .strand {
+      animation: none;
+    }
+
+    .wave-decoration {
+      opacity: 0.95;
+      transform: none;
+    }
+  }
+</style>
+</head>
+<body>
+  <main>
+    <section class="spacer" aria-label="Opening">
+      <div class="copy">
+        <h1>Red veil study</h1>
+      </div>
+    </section>
+
+    <section class="wave-section" aria-label="Decorative red veil wave">
+      <div class="wave-decoration" aria-hidden="true">
+        <svg viewBox="0 0 1200 220" preserveAspectRatio="none">
+          <defs>
+            <linearGradient id="redStrong" x1="0" y1="0" x2="1" y2="0">
+              <stop offset="0%" stop-color="#ff9b9b" stop-opacity="0.04"></stop>
+              <stop offset="15%" stop-color="#ff4d43" stop-opacity="0.56"></stop>
+              <stop offset="42%" stop-color="#ef1515" stop-opacity="0.92"></stop>
+              <stop offset="70%" stop-color="#ff4545" stop-opacity="0.58"></stop>
+              <stop offset="100%" stop-color="#ffc7c7" stop-opacity="0.02"></stop>
+            </linearGradient>
+
+            <linearGradient id="redSoft" x1="0" y1="0" x2="1" y2="0">
+              <stop offset="0%" stop-color="#ffd4d4" stop-opacity="0.02"></stop>
+              <stop offset="24%" stop-color="#ff8a8a" stop-opacity="0.32"></stop>
+              <stop offset="55%" stop-color="#ff3434" stop-opacity="0.32"></stop>
+              <stop offset="100%" stop-color="#ffe5e5" stop-opacity="0.01"></stop>
+            </linearGradient>
+
+            <linearGradient id="redDark" x1="0" y1="0" x2="1" y2="0">
+              <stop offset="0%" stop-color="#81040d" stop-opacity="0"></stop>
+              <stop offset="30%" stop-color="#9d0611" stop-opacity="0.38"></stop>
+              <stop offset="63%" stop-color="#c00a13" stop-opacity="0.28"></stop>
+              <stop offset="100%" stop-color="#7c030c" stop-opacity="0"></stop>
+            </linearGradient>
+
+            <filter id="softGlow" x="-10%" y="-90%" width="120%" height="280%">
+              <feGaussianBlur stdDeviation="2.8"></feGaussianBlur>
+            </filter>
+
+            <filter id="haze" x="-12%" y="-120%" width="124%" height="340%">
+              <feGaussianBlur stdDeviation="7"></feGaussianBlur>
+            </filter>
+          </defs>
+
+          <path class="strand haze strand--broad-a" d="M -40 126 C 118 54, 224 166, 362 104 S 604 62, 742 130 S 994 160, 1240 42" stroke="url(#redSoft)" stroke-width="36" opacity="0.52">
+            <animate attributeName="d" dur="7.2s" repeatCount="indefinite" values="M -40 126 C 118 54, 224 166, 362 104 S 604 62, 742 130 S 994 160, 1240 42;M -40 138 C 120 86, 236 144, 368 92 S 612 92, 748 140 S 1004 132, 1240 58;M -40 126 C 118 54, 224 166, 362 104 S 604 62, 742 130 S 994 160, 1240 42"></animate>
+          </path>
+
+          <path class="strand soft strand--broad-b" d="M -30 118 C 130 150, 245 40, 390 88 S 630 178, 795 110 S 1030 50, 1230 70" stroke="url(#redSoft)" stroke-width="23" opacity="0.46">
+            <animate attributeName="d" dur="8.4s" repeatCount="indefinite" values="M -30 118 C 130 150, 245 40, 390 88 S 630 178, 795 110 S 1030 50, 1230 70;M -30 104 C 136 128, 246 70, 392 96 S 638 150, 800 100 S 1038 72, 1230 84;M -30 118 C 130 150, 245 40, 390 88 S 630 178, 795 110 S 1030 50, 1230 70"></animate>
+          </path>
+
+          <path class="strand strand--fine-a" d="M -24 126 C 120 60, 235 148, 360 92 S 606 66, 742 128 S 985 150, 1230 44" stroke="url(#redStrong)" stroke-width="3.4" opacity="0.9">
+            <animate attributeName="d" dur="6.3s" repeatCount="indefinite" values="M -24 126 C 120 60, 235 148, 360 92 S 606 66, 742 128 S 985 150, 1230 44;M -24 134 C 126 82, 242 126, 366 84 S 616 88, 748 136 S 992 130, 1230 58;M -24 126 C 120 60, 235 148, 360 92 S 606 66, 742 128 S 985 150, 1230 44"></animate>
+          </path>
+
+          <path class="strand strand--fine-b" d="M -18 120 C 132 140, 238 43, 386 84 S 635 171, 786 112 S 1020 57, 1235 70" stroke="url(#redStrong)" stroke-width="2.15" opacity="0.78">
+            <animate attributeName="d" dur="7.5s" repeatCount="indefinite" values="M -18 120 C 132 140, 238 43, 386 84 S 635 171, 786 112 S 1020 57, 1235 70;M -18 110 C 136 124, 244 66, 390 92 S 642 150, 792 104 S 1028 78, 1235 84;M -18 120 C 132 140, 238 43, 386 84 S 635 171, 786 112 S 1020 57, 1235 70"></animate>
+          </path>
+
+          <path class="strand strand--fine-c" d="M 16 130 C 170 100, 246 65, 385 77 S 622 142, 775 126 S 1030 85, 1180 54" stroke="url(#redStrong)" stroke-width="1.45" opacity="0.54"></path>
+          <path class="strand strand--fine-a" d="M 5 118 C 150 82, 266 131, 404 110 S 650 71, 804 118 S 1030 142, 1210 68" stroke="url(#redStrong)" stroke-width="1.15" opacity="0.46"></path>
+          <path class="strand soft strand--broad-a" d="M 45 132 C 188 72, 292 70, 430 98 S 670 156, 822 110 S 1064 66, 1205 78" stroke="url(#redSoft)" stroke-width="8" opacity="0.26"></path>
+          <path class="strand strand--hair" d="M 0 124 C 145 58, 280 157, 425 99 S 674 77, 830 131 S 1055 133, 1220 57" stroke="#ff2424" stroke-width="0.85" opacity="0.36"></path>
+          <path class="strand strand--hair" d="M 22 113 C 152 96, 276 110, 414 86 S 654 96, 812 128 S 1034 112, 1218 78" stroke="url(#redDark)" stroke-width="1.05" opacity="0.3"></path>
+        </svg>
+      </div>
+    </section>
+
+    <section class="spacer" aria-label="Closing">
+      <div class="copy">
+        <h2>Decorative wave</h2>
+      </div>
+    </section>
+  </main>
+
+<script>
+(() => {
+  const wave = document.querySelector('.wave-decoration');
+  const section = document.querySelector('.wave-section');
+  const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  if (!wave || !section || reducedMotion) return;
+
+  const clamp = (value, min, max) => Math.min(Math.max(value, min), max);
+  let ticking = false;
+
+  function updateWave() {
+    const rect = section.getBoundingClientRect();
+    const viewportHeight = window.innerHeight || document.documentElement.clientHeight;
+    const progress = clamp((viewportHeight - rect.top) / (viewportHeight + rect.height), 0, 1);
+    const phase = (progress - 0.5) * 2;
+    const presence = Math.sin(progress * Math.PI);
+    const visible = Math.pow(Math.max(presence, 0), 0.72);
+
+    wave.style.setProperty('--wave-shift', `${phase * 72}px`);
+    wave.style.setProperty('--wave-rise', `${phase * -18}px`);
+    wave.style.setProperty('--wave-tilt', `${phase * 1.8}deg`);
+    wave.style.setProperty('--wave-scale', `${0.975 + visible * 0.04}`);
+    wave.style.setProperty('--wave-opacity', `${0.48 + visible * 0.48}`);
+    wave.style.setProperty('--wind-speed', `${8.8 - visible * 2.6}s`);
+    wave.style.setProperty('--wind-speed-b', `${10.2 - visible * 3}s`);
+    ticking = false;
+  }
+
+  function requestUpdate() {
+    if (ticking) return;
+    ticking = true;
+    requestAnimationFrame(updateWave);
+  }
+
+  updateWave();
+  addEventListener('scroll', requestUpdate, { passive: true });
+  addEventListener('resize', requestUpdate);
+})();
+</script>
+</body>
+</html>
+
+
+
+
+
