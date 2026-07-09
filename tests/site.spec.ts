@@ -2,6 +2,7 @@ import { expect, test } from '@playwright/test';
 import { resolve } from 'node:path';
 
 const siteUrl = `file:///${resolve('index.html').replace(/\\/g, '/')}`;
+const editorUrl = `file:///${resolve('editor.html').replace(/\\/g, '/')}`;
 
 test('renders editable practice content and section navigation', async ({ page }) => {
   await page.goto(siteUrl);
@@ -25,4 +26,25 @@ test('provides a usable compact navigation', async ({ page }) => {
   await expect(page.getByRole('link', { name: 'Kontakt' })).toBeVisible();
   await page.getByRole('link', { name: 'Kontakt' }).click();
   await expect(page.locator('#contact')).toBeInViewport();
+});
+
+test('editor exports the updated content without source editing', async ({ page }) => {
+  await page.goto(editorUrl);
+
+  await expect(page.getByRole('heading', { name: 'Inhalte bearbeiten' })).toBeVisible();
+  await page.locator('[data-bind="practiceName"]').fill('Praxis Sonnenweg');
+  await page.getByRole('radio', { name: 'Scharlachrot' }).check();
+
+  const downloadPromise = page.waitForEvent('download');
+  await page.getByRole('button', { name: 'content.js herunterladen' }).first().click();
+  const download = await downloadPromise;
+  const content = await download.createReadStream().then(async (stream) => {
+    let output = '';
+    for await (const chunk of stream) output += chunk;
+    return output;
+  });
+
+  expect(download.suggestedFilename()).toBe('content.js');
+  expect(content).toContain('Praxis Sonnenweg');
+  expect(content).toContain('"colorTheme": "scarlet"');
 });
