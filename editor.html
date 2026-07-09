@@ -15,5 +15,150 @@
 <script>
 (()=>{const published=window.practiceContent,storageKey='practice-content-draft-v1',clone=value=>JSON.parse(JSON.stringify(value)),escape=value=>String(value??'').replace(/[&<>"']/g,char=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[char]));let data=clone(published);try{const draft=localStorage.getItem(storageKey);if(draft)data=JSON.parse(draft)}catch{}const get=(path,source=data)=>path.split('.').reduce((value,key)=>value?.[key],source);const set=(path,value)=>{const keys=path.split('.');const last=keys.pop();const target=keys.reduce((obj,key)=>obj[key],data);target[last]=value};const field=(label,path,{rows=4,short=false,markup=false}={})=>`<div class="field ${short?'':'grid-wide'}"><label for="${path}">${label}</label>${markup?'<div class="toolbar" aria-label="Formatierung"><button type="button" data-format="bold" title="Fett" aria-label="Fett">B</button><button type="button" data-format="italic" title="Kursiv" aria-label="Kursiv"><em>I</em></button><button type="button" data-format="link" title="Link einfuegen" aria-label="Link einfuegen">&#128279;</button></div>':''}${short?`<input id="${path}" data-bind="${path}" value="${escape(get(path))}">`:`<textarea id="${path}" data-bind="${path}" rows="${rows}">${escape(get(path))}</textarea>`}</div>`;const list=(label,path)=>`<div class="field grid-wide"><label>${label}</label><div class="card-list">${get(path).map((_,index)=>field(`${label} ${index+1}`,`${path}.${index}`,{rows:2,markup:true})).join('')}</div></div>`;const pairs=(path,labels)=>`<div class="card-list grid-wide">${get(path).map((_,index)=>`<div class="card">${field(labels[0],`${path}.${index}.0`,{short:true})}${field(labels[1],`${path}.${index}.1`,{rows:2,markup:true})}</div>`).join('')}</div>`;const prices=()=>`<div class="card-list grid-wide">${data.costs.entries.map((_,index)=>`<div class="card">${field('Leistung',`costs.entries.${index}.0`,{short:true})}${field('Dauer und Preis',`costs.entries.${index}.1`,{short:true})}${field('Preis',`costs.entries.${index}.2`,{short:true})}</div>`).join('')}</div>`;const editor=document.querySelector('#editor');editor.innerHTML=`<section class="editor-section" id="general"><h2>Allgemein</h2><p>Wahlweise bleibt das dunkle Weinrot erhalten oder die Seite wird als kraeftigeres Rubinrot beziehungsweise warmes Scharlachrot dargestellt.</p><div class="grid">${field('Praxisname','practiceName',{short:true})}<div class="field"><label>Farbvariante</label><div class="theme-options">${[['wine','Weinrot'],['ruby','Rubinrot'],['scarlet','Scharlachrot']].map(([theme,label])=>`<label class="theme-option" data-theme="${theme}"><input type="radio" name="theme" value="${theme}" ${data.colorTheme===theme?'checked':''}><span class="theme-swatch"></span><span>${label}</span></label>`).join('')}</div></div></div></section><section class="editor-section" id="start"><h2>Startseite</h2><div class="grid">${field('Ueberzeile','hero.eyebrow',{short:true})}${field('Titel','hero.title',{rows:3,markup:true})}${field('Einleitung','hero.sentence',{rows:4,markup:true})}</div></section><section class="editor-section" id="therapy"><h2>Psychotherapie</h2><div class="grid">${field('Einleitung Titel','introduction.title',{rows:3,markup:true})}${field('Einleitung Text','introduction.text',{rows:5,markup:true})}${list('Aufzaehlungspunkt','introduction.items')}${field('Bereichsbezeichnung','therapy.label',{short:true})}${field('Titel','therapy.title',{rows:3,markup:true})}${field('Text','therapy.text',{rows:5,markup:true})}${field('Hervorgehobener Text','therapy.note',{rows:4,markup:true})}</div></section><section class="editor-section" id="focus"><h2>Schwerpunkte</h2><div class="grid">${field('Bereichsbezeichnung','focusAreas.label',{short:true})}${field('Titel','focusAreas.title',{rows:3,markup:true})}${field('Einleitung','focusAreas.intro',{rows:4,markup:true})}${pairs('focusAreas.areas',['Titel','Beschreibung'])}</div></section><section class="editor-section" id="practice"><h2>Praxis</h2><div class="grid">${field('Bereichsbezeichnung','practice.label',{short:true})}${field('Titel','practice.title',{rows:3,markup:true})}${field('Text','practice.text',{rows:4,markup:true})}</div></section><section class="editor-section" id="costs"><h2>Kosten</h2><div class="grid">${field('Bereichsbezeichnung','costs.label',{short:true})}${field('Titel','costs.title',{rows:3,markup:true})}${field('Einleitung','costs.intro',{rows:4,markup:true})}${prices()}${field('Hinweis zur Kostenerstattung','costs.reimbursement',{rows:3,markup:true})}</div></section><section class="editor-section" id="contact"><h2>Kontakt</h2><div class="grid">${field('Bereichsbezeichnung','contact.label',{short:true})}${field('Titel','contact.title',{rows:3,markup:true})}${field('Einleitung','contact.text',{rows:4,markup:true})}${field('Strasse','contact.address.0',{short:true})}${field('Postleitzahl und Ort','contact.address.1',{short:true})}${field('Telefonnummer','contact.phoneLabel',{short:true})}${field('Telefonnummer nur Ziffern','contact.phoneHref',{short:true})}${field('E-Mail','contact.email',{short:true})}${field('OpenStreetMap Link','contact.mapLink',{short:true})}${field('Linkbeschriftung Karte','contact.mapLabel',{short:true})}</div></section><div class="footer-actions"><button class="secondary" type="button" id="reset">Entwurf zuruecksetzen</button><button class="download" type="button" id="download-bottom">content.js herunterladen</button></div>`;const save=()=>{try{localStorage.setItem(storageKey,JSON.stringify(data));document.querySelector('#status').textContent='Entwurf gespeichert'}catch{document.querySelector('#status').textContent='Entwurf konnte nicht gespeichert werden'}};editor.addEventListener('input',event=>{const path=event.target.dataset.bind;if(!path)return;set(path,event.target.value);save()});editor.addEventListener('change',event=>{if(event.target.name==='theme'){data.colorTheme=event.target.value;save()}});editor.addEventListener('click',event=>{const format=event.target.closest('[data-format]')?.dataset.format;if(!format)return;const textarea=event.target.closest('.field')?.querySelector('textarea');if(!textarea)return;const start=textarea.selectionStart,end=textarea.selectionEnd,selection=textarea.value.slice(start,end)||'Text';let replacement=selection;if(format==='bold')replacement=`**${selection}**`;if(format==='italic')replacement=`_${selection}_`;if(format==='link'){const url=prompt('Webadresse eingeben (https://...)','https://');if(!url)return;replacement=`[${selection}](${url})`}textarea.value=textarea.value.slice(0,start)+replacement+textarea.value.slice(end);textarea.focus();textarea.setSelectionRange(start,start+replacement.length);textarea.dispatchEvent(new Event('input',{bubbles:true}))});const download=()=>{const output=`/* Generated by editor.html. Do not edit this file manually. */\nwindow.practiceContent = ${JSON.stringify(data,null,2)};\n`;const url=URL.createObjectURL(new Blob([output],{type:'text/javascript'}));const link=document.createElement('a');link.href=url;link.download='content.js';link.click();URL.revokeObjectURL(url);document.querySelector('#status').textContent='content.js heruntergeladen'};document.querySelector('#download').addEventListener('click',download);document.querySelector('#download-bottom').addEventListener('click',download);document.querySelector('#reset').addEventListener('click',()=>{if(!confirm('Entwurf wirklich zuruecksetzen?'))return;data=clone(published);localStorage.removeItem(storageKey);location.reload()})})();
 </script>
+<style>
+  .file-actions { display: flex; gap: 8px; }
+  .file-button { border: 1px solid rgba(255,255,255,.58); background: transparent; color: #fff; font: inherit; font-size: .78rem; font-weight: 700; padding: 10px 12px; cursor: pointer; }
+  .file-button:hover { background: rgba(255,255,255,.12); }
+  .collection-actions { display: flex; align-items: center; justify-content: space-between; gap: 14px; margin-top: 13px; }
+  .collection-count { color: var(--muted); font-size: .78rem; }
+  .remove-focus { justify-self: end; width: 30px; height: 30px; border: 1px solid var(--line); background: #fff; color: var(--wine); font-size: 1.1rem; line-height: 1; cursor: pointer; }
+  .remove-focus:disabled, .collection-actions button:disabled { cursor: not-allowed; opacity: .42; }
+  .preview-modal { width: min(1200px, calc(100% - 32px)); height: min(860px, calc(100% - 32px)); padding: 0; border: 0; box-shadow: 0 30px 100px rgba(18,2,7,.45); }
+  .preview-modal::backdrop { background: rgba(28,5,11,.72); }
+  .preview-head { display: flex; align-items: center; justify-content: space-between; min-height: 56px; padding: 0 18px; background: var(--wine-dark); color: #fff; }
+  .preview-head h2 { margin: 0; font-family: var(--serif); font-size: 1.12rem; font-weight: 400; }
+  .preview-close { width: 32px; height: 32px; border: 0; background: transparent; color: #fff; font-size: 1.5rem; line-height: 1; cursor: pointer; }
+  .preview-frame { display: block; width: 100%; height: calc(100% - 56px); border: 0; }
+  @media (max-width: 760px) { .file-actions { flex-wrap: wrap; justify-content: flex-end; } .preview-modal { width: 100%; height: 100%; max-width: none; max-height: none; } }
+</style>
+<script>
+(() => {
+  const draftKey = 'practice-content-draft-v1';
+  const minFocusAreas = 2;
+  const maxFocusAreas = 6;
+  let fileHandle;
+  let previewTimer;
+
+  const escape = (value) => String(value ?? '').replace(/[&<>"']/g, (character) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[character]));
+  const clone = (value) => JSON.parse(JSON.stringify(value));
+  const loadDraft = () => {
+    try { return JSON.parse(localStorage.getItem(draftKey)) || clone(window.practiceContent); }
+    catch { return clone(window.practiceContent); }
+  };
+  const saveDraft = (draft) => localStorage.setItem(draftKey, JSON.stringify(draft));
+  const contentFile = (draft) => `/* Generated by editor.html. Do not edit this file manually. */\nwindow.practiceContent = ${JSON.stringify(draft, null, 2)};\n`;
+  let focusItems = clone(loadDraft().focusAreas.areas);
+
+  const focusList = document.querySelector('#focus .card-list');
+  focusList.dataset.focusList = '';
+  const focusGrid = document.querySelector('#focus .grid');
+  focusGrid.insertAdjacentHTML('beforeend', '<div class="collection-actions grid-wide" id="focus-controls"><span class="collection-count"></span><button class="secondary" type="button" data-focus-action="add">Schwerpunkt hinzufuegen</button></div>');
+  const focusControls = document.querySelector('#focus-controls');
+
+  function mergeFocusAreas() {
+    const draft = loadDraft();
+    draft.focusAreas.areas = clone(focusItems);
+    saveDraft(draft);
+    return draft;
+  }
+
+  function renderFocusAreas() {
+    focusList.innerHTML = focusItems.map(([title, copy], index) => `<div class="card" data-focus-index="${index}"><div class="field"><label>Titel</label><input data-focus-title value="${escape(title)}"></div><div class="field"><label>Beschreibung</label><textarea data-focus-copy rows="2">${escape(copy)}</textarea></div><button class="remove-focus" type="button" data-focus-action="remove" aria-label="Schwerpunkt entfernen" ${focusItems.length <= minFocusAreas ? 'disabled' : ''}>&times;</button></div>`).join('');
+    focusControls.querySelector('.collection-count').textContent = `${focusItems.length} von ${maxFocusAreas} Schwerpunkten`;
+    focusControls.querySelector('[data-focus-action="add"]').disabled = focusItems.length >= maxFocusAreas;
+  }
+
+  function refreshPreview() {
+    const draft = mergeFocusAreas();
+    try {
+      sessionStorage.setItem('practice-preview-content', JSON.stringify(draft));
+      document.querySelector('#preview-frame').src = `index.html?preview=1&updated=${Date.now()}`;
+    } catch {
+      document.querySelector('#status').textContent = 'Vorschau konnte nicht aktualisiert werden';
+    }
+  }
+
+  function queuePreview() {
+    const dialog = document.querySelector('#preview-modal');
+    if (!dialog.open) return;
+    clearTimeout(previewTimer);
+    previewTimer = setTimeout(refreshPreview, 350);
+  }
+
+  renderFocusAreas();
+
+  document.querySelector('#editor').addEventListener('input', (event) => {
+    const card = event.target.closest('[data-focus-index]');
+    if (card) {
+      const index = Number(card.dataset.focusIndex);
+      if (event.target.matches('[data-focus-title]')) focusItems[index][0] = event.target.value;
+      if (event.target.matches('[data-focus-copy]')) focusItems[index][1] = event.target.value;
+      mergeFocusAreas();
+    }
+    setTimeout(() => { mergeFocusAreas(); queuePreview(); }, 0);
+  });
+
+  document.querySelector('#editor').addEventListener('click', (event) => {
+    const action = event.target.closest('[data-focus-action]')?.dataset.focusAction;
+    if (!action) return;
+    if (action === 'add' && focusItems.length < maxFocusAreas) focusItems.push(['Neuer Schwerpunkt', 'Kurze Beschreibung des Schwerpunkts.']);
+    if (action === 'remove' && focusItems.length > minFocusAreas) focusItems.splice(Number(event.target.closest('[data-focus-index]').dataset.focusIndex), 1);
+    mergeFocusAreas();
+    renderFocusAreas();
+    queuePreview();
+  });
+
+  const headerActions = document.createElement('div');
+  headerActions.className = 'file-actions';
+  headerActions.innerHTML = '<button class="file-button" type="button" id="open-content">content.js oeffnen</button><button class="file-button" type="button" id="save-content">In content.js speichern</button><button class="file-button" type="button" id="open-preview">Vorschau</button>';
+  document.querySelector('.bar .download').before(headerActions);
+
+  document.body.insertAdjacentHTML('beforeend', '<dialog class="preview-modal" id="preview-modal"><div class="preview-head"><h2>Vorschau</h2><button class="preview-close" type="button" id="close-preview" aria-label="Vorschau schliessen">&times;</button></div><iframe class="preview-frame" id="preview-frame" title="Vorschau der Website"></iframe></dialog>');
+
+  async function openContentFile() {
+    if (!window.showOpenFilePicker) return;
+    try {
+      [fileHandle] = await window.showOpenFilePicker({ types: [{ description: 'Website content', accept: { 'text/javascript': ['.js'] } }], multiple: false });
+      const source = await (await fileHandle.getFile()).text();
+      const match = source.match(/window\.practiceContent\s*=\s*([\s\S]*?);\s*$/);
+      if (!match) throw new Error('content.js has no practice content');
+      const content = Function(`"use strict"; return (${match[1]});`)();
+      saveDraft(content);
+      location.reload();
+    } catch (error) {
+      if (error.name !== 'AbortError') document.querySelector('#status').textContent = 'content.js konnte nicht geoeffnet werden';
+    }
+  }
+
+  async function saveContentFile() {
+    try {
+      if (!fileHandle) return openContentFile();
+      const output = contentFile(mergeFocusAreas());
+      const writable = await fileHandle.createWritable();
+      await writable.write(output);
+      await writable.close();
+      document.querySelector('#status').textContent = 'content.js gespeichert';
+    } catch (error) {
+      document.querySelector('#status').textContent = 'content.js konnte nicht gespeichert werden';
+    }
+  }
+
+  document.querySelector('#open-content').addEventListener('click', openContentFile);
+  document.querySelector('#save-content').addEventListener('click', saveContentFile);
+  document.querySelector('#open-preview').addEventListener('click', () => { const dialog = document.querySelector('#preview-modal'); dialog.showModal(); refreshPreview(); });
+  document.querySelector('#close-preview').addEventListener('click', () => document.querySelector('#preview-modal').close());
+
+  if (!window.showOpenFilePicker) {
+    document.querySelector('#open-content').hidden = true;
+    document.querySelector('#save-content').hidden = true;
+  }
+
+  document.addEventListener('click', (event) => {
+    if (!event.target.closest('#download, #download-bottom')) return;
+    // The original download handler runs afterwards; keep its draft synchronized first.
+    mergeFocusAreas();
+  }, true);
+})();
+</script>
 </body>
 </html>

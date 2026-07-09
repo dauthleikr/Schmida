@@ -48,3 +48,17 @@ test('editor exports the updated content without source editing', async ({ page 
   expect(content).toContain('Praxis Sonnenweg');
   expect(content).toContain('"colorTheme": "scarlet"');
 });
+
+test('editor previews drafts and bounds focus areas', async ({ page }) => {
+  await page.goto(editorUrl);
+
+  await page.locator('[data-bind="practiceName"]').fill('Praxis Sonnenweg');
+  const addFocus = page.getByRole('button', { name: 'Schwerpunkt hinzufuegen' });
+  await addFocus.click();
+  await addFocus.click();
+  await expect(addFocus).toBeDisabled();
+  await expect(page.locator('[data-focus-index]')).toHaveCount(6);
+
+  await page.getByRole('button', { name: 'Vorschau' }).click();
+  await expect(page.frameLocator('#preview-frame').locator('.brand')).toContainText('Praxis Sonnenweg');
+});
