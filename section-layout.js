@@ -70,7 +70,6 @@
     costs: 'var(--paper)',
     contact: 'var(--wine-950)'
   };
-  let transitionId = 0;
   const addTransition = (divider, fromKey, toKey) => {
     divider.style.setProperty('--divider-top', backgrounds[fromKey]);
     divider.style.setProperty('--divider-bottom', backgrounds[toKey]);
@@ -80,12 +79,7 @@
     transition.setAttribute('preserveAspectRatio', 'none');
     transition.setAttribute('aria-hidden', 'true');
     const curve = 'M0 111C154 54 266 165 416 108s260-72 396 9 235 33 388-43V210H0Z';
-    if (fromKey === 'hero') {
-      const gradientId = `hero-transition-${transitionId++}`;
-      transition.innerHTML = `<defs><linearGradient id="${gradientId}" x1="0" y1="0" x2="0" y2="1"><stop class="ribbon-transition-gradient-stop" offset="0%" stop-opacity="0"/><stop class="ribbon-transition-gradient-stop" offset="46%" stop-opacity=".38"/><stop class="ribbon-transition-gradient-stop" offset="100%" stop-opacity="1"/></linearGradient></defs><path fill="url(#${gradientId})" d="${curve}"/>`;
-    } else {
-      transition.innerHTML = `<path class="ribbon-transition-bottom" d="${curve}"/><path class="ribbon-transition-soft" d="M0 111C154 54 266 165 416 108s260-72 396 9 235 33 388-43"/>`;
-    }
+    transition.innerHTML = `<path class="ribbon-transition-bottom" d="${curve}"/><path class="ribbon-transition-soft" d="M0 111C154 54 266 165 416 108s260-72 396 9 235 33 388-43"/>`;
     divider.prepend(transition);
   };
 

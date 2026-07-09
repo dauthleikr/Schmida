@@ -17,7 +17,7 @@
   };
   const colorFields = [
     ['--wine-950', 'Hero und Kontakt'],
-    ['--header-bg', 'Kopfzeile'],
+    ['--header-bg', 'Header Hintergrund'],
     ['--wine-650', 'Akzent'],
     ['--ribbon-hot', 'Linien'],
     ['--rose-100', 'Psychotherapie Hintergrund'],
