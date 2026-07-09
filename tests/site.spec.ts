@@ -62,3 +62,21 @@ test('editor previews drafts and bounds focus areas', async ({ page }) => {
   await page.getByRole('button', { name: 'Vorschau' }).click();
   await expect(page.frameLocator('#preview-frame').locator('.brand')).toContainText('Praxis Sonnenweg');
 });
+
+test('enhanced editor formats text and bounds services', async ({ page }) => {
+  await page.goto(editorUrl);
+
+  await expect(page.locator('[name="enhanced-theme"]')).toHaveCount(6);
+  const richText = page.locator('.rich-editor').first();
+  await richText.click();
+  await page.keyboard.press('Control+A');
+  await page.getByRole('button', { name: 'Fett' }).first().click();
+  await expect(page.locator('textarea').first()).toHaveValue(/^\*\*.+\*\*$/);
+
+  const addService = page.getByRole('button', { name: 'Leistung hinzufuegen' });
+  await addService.click();
+  await addService.click();
+  await expect(addService).toBeDisabled();
+  await expect(page.locator('[data-price-index]')).toHaveCount(5);
+  await expect(page.locator('[data-focus-index]').first()).toHaveCSS('grid-template-columns', /30px/);
+});

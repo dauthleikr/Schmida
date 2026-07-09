@@ -5,7 +5,7 @@ This is a static website that can be published directly with GitHub Pages or any
 ## Edit content
 
 1. Open `editor.html` in the browser.
-2. In Chrome or Edge on the deployed HTTPS site, select `content.js` once with **content.js oeffnen**. Update the fields and use the bold, italic, and link controls where needed. The editor keeps an automatic local draft in the browser.
+2. In Chrome or Edge on the deployed HTTPS site, select or drop `content.js` once with **content.js verbinden**. The editor loads that file as the draft. Update the fields and use the visual text controls where needed. The editor keeps an automatic local draft in the browser.
 3. Click **In content.js speichern** to write back to the chosen local file, then commit and push it. The browser must ask the user to choose the file; a website cannot access a repository file silently.
 4. In other browsers, use the generated `content.js` download instead.
 
