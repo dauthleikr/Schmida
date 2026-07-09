@@ -1,0 +1,39 @@
+/*
+ * Website content
+ * Edit these values, then commit and publish the changes.
+ */
+window.practiceContent = {
+  practiceName: "Praxis fuer Psychotherapie",
+  practitionerName: "Dr. Anna Beispiel",
+  navigation: { home: "Startseite", psychotherapy: "Psychotherapie", costs: "Kosten", focusAreas: "Schwerpunkte", contact: "Kontakt" },
+  hero: { eyebrow: "Psychotherapie in Wien", title: "Ein Ort, an dem Sie mit allem da sein duerfen.", sentence: "In einem vertrauensvollen Rahmen schauen wir gemeinsam auf das, was Sie bewegt." },
+  introduction: {
+    title: "Manchmal hilft es, nicht allein weitergehen zu muessen.",
+    text: "Psychotherapie bietet Raum, die eigene Geschichte besser zu verstehen und neue Wege im Umgang mit Belastungen zu finden. Der erste Schritt muss nicht perfekt sein - es reicht, dass er zu Ihnen passt.",
+    items: ["Ein geschuetzter, wertfreier Rahmen", "Zeit fuer Ihre Themen und Ihr Tempo", "Persoenlich, klar und zugewandt"]
+  },
+  therapy: {
+    label: "Psychotherapie",
+    title: "Verstehen, was wirkt. Veraendern, was schwer geworden ist.",
+    text: "In unseren Gespraechen geht es um Ihre aktuellen Fragen, wiederkehrende Muster und um das, was Sie staerken kann. Die Zusammenarbeit richtet sich nach Ihrer Lebenssituation und Ihren Zielen.",
+    note: "Ein Erstgespraech gibt Ihnen Gelegenheit, mich und meine Arbeitsweise kennenzulernen. Danach entscheiden Sie in Ruhe, ob eine Zusammenarbeit fuer Sie stimmig ist."
+  },
+  focusAreas: {
+    label: "Schwerpunkte",
+    title: "Womit Sie zu mir kommen koennen.",
+    intro: "Therapie ist so individuell wie die Menschen, die zu mir kommen. Hier finden einige Themen Platz, bei denen ich Sie begleiten kann.",
+    areas: [["Belastung & Erschoepfung", "Wenn Anforderungen, Sorgen oder Veraenderungen zu viel Raum einnehmen."], ["Beziehungen", "Wenn Naehe, Konflikte oder Trennungen Sie nachhaltig beschaeftigen."], ["Selbstwert", "Wenn der Blick auf sich selbst von Zweifel oder hohem Druck gepraegt ist."], ["Uebergaenge", "Wenn ein neuer Lebensabschnitt Orientierung und Halt braucht."]]
+  },
+  practice: { label: "Die Praxis", title: "Ein ruhiger Raum fuer Ihr Gespraech.", text: "Die Praxis ist bewusst schlicht und ruhig gehalten. Sie erwartet ein ungestoerter Rahmen fuer vertrauliche Gespraeche.", imageAlt: "Platzhalter fuer ein Foto des Praxisraums" },
+  costs: {
+    label: "Kosten", title: "Transparent von Anfang an.", intro: "Die Rahmenbedingungen besprechen wir im Erstgespraech. Bitte passen Sie die folgenden Angaben an Ihre Praxis an.",
+    entries: [["Einzeltherapie", "50 Minuten", "EUR 110"], ["Erstgespraech", "50 Minuten", "EUR 110"], ["Absageregelung", "bis 48 Stunden vorher", "kostenfrei"]],
+    reimbursement: "Je nach Krankenkasse kann ein Kostenzuschuss moeglich sein. Details klaeren wir gerne persoenlich."
+  },
+  contact: {
+    label: "Kontakt", title: "Nehmen Sie Kontakt auf.", text: "Sie koennen mich gerne per E-Mail oder telefonisch erreichen. Ich melde mich zeitnah bei Ihnen zurueck.",
+    address: ["Musterstrasse 12", "1010 Wien"], phoneLabel: "+43 660 123 45 67", phoneHref: "+436601234567", email: "praxis@beispiel.at",
+    mapLink: "https://www.openstreetmap.org/?mlat=48.2082&mlon=16.3738#map=15/48.2082/16.3738", mapLabel: "Karte in OpenStreetMap oeffnen"
+  },
+  footer: { copyright: "2026 Praxis fuer Psychotherapie" }
+};
