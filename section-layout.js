@@ -105,6 +105,8 @@
   host.after(footerBand);
 
   const nav = document.querySelector('.nav-list');
+  const heroContact = document.querySelector('.hero-contact');
+  if (heroContact) heroContact.hidden = !enabled.contact;
   if (!nav) return;
   const navigation = content.navigation || {};
   const items = [

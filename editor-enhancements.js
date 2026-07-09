@@ -157,6 +157,7 @@
   let activeTheme = presets[readDraft().colorTheme] ? readDraft().colorTheme : 'wine';
   let customColors = clone(readDraft().customColors || {});
   let heroImage = { ...heroImageDefaults, ...(readDraft().heroImage || {}) };
+  let heroContactButton = readDraft().hero?.contactButton || 'Kontakt aufnehmen';
   const activePalette = () => ({ ...(presets[activeTheme] || presets.wine), ...customColors });
   const themeField = document.querySelector('.theme-options')?.closest('.field');
   const sectionDefaults = {
@@ -193,7 +194,7 @@
   document.querySelector('#start .grid')?.append(heroImagePanel);
   const options = (items, value) => items.map(([key, label]) => `<option value="${key}" ${value === key ? 'selected' : ''}>${label}</option>`).join('');
   function renderHeroImagePanel() {
-    heroImagePanel.innerHTML = `<h3>Hero Bild</h3><label>Bilddatei<input data-hero-image="src" value="${escapeHtml(heroImage.src)}"></label><label>Alternativtext<input data-hero-image="alt" value="${escapeHtml(heroImage.alt)}"></label><label>Bildformat<select data-hero-image="layout">${options([['portrait','Seitliches Portraet'],['landscape','Breite Fotoflaeche'],['background','Vollflaechiger Hintergrund']], heroImage.layout)}</select></label><label>Bildwirkung<select data-hero-image="blend">${options([['duotone','Weiches Duoton'],['natural','Natuerlich'],['mono','Monochrom'],['warm','Warm und weich']], heroImage.blend)}</select></label><label>Bildposition<select data-hero-image="position">${options([['center top','Mitte oben'],['center center','Mitte'],['right center','Rechts Mitte'],['left center','Links Mitte']], heroImage.position)}</select></label><label>Textueberlagerung<select data-hero-image="overlay">${options([['soft','Sanft'],['strong','Stark'],['none','Keine']], heroImage.overlay)}</select></label>`;
+    heroImagePanel.innerHTML = `<h3>Hero Bild</h3><label>Bilddatei<input data-hero-image="src" value="${escapeHtml(heroImage.src)}"></label><label>Alternativtext<input data-hero-image="alt" value="${escapeHtml(heroImage.alt)}"></label><label>Bildformat<select data-hero-image="layout">${options([['portrait','Seitliches Portraet'],['landscape','Breite Fotoflaeche'],['background','Vollflaechiger Hintergrund']], heroImage.layout)}</select></label><label>Bildwirkung<select data-hero-image="blend">${options([['duotone','Weiches Duoton'],['natural','Natuerlich'],['mono','Monochrom'],['warm','Warm und weich']], heroImage.blend)}</select></label><label>Bildposition<select data-hero-image="position">${options([['center top','Mitte oben'],['center center','Mitte'],['right center','Rechts Mitte'],['left center','Links Mitte']], heroImage.position)}</select></label><label>Textueberlagerung<select data-hero-image="overlay">${options([['soft','Sanft'],['strong','Stark'],['none','Keine']], heroImage.overlay)}</select></label><label>Kontakt Button<input data-hero-contact value="${escapeHtml(heroContactButton)}"></label>`;
   }
 
   function focusAreasFromDom() {
@@ -222,6 +223,7 @@
     draft.colorTheme = activeTheme;
     draft.customColors = clone(customColors);
     draft.heroImage = { ...heroImage };
+    draft.hero = { ...(draft.hero || {}), contactButton: heroContactButton };
     draft.sectionLayout = { order: [...sectionLayout.order], enabled: { ...sectionLayout.enabled } };
     writeDraft(draft);
     return draft;
@@ -286,11 +288,21 @@
       persistEnhancements();
       queuePreview();
     }
+    if (event.target.matches('[data-hero-contact]')) {
+      heroContactButton = event.target.value;
+      persistEnhancements();
+      queuePreview();
+    }
   });
 
   editor.addEventListener('input', (event) => {
     if (event.target.matches('[data-hero-image]')) {
       heroImage[event.target.dataset.heroImage] = event.target.value;
+      persistEnhancements();
+      queuePreview();
+    }
+    if (event.target.matches('[data-hero-contact]')) {
+      heroContactButton = event.target.value;
       persistEnhancements();
       queuePreview();
     }

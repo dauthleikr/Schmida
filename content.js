@@ -13,7 +13,7 @@ window.practiceContent = {
   practiceName: "Praxis fuer Psychotherapie",
   practitionerName: "Dr. Anna Beispiel",
   navigation: { home: "Startseite", psychotherapy: "Psychotherapie", costs: "Kosten", focusAreas: "Schwerpunkte", contact: "Kontakt" },
-  hero: { eyebrow: "Psychotherapie in Wien", title: "Ein Ort, an dem Sie mit allem da sein duerfen.", sentence: "In einem vertrauensvollen Rahmen schauen wir gemeinsam auf das, was Sie bewegt." },
+  hero: { eyebrow: "Psychotherapie in Wien", title: "Ein Ort, an dem Sie mit allem da sein duerfen.", sentence: "In einem vertrauensvollen Rahmen schauen wir gemeinsam auf das, was Sie bewegt.", contactButton: "Kontakt aufnehmen" },
   heroImage: {
     src: "therapist.png",
     alt: "Portraet der Therapeutin",

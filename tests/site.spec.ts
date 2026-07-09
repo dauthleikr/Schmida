@@ -23,8 +23,8 @@ test('provides a usable compact navigation', async ({ page }) => {
   const menu = page.getByRole('button', { name: 'Menue' });
   await menu.click();
   await expect(menu).toHaveAttribute('aria-expanded', 'true');
-  await expect(page.getByRole('link', { name: 'Kontakt' })).toBeVisible();
-  await page.getByRole('link', { name: 'Kontakt' }).click();
+  await expect(page.getByRole('link', { name: 'Kontakt', exact: true })).toBeVisible();
+  await page.getByRole('link', { name: 'Kontakt', exact: true }).click();
   await expect(page.locator('#contact')).toBeInViewport();
 });
 
@@ -108,4 +108,13 @@ test('editor configures hero image presentation', async ({ page }) => {
   await expect(preview.locator('.hero')).toHaveAttribute('data-image-layout', 'background');
   await expect(preview.locator('.hero')).toHaveAttribute('data-image-blend', 'natural');
   await expect(preview.locator('.hero')).toHaveCSS('--hero-image-position', 'right center');
+});
+
+test('hero contact button follows the editable label', async ({ page }) => {
+  await page.goto(editorUrl);
+
+  await page.locator('[data-hero-contact]').fill('Erstgespraech anfragen');
+  await page.getByRole('button', { name: 'Vorschau' }).click();
+  const preview = page.frameLocator('#preview-frame');
+  await expect(preview.getByRole('link', { name: 'Erstgespraech anfragen' })).toHaveAttribute('href', '#contact');
 });
