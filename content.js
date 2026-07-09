@@ -6,6 +6,10 @@ window.practiceContent = {
   // Chosen by editor.html. Presets include wine, garnet, ruby, crimson, scarlet, and vermilion.
   colorTheme: "ruby",
   customColors: {},
+  sectionLayout: {
+    order: ["intro", "therapy", "focusAreas", "practice", "costs", "contact"],
+    enabled: { intro: true, therapy: false, focusAreas: true, practice: true, costs: true, contact: true }
+  },
   practiceName: "Praxis fuer Psychotherapie",
   practitionerName: "Dr. Anna Beispiel",
   navigation: { home: "Startseite", psychotherapy: "Psychotherapie", costs: "Kosten", focusAreas: "Schwerpunkte", contact: "Kontakt" },

@@ -80,3 +80,18 @@ test('enhanced editor formats text and bounds services', async ({ page }) => {
   await expect(page.locator('[data-price-index]')).toHaveCount(5);
   await expect(page.locator('[data-focus-index]').first()).toHaveCSS('grid-template-columns', /30px/);
 });
+
+test('editor controls section visibility and order', async ({ page }) => {
+  await page.goto(editorUrl);
+
+  const intro = page.locator('.section-row', { hasText: 'Psychotherapie Einstieg' });
+  const details = page.locator('.section-row', { hasText: 'Psychotherapie Vertiefung (farbig)' });
+  await intro.getByRole('checkbox').uncheck();
+  await details.getByRole('checkbox').check();
+  await details.getByRole('button', { name: 'Nach oben' }).click();
+
+  await page.getByRole('button', { name: 'Vorschau' }).click();
+  const preview = page.frameLocator('#preview-frame');
+  await expect(preview.locator('section#psychotherapy.therapy')).toHaveCount(1);
+  await expect(preview.locator('.content-section[data-section-key="intro"]')).toHaveCount(0);
+});

@@ -8,12 +8,12 @@
   let previewTimer;
 
   const presets = {
-    wine: { label: 'Weinrot', '--wine-950': '#291117', '--header-bg': '#291117', '--wine-650': '#863547', '--ribbon-hot': '#9d1c30', '--rose-100': '#f4e4e4', '--paper': '#fcfaf8' },
-    garnet: { label: 'Granatrot', '--wine-950': '#260810', '--header-bg': '#260810', '--wine-650': '#a92b3b', '--ribbon-hot': '#9d172c', '--rose-100': '#f9ecec', '--paper': '#fffafa' },
-    ruby: { label: 'Rubinrot', '--wine-950': '#32040f', '--header-bg': '#32040f', '--wine-650': '#c8174a', '--ribbon-hot': '#c61032', '--rose-100': '#fff0f3', '--paper': '#fffafa' },
-    crimson: { label: 'Karminrot', '--wine-950': '#31030a', '--header-bg': '#31030a', '--wine-650': '#d11137', '--ribbon-hot': '#d10b30', '--rose-100': '#fff0f2', '--paper': '#fffafb' },
-    scarlet: { label: 'Scharlachrot', '--wine-950': '#31080d', '--header-bg': '#31080d', '--wine-650': '#d33a3f', '--ribbon-hot': '#c72224', '--rose-100': '#fff1ed', '--paper': '#fffaf8' },
-    vermilion: { label: 'Zinnoberrot', '--wine-950': '#32100c', '--header-bg': '#32100c', '--wine-650': '#d45639', '--ribbon-hot': '#c9402c', '--rose-100': '#fff1ed', '--paper': '#fffaf8' }
+    wine: { label: 'Weinrot', '--wine-950': '#291117', '--header-bg': '#291117', '--wine-650': '#863547', '--ribbon-hot': '#9d1c30', '--rose-100': '#f4e4e4', '--practice-bg': '#f2edeb', '--paper': '#fcfaf8' },
+    garnet: { label: 'Granatrot', '--wine-950': '#260810', '--header-bg': '#260810', '--wine-650': '#a92b3b', '--ribbon-hot': '#9d172c', '--rose-100': '#f9ecec', '--practice-bg': '#f3eded', '--paper': '#fffafa' },
+    ruby: { label: 'Rubinrot', '--wine-950': '#32040f', '--header-bg': '#32040f', '--wine-650': '#c8174a', '--ribbon-hot': '#c61032', '--rose-100': '#fff0f3', '--practice-bg': '#f5eeee', '--paper': '#fffafa' },
+    crimson: { label: 'Karminrot', '--wine-950': '#31030a', '--header-bg': '#31030a', '--wine-650': '#d11137', '--ribbon-hot': '#d10b30', '--rose-100': '#fff0f2', '--practice-bg': '#f6eeee', '--paper': '#fffafb' },
+    scarlet: { label: 'Scharlachrot', '--wine-950': '#31080d', '--header-bg': '#31080d', '--wine-650': '#d33a3f', '--ribbon-hot': '#c72224', '--rose-100': '#fff1ed', '--practice-bg': '#f6efec', '--paper': '#fffaf8' },
+    vermilion: { label: 'Zinnoberrot', '--wine-950': '#32100c', '--header-bg': '#32100c', '--wine-650': '#d45639', '--ribbon-hot': '#c9402c', '--rose-100': '#fff1ed', '--practice-bg': '#f2edeb', '--paper': '#fffaf8' }
   };
   const colorFields = [
     ['--wine-950', 'Hero und Kontakt'],
@@ -21,7 +21,16 @@
     ['--wine-650', 'Akzent'],
     ['--ribbon-hot', 'Linien'],
     ['--rose-100', 'Psychotherapie Hintergrund'],
+    ['--practice-bg', 'Praxis Hintergrund'],
     ['--paper', 'Seitenhintergrund']
+  ];
+  const sectionDefinitions = [
+    ['intro', 'Psychotherapie Einstieg'],
+    ['therapy', 'Psychotherapie Vertiefung (farbig)'],
+    ['focusAreas', 'Schwerpunkte'],
+    ['practice', 'Praxis'],
+    ['costs', 'Kosten'],
+    ['contact', 'Kontakt']
   ];
 
   const escapeHtml = (value) => String(value ?? '').replace(/[&<>"']/g, (character) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[character]));
@@ -63,6 +72,16 @@
     .collection-actions { display:flex; align-items:center; justify-content:space-between; gap:14px; margin-top:13px; }
     .collection-count { color:var(--muted); font-size:.78rem; }
     .collection-actions button:disabled, .remove-price:disabled { cursor:not-allowed; opacity:.42; }
+    .section-manager { grid-column:1/-1; margin-top:4px; }
+    .section-manager > label { display:block; margin-bottom:8px; color:var(--wine-dark); font-size:.77rem; font-weight:700; }
+    .section-list { display:grid; gap:7px; }
+    .section-row { display:grid; grid-template-columns:auto minmax(0,1fr) auto; align-items:center; gap:10px; min-height:47px; padding:7px 9px; border:1px solid var(--line); background:#fff; }
+    .section-row.is-disabled { opacity:.55; }
+    .section-toggle { display:flex; align-items:center; gap:8px; color:var(--wine-dark); font-size:.8rem; font-weight:700; }
+    .section-toggle input { width:16px; height:16px; accent-color:var(--wine); }
+    .section-move { display:flex; gap:4px; }
+    .section-move button { width:28px; height:28px; border:1px solid var(--line); background:#fff; color:var(--wine); font-size:1rem; cursor:pointer; }
+    .section-move button:disabled { cursor:not-allowed; opacity:.34; }
     @media (max-width:760px) { .enhanced-actions { justify-content:flex-end; } .enhanced-themes,.color-controls { grid-template-columns:1fr; } .card[data-focus-index],.price-card { grid-template-columns:1fr; } .remove-price { justify-self:end; } }
   `;
   document.head.append(style);
@@ -134,11 +153,33 @@
   let customColors = clone(readDraft().customColors || {});
   const activePalette = () => ({ ...(presets[activeTheme] || presets.wine), ...customColors });
   const themeField = document.querySelector('.theme-options')?.closest('.field');
+  const sectionDefaults = {
+    order: sectionDefinitions.map(([key]) => key),
+    enabled: { intro: true, therapy: false, focusAreas: true, practice: true, costs: true, contact: true }
+  };
+  const sourceLayout = readDraft().sectionLayout || {};
+  const sectionLayout = {
+    order: [...new Set([...(sourceLayout.order || []), ...sectionDefaults.order])].filter((key) => sectionDefaults.order.includes(key)),
+    enabled: { ...sectionDefaults.enabled, ...(sourceLayout.enabled || {}) }
+  };
 
   function renderThemes() {
     if (!themeField) return;
     const palette = activePalette();
     themeField.innerHTML = `<label>Farbsystem</label><div class="enhanced-themes">${Object.entries(presets).map(([key, theme]) => `<label class="enhanced-theme" style="--preview-deep:${theme['--wine-950']};--preview-accent:${theme['--wine-650']};--preview-ribbon:${theme['--ribbon-hot']}"><input type="radio" name="enhanced-theme" value="${key}" ${activeTheme === key ? 'checked' : ''}><span class="enhanced-theme-swatch"></span><span class="enhanced-theme-label">${theme.label}</span></label>`).join('')}</div><div class="color-controls">${colorFields.map(([token, label]) => `<div class="color-control"><label>${label}</label><input type="color" data-color-picker="${token}" value="${palette[token] || presets.wine[token]}"><input type="text" data-color-code="${token}" value="${palette[token] || presets.wine[token]}" spellcheck="false"></div>`).join('')}</div>`;
+  }
+
+  const sectionManager = document.createElement('div');
+  sectionManager.className = 'section-manager';
+  sectionManager.innerHTML = '<label>Seitenbereiche</label><div class="section-list"></div>';
+  themeField?.after(sectionManager);
+  function renderSectionManager() {
+    const list = sectionManager.querySelector('.section-list');
+    list.innerHTML = sectionLayout.order.map((key, index) => {
+      const [, label] = sectionDefinitions.find(([candidate]) => candidate === key);
+      const isEnabled = sectionLayout.enabled[key];
+      return `<div class="section-row ${isEnabled ? '' : 'is-disabled'}" data-section-key="${key}"><label class="section-toggle"><input type="checkbox" data-section-enabled ${isEnabled ? 'checked' : ''}><span>${label}</span></label><div></div><div class="section-move"><button type="button" data-section-move="up" title="Nach oben" aria-label="Nach oben" ${index === 0 ? 'disabled' : ''}>&#8593;</button><button type="button" data-section-move="down" title="Nach unten" aria-label="Nach unten" ${index === sectionLayout.order.length - 1 ? 'disabled' : ''}>&#8595;</button></div></div>`;
+    }).join('');
   }
 
   function focusAreasFromDom() {
@@ -166,6 +207,7 @@
     draft.costs.entries = clone(priceEntries);
     draft.colorTheme = activeTheme;
     draft.customColors = clone(customColors);
+    draft.sectionLayout = { order: [...sectionLayout.order], enabled: { ...sectionLayout.enabled } };
     writeDraft(draft);
     return draft;
   }
@@ -181,6 +223,7 @@
   }
 
   renderThemes();
+  renderSectionManager();
   renderPrices();
   enhanceRichText();
 
@@ -215,6 +258,13 @@
       persistEnhancements();
       queuePreview();
     }
+    if (event.target.matches('[data-section-enabled]')) {
+      const key = event.target.closest('[data-section-key]').dataset.sectionKey;
+      sectionLayout.enabled[key] = event.target.checked;
+      renderSectionManager();
+      persistEnhancements();
+      queuePreview();
+    }
   });
 
   editor.addEventListener('input', (event) => {
@@ -246,6 +296,19 @@
     if (action === 'add' && priceEntries.length < maxPrices) priceEntries.push(['Neue Leistung', '50 Minuten', 'EUR 0']);
     if (action === 'remove' && priceEntries.length > minPrices) priceEntries.splice(Number(event.target.closest('[data-price-index]').dataset.priceIndex), 1);
     renderPrices();
+    persistEnhancements();
+    queuePreview();
+  });
+
+  editor.addEventListener('click', (event) => {
+    const direction = event.target.closest('[data-section-move]')?.dataset.sectionMove;
+    if (!direction) return;
+    const key = event.target.closest('[data-section-key]').dataset.sectionKey;
+    const index = sectionLayout.order.indexOf(key);
+    const nextIndex = direction === 'up' ? index - 1 : index + 1;
+    if (nextIndex < 0 || nextIndex >= sectionLayout.order.length) return;
+    [sectionLayout.order[index], sectionLayout.order[nextIndex]] = [sectionLayout.order[nextIndex], sectionLayout.order[index]];
+    renderSectionManager();
     persistEnhancements();
     queuePreview();
   });
