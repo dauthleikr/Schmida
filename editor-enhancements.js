@@ -32,6 +32,7 @@
     ['costs', 'Kosten'],
     ['contact', 'Kontakt']
   ];
+  const heroImageDefaults = { src: 'therapist.png', alt: 'Portraet der Therapeutin', layout: 'portrait', blend: 'duotone', position: 'center top', overlay: 'soft' };
 
   const escapeHtml = (value) => String(value ?? '').replace(/[&<>"']/g, (character) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[character]));
   const clone = (value) => JSON.parse(JSON.stringify(value));
@@ -82,7 +83,11 @@
     .section-move { display:flex; gap:4px; }
     .section-move button { width:28px; height:28px; border:1px solid var(--line); background:#fff; color:var(--wine); font-size:1rem; cursor:pointer; }
     .section-move button:disabled { cursor:not-allowed; opacity:.34; }
-    @media (max-width:760px) { .enhanced-actions { justify-content:flex-end; } .enhanced-themes,.color-controls { grid-template-columns:1fr; } .card[data-focus-index],.price-card { grid-template-columns:1fr; } .remove-price { justify-self:end; } }
+    .hero-image-panel { grid-column:1/-1; display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:14px 18px; padding:17px; border:1px solid var(--line); background:#fff; }
+    .hero-image-panel > h3 { grid-column:1/-1; margin:0; color:var(--wine-dark); font-family:var(--serif); font-size:1.28rem; font-weight:400; }
+    .hero-image-panel label { display:grid; gap:6px; color:var(--wine-dark); font-size:.75rem; font-weight:700; }
+    .hero-image-panel input,.hero-image-panel select { width:100%; border:1px solid var(--line); border-radius:2px; background:#fff; color:var(--ink); font:inherit; padding:9px 10px; }
+    @media (max-width:760px) { .enhanced-actions { justify-content:flex-end; } .enhanced-themes,.color-controls,.hero-image-panel { grid-template-columns:1fr; } .card[data-focus-index],.price-card { grid-template-columns:1fr; } .remove-price { justify-self:end; } }
   `;
   document.head.append(style);
 
@@ -151,6 +156,7 @@
 
   let activeTheme = presets[readDraft().colorTheme] ? readDraft().colorTheme : 'wine';
   let customColors = clone(readDraft().customColors || {});
+  let heroImage = { ...heroImageDefaults, ...(readDraft().heroImage || {}) };
   const activePalette = () => ({ ...(presets[activeTheme] || presets.wine), ...customColors });
   const themeField = document.querySelector('.theme-options')?.closest('.field');
   const sectionDefaults = {
@@ -182,6 +188,14 @@
     }).join('');
   }
 
+  const heroImagePanel = document.createElement('div');
+  heroImagePanel.className = 'hero-image-panel';
+  document.querySelector('#start .grid')?.append(heroImagePanel);
+  const options = (items, value) => items.map(([key, label]) => `<option value="${key}" ${value === key ? 'selected' : ''}>${label}</option>`).join('');
+  function renderHeroImagePanel() {
+    heroImagePanel.innerHTML = `<h3>Hero Bild</h3><label>Bilddatei<input data-hero-image="src" value="${escapeHtml(heroImage.src)}"></label><label>Alternativtext<input data-hero-image="alt" value="${escapeHtml(heroImage.alt)}"></label><label>Bildformat<select data-hero-image="layout">${options([['portrait','Seitliches Portraet'],['landscape','Breite Fotoflaeche'],['background','Vollflaechiger Hintergrund']], heroImage.layout)}</select></label><label>Bildwirkung<select data-hero-image="blend">${options([['duotone','Weiches Duoton'],['natural','Natuerlich'],['mono','Monochrom'],['warm','Warm und weich']], heroImage.blend)}</select></label><label>Bildposition<select data-hero-image="position">${options([['center top','Mitte oben'],['center center','Mitte'],['right center','Rechts Mitte'],['left center','Links Mitte']], heroImage.position)}</select></label><label>Textueberlagerung<select data-hero-image="overlay">${options([['soft','Sanft'],['strong','Stark'],['none','Keine']], heroImage.overlay)}</select></label>`;
+  }
+
   function focusAreasFromDom() {
     const cards = [...document.querySelectorAll('[data-focus-index]')];
     if (!cards.length) return readDraft().focusAreas.areas;
@@ -207,6 +221,7 @@
     draft.costs.entries = clone(priceEntries);
     draft.colorTheme = activeTheme;
     draft.customColors = clone(customColors);
+    draft.heroImage = { ...heroImage };
     draft.sectionLayout = { order: [...sectionLayout.order], enabled: { ...sectionLayout.enabled } };
     writeDraft(draft);
     return draft;
@@ -224,6 +239,7 @@
 
   renderThemes();
   renderSectionManager();
+  renderHeroImagePanel();
   renderPrices();
   enhanceRichText();
 
@@ -265,9 +281,19 @@
       persistEnhancements();
       queuePreview();
     }
+    if (event.target.matches('[data-hero-image]')) {
+      heroImage[event.target.dataset.heroImage] = event.target.value;
+      persistEnhancements();
+      queuePreview();
+    }
   });
 
   editor.addEventListener('input', (event) => {
+    if (event.target.matches('[data-hero-image]')) {
+      heroImage[event.target.dataset.heroImage] = event.target.value;
+      persistEnhancements();
+      queuePreview();
+    }
     const card = event.target.closest('[data-price-index]');
     if (card) {
       const index = Number(card.dataset.priceIndex);

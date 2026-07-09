@@ -14,6 +14,14 @@ window.practiceContent = {
   practitionerName: "Dr. Anna Beispiel",
   navigation: { home: "Startseite", psychotherapy: "Psychotherapie", costs: "Kosten", focusAreas: "Schwerpunkte", contact: "Kontakt" },
   hero: { eyebrow: "Psychotherapie in Wien", title: "Ein Ort, an dem Sie mit allem da sein duerfen.", sentence: "In einem vertrauensvollen Rahmen schauen wir gemeinsam auf das, was Sie bewegt." },
+  heroImage: {
+    src: "therapist.png",
+    alt: "Portraet der Therapeutin",
+    layout: "portrait",
+    blend: "duotone",
+    position: "center top",
+    overlay: "soft"
+  },
   introduction: {
     title: "Manchmal hilft es, nicht allein weitergehen zu muessen.",
     text: "Psychotherapie bietet Raum, die eigene Geschichte besser zu verstehen und neue Wege im Umgang mit Belastungen zu finden. Der erste Schritt muss nicht perfekt sein - es reicht, dass er zu Ihnen passt.",

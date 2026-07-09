@@ -95,3 +95,17 @@ test('editor controls section visibility and order', async ({ page }) => {
   await expect(preview.locator('section#psychotherapy.therapy')).toHaveCount(1);
   await expect(preview.locator('.content-section[data-section-key="intro"]')).toHaveCount(0);
 });
+
+test('editor configures hero image presentation', async ({ page }) => {
+  await page.goto(editorUrl);
+
+  await page.selectOption('[data-hero-image="layout"]', 'background');
+  await page.selectOption('[data-hero-image="blend"]', 'natural');
+  await page.selectOption('[data-hero-image="position"]', 'right center');
+  await page.getByRole('button', { name: 'Vorschau' }).click();
+
+  const preview = page.frameLocator('#preview-frame');
+  await expect(preview.locator('.hero')).toHaveAttribute('data-image-layout', 'background');
+  await expect(preview.locator('.hero')).toHaveAttribute('data-image-blend', 'natural');
+  await expect(preview.locator('.hero')).toHaveCSS('--hero-image-position', 'right center');
+});
