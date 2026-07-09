@@ -9,7 +9,7 @@
   const keys = ['intro', 'therapy', 'focusAreas', 'practice', 'costs', 'contact'];
   const defaults = {
     order: keys,
-    enabled: { intro: true, therapy: false, focusAreas: true, practice: true, costs: true, contact: true }
+    enabled: { intro: true, therapy: true, focusAreas: true, practice: true, costs: true, contact: true }
   };
   const configured = content.sectionLayout || {};
   const orderedKeys = [...new Set([...(configured.order || []), ...keys])].filter((key) => keys.includes(key));
@@ -61,8 +61,38 @@
     costs: 'costs',
     contact: 'contact'
   };
+  const backgrounds = {
+    hero: 'var(--wine-950)',
+    intro: 'var(--paper)',
+    therapy: 'var(--rose-100)',
+    focusAreas: 'var(--paper)',
+    practice: 'var(--practice-bg)',
+    costs: 'var(--paper)',
+    contact: 'var(--wine-950)'
+  };
+  let transitionId = 0;
+  const addTransition = (divider, fromKey, toKey) => {
+    divider.style.setProperty('--divider-top', backgrounds[fromKey]);
+    divider.style.setProperty('--divider-bottom', backgrounds[toKey]);
+    const transition = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+    transition.setAttribute('class', 'ribbon-transition');
+    transition.setAttribute('viewBox', '0 0 1200 210');
+    transition.setAttribute('preserveAspectRatio', 'none');
+    transition.setAttribute('aria-hidden', 'true');
+    const curve = 'M0 111C154 54 266 165 416 108s260-72 396 9 235 33 388-43V210H0Z';
+    if (fromKey === 'hero') {
+      const gradientId = `hero-transition-${transitionId++}`;
+      transition.innerHTML = `<defs><linearGradient id="${gradientId}" x1="0" y1="0" x2="0" y2="1"><stop class="ribbon-transition-gradient-stop" offset="0%" stop-opacity="0"/><stop class="ribbon-transition-gradient-stop" offset="46%" stop-opacity=".38"/><stop class="ribbon-transition-gradient-stop" offset="100%" stop-opacity="1"/></linearGradient></defs><path fill="url(#${gradientId})" d="${curve}"/>`;
+    } else {
+      transition.innerHTML = `<path class="ribbon-transition-bottom" d="${curve}"/><path class="ribbon-transition-soft" d="M0 111C154 54 266 165 416 108s260-72 396 9 235 33 388-43"/>`;
+    }
+    divider.prepend(transition);
+  };
 
-  orderedKeys.filter((key) => enabled[key]).forEach((key, index, visibleKeys) => {
+  const visibleKeys = orderedKeys.filter((key) => enabled[key]);
+  const heroRibbon = document.querySelector('.hero-ribbon');
+  if (heroRibbon && visibleKeys.length) addTransition(heroRibbon, 'hero', visibleKeys[0]);
+  visibleKeys.forEach((key, index) => {
     const section = nodes[key];
     section.id = key === primaryTherapy ? 'psychotherapy' : idForKey[key];
     const block = document.createElement('div');
@@ -72,6 +102,7 @@
     if (dividerTemplate && index < visibleKeys.length - 1) {
       const divider = dividerTemplate.cloneNode(true);
       divider.classList.remove('in-view');
+      addTransition(divider, key, visibleKeys[index + 1]);
       block.append(divider);
       reveal(divider);
     }

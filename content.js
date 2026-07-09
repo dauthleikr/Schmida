@@ -8,7 +8,7 @@ window.practiceContent = {
   customColors: {},
   sectionLayout: {
     order: ["intro", "therapy", "focusAreas", "practice", "costs", "contact"],
-    enabled: { intro: true, therapy: false, focusAreas: true, practice: true, costs: true, contact: true }
+    enabled: { intro: true, therapy: true, focusAreas: true, practice: true, costs: true, contact: true }
   },
   practiceName: "Praxis fuer Psychotherapie",
   practitionerName: "Dr. Anna Beispiel",

@@ -155,7 +155,7 @@
   const themeField = document.querySelector('.theme-options')?.closest('.field');
   const sectionDefaults = {
     order: sectionDefinitions.map(([key]) => key),
-    enabled: { intro: true, therapy: false, focusAreas: true, practice: true, costs: true, contact: true }
+    enabled: { intro: true, therapy: true, focusAreas: true, practice: true, costs: true, contact: true }
   };
   const sourceLayout = readDraft().sectionLayout || {};
   const sectionLayout = {
