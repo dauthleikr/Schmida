@@ -13,14 +13,14 @@ window.practiceContent = {
     ],
     "enabled": {
       "intro": true,
-      "therapy": true,
+      "therapy": false,
       "focusAreas": true,
       "practice": true,
       "costs": true,
       "contact": true
     }
   },
-  "practiceName": "Praxis fuer Psychotherapie 1112",
+  "practiceName": "Carina Schmida, BA.pth.",
   "practitionerName": "Dr. Anna Beispiel",
   "navigation": {
     "home": "Startseite",
@@ -30,9 +30,9 @@ window.practiceContent = {
     "contact": "Kontakt"
   },
   "hero": {
-    "eyebrow": "Psychotherapie in Wien",
-    "title": "Ein Ort, an dem Sie mit allem da sein duerfen.",
-    "sentence": "In einem vertrauensvollen Rahmen schauen wir gemeinsam auf das, was Sie bewegt.",
+    "eyebrow": "Psychotherapeutin in Ausbildung unter Supervision",
+    "title": "Gefühle annehmen.\nGedanken ordnen.\nLeben gestalten.",
+    "sentence": "",
     "contactButton": "Kontakt aufnehmen"
   },
   "heroImage": {
@@ -44,12 +44,12 @@ window.practiceContent = {
     "overlay": "soft"
   },
   "introduction": {
-    "title": "Manchmal hilft es, nicht allein weitergehen zu muessen.",
-    "text": "Psychotherapie bietet Raum, die eigene Geschichte besser zu verstehen und neue Wege im Umgang mit Belastungen zu finden. Der erste Schritt muss nicht perfekt sein - es reicht, dass er zu Ihnen passt.",
+    "title": "Manchmal hilft es, nicht allein weitergehen zu müssen.",
+    "text": "Ob bei Ängsten, Depressionen oder sonstigen psychischen Krisen – als Verhaltenstherapeutin helfe ich Ihnen belastende Gefühle, Gedanken und Verhaltensweisen zu erkennen und schrittweise zu verändern. \n\nRespekt, Wertschätzung und Empathie bilden die Basis unserer Zusammenarbeit. In einem sicheren, geschützten Rahmen können Sie sich öffnen, vorhandene Stärken und Ressourcen wieder entdecken, hilfreiche Strategien zur Überwindung Ihrer individuellen Probleme erlernen und neue Wege erkunden. Das Ziel ist, dass Sie mehr Klarheit und Selbstwirksamkeit erlangen und damit mehr Lebensfreude und Wohlbefinden in Ihr Leben einziehen können. \n\nIch würde mich freuen, Sie kennenlernen und ein Stück auf Ihrem Weg in eine möglichst unbeschwerte Zukunft begleiten zu dürfen.",
     "items": [
-      "Ein geschuetzter, wertfreier Rahmen",
-      "Zeit fuer Ihre Themen und Ihr Tempo",
-      "Persoenlich, klar und zugewandt"
+      "",
+      "",
+      ""
     ]
   },
   "therapy": {
@@ -60,24 +60,32 @@ window.practiceContent = {
   },
   "focusAreas": {
     "label": "Schwerpunkte",
-    "title": "Womit Sie zu mir kommen koennen.",
-    "intro": "Therapie ist so individuell wie die Menschen, die zu mir kommen. Hier finden einige Themen Platz, bei denen ich Sie begleiten kann.",
+    "title": "Womit Sie zu mir kommen können.",
+    "intro": "Psychotherapie ist so individuell wie die Menschen, die zu mir kommen. Hier finden Sie einige Themen, bei denen ich Sie begleiten kann.",
     "areas": [
       [
         "Belastung & Erschoepfung",
-        "Wenn Anforderungen, Sorgen oder Veraenderungen zu viel Raum einnehmen."
+        ""
       ],
       [
         "Beziehungen",
-        "Wenn Naehe, Konflikte oder Trennungen Sie nachhaltig beschaeftigen."
+        ""
       ],
       [
         "Selbstwert",
-        "Wenn der Blick auf sich selbst von Zweifel oder hohem Druck gepraegt ist."
+        ""
       ],
       [
         "Uebergaenge",
-        "Wenn ein neuer Lebensabschnitt Orientierung und Halt braucht."
+        ""
+      ],
+      [
+        "Neuer Schwerpunkt",
+        "Kurze Beschreibung des Schwerpunkts."
+      ],
+      [
+        "Neuer Schwerpunkt",
+        "Kurze Beschreibung des Schwerpunkts."
       ]
     ]
   },
