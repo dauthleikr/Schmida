@@ -20,7 +20,7 @@ window.practiceContent = {
       "contact": true
     }
   },
-  "practiceName": "Praxis fuer Psychotherapie 111",
+  "practiceName": "Praxis fuer Psychotherapie 1112",
   "practitionerName": "Dr. Anna Beispiel",
   "navigation": {
     "home": "Startseite",
