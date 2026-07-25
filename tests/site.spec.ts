@@ -43,6 +43,41 @@ test('provides a usable compact navigation', async ({ page }) => {
   await expect(page.locator('#kontakt')).toBeInViewport();
 });
 
+test('wide hero imagery fills available width without falling behind the wave', async ({ page }) => {
+  await page.setViewportSize({ width:720,height:900 });
+  await page.goto(siteUrl);
+
+  const tabletLayout = await page.evaluate(() => {
+    const image = document.querySelector('.hero-image-wrap')!.getBoundingClientRect();
+    const ribbon = document.querySelector('.hero-ribbon')!.getBoundingClientRect();
+    const pageBox = document.querySelector('.hero-inner')!.getBoundingClientRect();
+    return {
+      imageWidth:image.width,
+      pageWidth:pageBox.width,
+      imageBottom:image.bottom,
+      ribbonTop:ribbon.top
+    };
+  });
+  expect(tabletLayout.imageWidth).toBeGreaterThanOrEqual(tabletLayout.pageWidth - 1);
+  expect(tabletLayout.imageBottom).toBeLessThanOrEqual(tabletLayout.ribbonTop);
+
+  await page.setViewportSize({ width:1600,height:900 });
+  await page.reload();
+
+  const desktopLayout = await page.evaluate(() => {
+    const image = document.querySelector('.hero-image-wrap')!.getBoundingClientRect();
+    const ribbon = document.querySelector('.hero-ribbon')!.getBoundingClientRect();
+    return {
+      imageRight:image.right,
+      imageBottom:image.bottom,
+      ribbonTop:ribbon.top,
+      viewportWidth:document.documentElement.clientWidth
+    };
+  });
+  expect(desktopLayout.imageRight).toBeGreaterThanOrEqual(desktopLayout.viewportWidth - 1);
+  expect(desktopLayout.imageBottom).toBeLessThanOrEqual(desktopLayout.ribbonTop);
+});
+
 test('editor exports normalized schema content', async ({ page }) => {
   await page.goto(editorUrl);
 
