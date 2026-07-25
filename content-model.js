@@ -335,12 +335,14 @@
     const source = input && typeof input === 'object' ? clone(input) : {};
     const sections = Array.isArray(source.sections) ? source.sections : migrateLegacySections(source);
     const hero = mergeDefaults({ eyebrow: '', title: '', sentence: '', contactButton: 'Kontakt aufnehmen', titleSize: 'standard' }, source.hero);
-    const heroImage = mergeDefaults({ src: 'therapist.png', alt: '', layout: 'portrait', blend: 'duotone', position: 'center top', mobileLayout: 'portrait', mobilePosition: 'center center', overlay: 'soft' }, source.heroImage);
+    const heroImage = mergeDefaults({ src: 'therapist.png', alt: '', layout: 'portrait', blend: 'duotone', position: 'center top', mobileLayout: 'portrait', mobilePosition: 'center center', overlay: 'soft', blendWidthDesktop: 32, blendWidthMobile: 28 }, source.heroImage);
     if (!titleSizeOptions.some(([value]) => value === hero.titleSize)) hero.titleSize = 'standard';
     if (!['portrait','landscape','background'].includes(heroImage.layout)) heroImage.layout = 'portrait';
     if (!['portrait','landscape','hidden'].includes(heroImage.mobileLayout)) heroImage.mobileLayout = 'portrait';
     if (!['duotone','natural','mono','warm'].includes(heroImage.blend)) heroImage.blend = 'duotone';
     if (!['soft','strong','none'].includes(heroImage.overlay)) heroImage.overlay = 'soft';
+    heroImage.blendWidthDesktop = Math.min(80,Math.max(5,Number(heroImage.blendWidthDesktop) || 32));
+    heroImage.blendWidthMobile = Math.min(80,Math.max(5,Number(heroImage.blendWidthMobile) || 28));
     return {
       schemaVersion: 3,
       colorTheme: themes[source.colorTheme] ? source.colorTheme : 'wine',

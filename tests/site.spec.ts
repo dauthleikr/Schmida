@@ -245,9 +245,20 @@ test('rich-text controls and hero presentation remain editable', async ({ page }
 
   await page.selectOption('[data-path="heroImage.layout"]','background');
   await page.selectOption('[data-path="heroImage.blend"]','natural');
-  await page.selectOption('[data-path="heroImage.mobileLayout"]','landscape');
+  await expect(page.locator('[data-path="heroImage.mobileLayout"] option')).toHaveCount(2);
+  await page.selectOption('[data-path="heroImage.mobileLayout"]','portrait');
   await expect(page.locator('[data-path="heroImage.position"]')).toHaveCount(0);
   await expect(page.locator('[data-path="heroImage.mobilePosition"]')).toHaveCount(0);
+  await page.locator('[data-path="heroImage.blendWidthDesktop"]').evaluate((input:HTMLInputElement) => {
+    input.value = '55';
+    input.dispatchEvent(new Event('input',{ bubbles:true }));
+  });
+  await page.locator('[data-path="heroImage.blendWidthMobile"]').evaluate((input:HTMLInputElement) => {
+    input.value = '45';
+    input.dispatchEvent(new Event('input',{ bubbles:true }));
+  });
+  await expect(page.locator('output[for="heroImage.blendWidthDesktop"]')).toHaveText('55%');
+  await expect(page.locator('output[for="heroImage.blendWidthMobile"]')).toHaveText('45%');
   await expect(page.locator('[data-path="hero.titleSize"] option')).toHaveCount(5);
   await page.selectOption('[data-path="hero.titleSize"]','tiny');
   await page.locator('.section-editor[data-section-id="psychotherapie"] [data-path$=".appearance.titleSize"]').selectOption('small');
@@ -257,11 +268,20 @@ test('rich-text controls and hero presentation remain editable', async ({ page }
   const preview = page.frameLocator('#preview-frame');
   await expect(preview.locator('.hero')).toHaveAttribute('data-image-layout','background');
   await expect(preview.locator('.hero')).toHaveAttribute('data-image-blend','natural');
-  await expect(preview.locator('.hero')).toHaveAttribute('data-mobile-image-layout','landscape');
+  await expect(preview.locator('.hero')).toHaveAttribute('data-mobile-image-layout','portrait');
   await expect(preview.locator('.hero')).toHaveAttribute('data-title-size','tiny');
+  await expect(preview.locator('.hero')).toHaveCSS('--hero-blend-desktop','55%');
+  await expect(preview.locator('.hero')).toHaveCSS('--hero-blend-mobile','45%');
   await expect(preview.locator('#psychotherapie')).toHaveAttribute('data-title-size','small');
   await expect(preview.getByRole('link',{ name:'Erstgespräch anfragen' })).toHaveAttribute('href','#kontakt');
   await expect(preview.locator('h1 strong')).toHaveText('Ein neuer Titel');
+
+  const backgroundBounds = await preview.locator('.hero-image-wrap').evaluate((element) => {
+    const box = element.getBoundingClientRect();
+    return { left:box.left,right:box.right,viewportWidth:document.documentElement.clientWidth };
+  });
+  expect(backgroundBounds.left).toBeLessThanOrEqual(0);
+  expect(backgroundBounds.right).toBeGreaterThanOrEqual(backgroundBounds.viewportWidth);
 });
 
 test('legacy fixed content is isolated behind the schema migration adapter', async ({ page }) => {

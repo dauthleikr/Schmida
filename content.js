@@ -23,7 +23,9 @@ window.practiceContent = {
     "position": "center 30%",
     "mobileLayout": "portrait",
     "mobilePosition": "center 38%",
-    "overlay": "soft"
+    "overlay": "soft",
+    "blendWidthDesktop": 32,
+    "blendWidthMobile": 28
   },
   "sections": [
     {

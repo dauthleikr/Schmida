@@ -60,6 +60,9 @@
     if (field.type === 'select') {
       return `<div class="field${wide}"><label for="${escapeHtml(path)}">${escapeHtml(field.label)}</label><select id="${escapeHtml(path)}" data-path="${escapeHtml(path)}">${field.options.map(([key,label]) => `<option value="${escapeHtml(key)}" ${key === value ? 'selected' : ''}>${escapeHtml(label)}</option>`).join('')}</select></div>`;
     }
+    if (field.type === 'range') {
+      return `<div class="field${wide}"><label class="range-label" for="${escapeHtml(path)}"><span>${escapeHtml(field.label)}</span><output for="${escapeHtml(path)}">${escapeHtml(value)}%</output></label><input type="range" id="${escapeHtml(path)}" data-path="${escapeHtml(path)}" min="${field.min}" max="${field.max}" step="${field.step || 1}" value="${escapeHtml(value)}"><p class="help">${escapeHtml(field.help || '')}</p></div>`;
+    }
     return `<div class="field${wide}"><label for="${escapeHtml(path)}">${escapeHtml(field.label)}</label><input id="${escapeHtml(path)}" data-path="${escapeHtml(path)}" value="${escapeHtml(value)}"></div>`;
   };
 
@@ -110,8 +113,10 @@
             ${fieldMarkup({ label:'Alternativtext',type:'text' },'heroImage.alt',image.alt)}
             ${fieldMarkup({ label:'Bildformat Desktop',type:'select',options:[['portrait','Seitliches Porträt'],['landscape','Breite Fotofläche'],['background','Vollflächiger Hintergrund']] },'heroImage.layout',image.layout)}
             ${fieldMarkup({ label:'Bildwirkung',type:'select',options:[['duotone','Weiches Duoton'],['natural','Natürlich'],['mono','Monochrom'],['warm','Warm und weich']] },'heroImage.blend',image.blend)}
-            ${fieldMarkup({ label:'Bildformat Mobil',type:'select',options:[['portrait','Hochformat'],['landscape','Querformat'],['hidden','Auf Mobil ausblenden']] },'heroImage.mobileLayout',image.mobileLayout)}
+            ${fieldMarkup({ label:'Bild auf Mobilgeräten',type:'select',options:[['portrait','Anzeigen'],['hidden','Ausblenden']] },'heroImage.mobileLayout',image.mobileLayout === 'hidden' ? 'hidden' : 'portrait')}
             ${fieldMarkup({ label:'Textüberlagerung',type:'select',options:[['soft','Sanft'],['strong','Stark'],['none','Keine']] },'heroImage.overlay',image.overlay)}
+            ${fieldMarkup({ label:'Blendbreite Desktop',type:'range',min:5,max:80,step:1,help:'Wie weit die Überblendung von links in das Bild reicht.' },'heroImage.blendWidthDesktop',image.blendWidthDesktop)}
+            ${fieldMarkup({ label:'Blendbreite Mobil',type:'range',min:5,max:80,step:1,help:'Wie weit die Überblendung von oben in das Bild reicht.' },'heroImage.blendWidthMobile',image.blendWidthMobile)}
           </div>
         </div>
       </div>`;
@@ -193,6 +198,8 @@
     const path = event.target.dataset.path;
     if (path) {
       setPath(data,path,event.target.value);
+      const output = event.target.parentElement.querySelector('output');
+      if (output) output.value = `${event.target.value}%`;
       saveDraft();
       return;
     }
