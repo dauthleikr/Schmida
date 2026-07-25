@@ -31,6 +31,7 @@ window.practiceContent = {
     {
       "id": "psychotherapie",
       "layout": "intro",
+      "internalName": "Intro",
       "navigationLabel": "Psychotherapie",
       "background": "paper",
       "customBackground": "#f7f2ef",
@@ -47,6 +48,7 @@ window.practiceContent = {
     {
       "id": "schwerpunkte",
       "layout": "topics",
+      "internalName": "Schwerpunkte",
       "navigationLabel": "Schwerpunkte",
       "background": "rose",
       "customBackground": "#f7f2ef",
@@ -85,6 +87,7 @@ window.practiceContent = {
     {
       "id": "supervision",
       "layout": "note",
+      "internalName": "Zweispaltiger Text mit Hervorhebung",
       "navigationLabel": "",
       "background": "soft",
       "customBackground": "#f7f2ef",
@@ -101,6 +104,7 @@ window.practiceContent = {
     {
       "id": "berufserfahrung",
       "layout": "timeline",
+      "internalName": "Vertikale Zeitleiste",
       "navigationLabel": "Über mich",
       "background": "paper",
       "customBackground": "#f7f2ef",
@@ -138,6 +142,7 @@ window.practiceContent = {
     {
       "id": "ausbildung",
       "layout": "timeline",
+      "internalName": "Vertikale Zeitleiste",
       "navigationLabel": "",
       "background": "rose",
       "customBackground": "#f7f2ef",
@@ -180,6 +185,7 @@ window.practiceContent = {
     {
       "id": "praxis",
       "layout": "wideImage",
+      "internalName": "Text über breitem Bild",
       "navigationLabel": "Praxis",
       "background": "soft",
       "customBackground": "#f7f2ef",
@@ -199,6 +205,7 @@ window.practiceContent = {
     {
       "id": "kontakt",
       "layout": "contact",
+      "internalName": "Kontaktblock mit Karte",
       "navigationLabel": "Kontakt",
       "background": "dark",
       "customBackground": "#f7f2ef",

@@ -137,11 +137,10 @@
 
   function renderSectionCard(section,index) {
     const definition = model.layouts[section.layout];
-    const title = String(section.content.title || definition.label).replace(/[*_[\]]/g,'').split('\n')[0];
     const colorOptions = model.sectionColors.map((color) => `<option value="${color.key}" ${section.background === color.key ? 'selected' : ''}>${escapeHtml(color.label)}</option>`).join('');
     return `<article class="section-editor" data-section-index="${index}" data-section-id="${escapeHtml(section.id)}">
       <header class="section-editor-head">
-        <div><h3 class="section-title">${escapeHtml(title)}</h3><p class="section-meta">${escapeHtml(definition.label)} · ${escapeHtml(section.navigationLabel || 'nicht in der Navigation')}</p></div>
+        <div><h3 class="section-title">${escapeHtml(section.internalName)}</h3><p class="section-meta">Bereich ${index + 1} · ${escapeHtml(definition.label)} · ${section.navigationLabel ? `Navigation: ${escapeHtml(section.navigationLabel)}` : 'nicht in der Navigation'}</p></div>
         <div class="section-actions">
           <button class="icon-button" type="button" data-section-action="up" aria-label="Nach oben" ${index === 0 ? 'disabled' : ''}>↑</button>
           <button class="icon-button" type="button" data-section-action="down" aria-label="Nach unten" ${index === data.sections.length - 1 ? 'disabled' : ''}>↓</button>
@@ -150,6 +149,7 @@
       </header>
       <div class="section-editor-body">
         <div class="section-settings">
+          <div class="field"><label>Interner Name</label><input data-path="sections.${index}.internalName" value="${escapeHtml(section.internalName)}"><p class="help">Nur im Editor sichtbar.</p></div>
           <div class="field"><label>Layout</label><select data-section-layout>${Object.entries(model.layouts).map(([key,item]) => `<option value="${key}" ${section.layout === key ? 'selected' : ''}>${escapeHtml(item.label)}</option>`).join('')}</select></div>
           <div class="field"><label>Navigation</label><input data-path="sections.${index}.navigationLabel" value="${escapeHtml(section.navigationLabel)}"><p class="help">Leer lassen, um den Bereich nicht im Menü zu zeigen.</p></div>
           <div class="field"><label>Hintergrund</label><select data-section-background>${colorOptions}</select>${section.background === 'custom' ? `<div class="background-custom"><input type="color" data-section-custom-color value="${escapeHtml(section.customBackground)}"><input data-section-custom-code value="${escapeHtml(section.customBackground)}" spellcheck="false"></div>` : ''}</div>
@@ -198,6 +198,11 @@
     const path = event.target.dataset.path;
     if (path) {
       setPath(data,path,event.target.value);
+      if (/^sections\.\d+\.internalName$/.test(path)) {
+        const card = event.target.closest('[data-section-index]');
+        const index = Number(card.dataset.sectionIndex);
+        card.querySelector('.section-title').textContent = event.target.value.trim() || model.layouts[data.sections[index].layout].label;
+      }
       const output = event.target.parentElement.querySelector('output');
       if (output) output.value = `${event.target.value}%`;
       saveDraft();
@@ -251,6 +256,7 @@
     if (event.target.matches('[data-section-layout]')) {
       const oldSection = data.sections[index];
       const replacement = model.createSection(event.target.value,oldSection.id);
+      if (oldSection.internalName !== model.layouts[oldSection.layout].label) replacement.internalName = oldSection.internalName;
       replacement.navigationLabel = oldSection.navigationLabel;
       replacement.background = oldSection.background;
       replacement.customBackground = oldSection.customBackground;

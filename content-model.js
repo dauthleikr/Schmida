@@ -43,7 +43,7 @@
   const layouts = {
     intro: {
       ...titleAppearance(),
-      label: 'Text und Aufzählung',
+      label: 'Zweispaltiger Text mit Liste',
       description: 'Große Überschrift links, Fließtext und optionale Punkte rechts.',
       defaultNavigation: 'Psychotherapie',
       defaultBackground: 'paper',
@@ -57,7 +57,7 @@
     },
     note: {
       ...titleAppearance(),
-      label: 'Text mit hervorgehobenem Hinweis',
+      label: 'Zweispaltiger Text mit Hervorhebung',
       description: 'Textspalte mit einer großen, seitlich abgesetzten Notiz.',
       defaultNavigation: '',
       defaultBackground: 'rose',
@@ -85,7 +85,7 @@
     },
     image: {
       ...titleAppearance(),
-      label: 'Text mit Bild',
+      label: 'Zweispaltiger Text mit Bild',
       description: 'Text links und ein großes Bild oder der bestehende Praxis-Platzhalter rechts.',
       defaultNavigation: '',
       defaultBackground: 'soft',
@@ -102,7 +102,7 @@
     },
     wideImage: {
       ...titleAppearance(),
-      label: 'Text mit breitem Bild',
+      label: 'Text über breitem Bild',
       description: 'Einleitung über einer großzügigen, querformatigen Fotofläche.',
       defaultNavigation: 'Praxis',
       defaultBackground: 'soft',
@@ -119,7 +119,7 @@
     },
     topics: {
       ...titleAppearance(),
-      label: 'Kompakte Themenliste',
+      label: 'Nummerierte Zweispaltenliste',
       description: 'Eine ruhige, flexible Liste für mehrere Schwerpunkte ohne erzwungene Beschreibungen.',
       defaultNavigation: 'Schwerpunkte',
       defaultBackground: 'rose',
@@ -133,7 +133,7 @@
     },
     timeline: {
       ...titleAppearance(),
-      label: 'Werdegang',
+      label: 'Vertikale Zeitleiste',
       description: 'Eine flexible chronologische Liste für Ausbildung oder Berufserfahrung.',
       defaultNavigation: 'Über mich',
       defaultBackground: 'paper',
@@ -147,7 +147,7 @@
     },
     pricing: {
       ...titleAppearance(),
-      label: 'Preisliste',
+      label: 'Zweispaltige Preisliste',
       description: 'Einleitung links und eine strukturierte Liste aus Leistungen und Preisen rechts.',
       defaultNavigation: 'Kosten',
       defaultBackground: 'paper',
@@ -162,7 +162,7 @@
     },
     contact: {
       ...titleAppearance(),
-      label: 'Kontakt',
+      label: 'Kontaktblock mit Karte',
       description: 'Kontakttext, Adresse, Telefon, E-Mail und eine Kartenfläche.',
       defaultNavigation: 'Kontakt',
       defaultBackground: 'dark',
@@ -215,6 +215,7 @@
     return {
       id: String(section?.id || `section-${index + 1}`),
       layout,
+      internalName: String(section?.internalName || definition.label),
       navigationLabel: String(section?.navigationLabel ?? definition.defaultNavigation),
       background,
       customBackground: /^#[0-9a-f]{6}$/i.test(section?.customBackground || '') ? section.customBackground : '#f7f2ef',

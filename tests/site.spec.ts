@@ -8,7 +8,7 @@ test('renders the new section schema with dynamic navigation and waves', async (
   await page.goto(siteUrl);
 
   await expect(page).toHaveTitle('Carina Schmida, BA.pth.');
-  await expect(page.locator('.hero')).toHaveAttribute('data-title-size','small');
+  await expect(page.locator('.hero')).toHaveAttribute('data-title-size','tiny');
   await expect(page.getByRole('navigation')).toHaveText(/Startseite[\s\S]*Psychotherapie[\s\S]*Schwerpunkte[\s\S]*Über mich[\s\S]*Praxis[\s\S]*Kontakt/);
   await expect(page.locator('.content-section')).toHaveCount(7);
   await expect(page.locator('.content-section[data-layout="topics"] .topics-list li')).toHaveCount(7);
@@ -140,6 +140,21 @@ test('editor exports normalized schema content', async ({ page }) => {
   await page.goto(editorUrl);
 
   await expect(page.getByRole('heading',{ name:'Inhalte bearbeiten' })).toBeVisible();
+  await expect(page.locator('.section-editor').first().locator('.section-title')).toHaveText('Zweispaltiger Text mit Liste');
+  await expect(page.locator('.section-editor').first().locator('.section-title')).not.toHaveText('Manchmal hilft es, nicht allein weitergehen zu müssen');
+  await page.locator('[data-path="sections.0.internalName"]').fill('Hauptbereich Psychotherapie');
+  await expect(page.locator('.section-editor').first().locator('.section-title')).toHaveText('Hauptbereich Psychotherapie');
+  await expect(page.locator('#new-layout option')).toHaveText([
+    /Zweispaltiger Text mit Liste/,
+    /Zweispaltiger Text mit Hervorhebung/,
+    /Kartenraster/,
+    /Zweispaltiger Text mit Bild/,
+    /Text über breitem Bild/,
+    /Nummerierte Zweispaltenliste/,
+    /Vertikale Zeitleiste/,
+    /Zweispaltige Preisliste/,
+    /Kontaktblock mit Karte/
+  ]);
   await page.locator('[data-path="practiceName"]').fill('Praxis Sonnenweg');
   await page.getByRole('radio',{ name:'Scharlachrot' }).check();
 
@@ -155,6 +170,7 @@ test('editor exports normalized schema content', async ({ page }) => {
   expect(download.suggestedFilename()).toBe('content.js');
   expect(output).toContain('Praxis Sonnenweg');
   expect(output).toContain('"schemaVersion": 3');
+  expect(output).toContain('"internalName": "Hauptbereich Psychotherapie"');
   expect(output).toContain('"sections": [');
   expect(output).toContain('"colorTheme": "scarlet"');
   expect(output).not.toContain('"sectionLayout"');
@@ -185,9 +201,10 @@ test('repeatable bullets, cards and prices use reusable add and remove controls'
   await page.goto(editorUrl);
 
   const intro = page.locator('.section-editor[data-section-id="psychotherapie"]');
+  const initialItemCount = await intro.locator('.collection-item').count();
   await intro.locator('[data-collection-action="add"][data-collection-key="items"]').click();
-  await expect(intro.locator('.collection-item')).toHaveCount(3);
-  await intro.locator('[data-path$=".items.2.text"]').fill('Dynamischer Aufzählungspunkt');
+  await expect(intro.locator('.collection-item')).toHaveCount(initialItemCount + 1);
+  await intro.locator('.collection-item').last().locator('[data-path$=".text"]').fill('Dynamischer Aufzählungspunkt');
 
   await page.selectOption('#new-layout','cards');
   await page.getByRole('button',{ name:'Bereich hinzufügen' }).click();
