@@ -15,6 +15,10 @@ test('renders the new section schema with dynamic navigation and waves', async (
   const savedListStyle = await page.evaluate(() => window.practiceContent.sections.find((section) => section.layout === 'topics')?.appearance?.listStyle || 'numbered-grid');
   await expect(page.locator('.content-section[data-layout="topics"] .topics-list')).toHaveAttribute('data-list-style',savedListStyle);
   await expect(page.locator('.content-section[data-layout="timeline"]')).toHaveCount(2);
+  const sectionEyebrowSizes = await page.locator('.dynamic-section .eyebrow').evaluateAll((elements) => elements.map((element) => parseFloat(getComputedStyle(element).fontSize)));
+  expect(Math.max(...sectionEyebrowSizes) - Math.min(...sectionEyebrowSizes)).toBeLessThan(.01);
+  expect(sectionEyebrowSizes[0]).toBeCloseTo(17.12,2);
+  await expect(page.locator('.hero .eyebrow')).toHaveCSS('font-size','11.2px');
   await expect(page.locator('.ribbon-transition')).toHaveCount(7);
   await expect(page.locator('.hero-image')).toHaveJSProperty('complete',true);
   await expect(page.locator('#kontakt')).toContainText('E-Mail-Adresse bitte ergänzen');
