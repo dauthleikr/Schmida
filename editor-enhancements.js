@@ -64,6 +64,9 @@
     if (field.type === 'range') {
       return `<div class="field${wide}"><label class="range-label" for="${escapeHtml(path)}"><span>${escapeHtml(field.label)}</span><output for="${escapeHtml(path)}">${escapeHtml(value)}%</output></label><input type="range" id="${escapeHtml(path)}" data-path="${escapeHtml(path)}" min="${field.min}" max="${field.max}" step="${field.step || 1}" value="${escapeHtml(value)}"><p class="help">${escapeHtml(field.help || '')}</p></div>`;
     }
+    if (field.type === 'color') {
+      return `<div class="field${wide}"><label for="${escapeHtml(path)}">${escapeHtml(field.label)}</label><input type="color" id="${escapeHtml(path)}" data-path="${escapeHtml(path)}" value="${escapeHtml(value)}"></div>`;
+    }
     return `<div class="field${wide}"><label for="${escapeHtml(path)}">${escapeHtml(field.label)}</label><input id="${escapeHtml(path)}" data-path="${escapeHtml(path)}" value="${escapeHtml(value)}"></div>`;
   };
 
@@ -156,7 +159,7 @@
           <div class="field"><label>Layout</label><select data-section-layout>${Object.entries(model.layouts).map(([key,item]) => `<option value="${key}" ${section.layout === key ? 'selected' : ''}>${escapeHtml(item.label)}</option>`).join('')}</select></div>
           <div class="field"><label>Navigation</label><input data-path="sections.${index}.navigationLabel" value="${escapeHtml(section.navigationLabel)}"><p class="help">Leer lassen, um den Bereich nicht im Menü zu zeigen.</p></div>
           <div class="field"><label>Hintergrund</label><select data-section-background>${colorOptions}</select>${section.background === 'custom' ? `<div class="background-custom"><input type="color" data-section-custom-color value="${escapeHtml(section.customBackground)}"><input data-section-custom-code value="${escapeHtml(section.customBackground)}" spellcheck="false"></div>` : ''}</div>
-          ${(definition.appearanceFields || []).map((field) => fieldMarkup(field,`sections.${index}.appearance.${field.key}`,section.appearance[field.key],{ compact:true })).join('')}
+          ${(definition.appearanceFields || []).filter((field) => !field.visibleWhen || field.visibleWhen.values.includes(section.appearance[field.visibleWhen.key])).map((field) => fieldMarkup(field,`sections.${index}.appearance.${field.key}`,section.appearance[field.key],{ compact:true })).join('')}
           <p class="layout-description">${escapeHtml(definition.description)}</p>
         </div>
         <div class="section-fields">
@@ -214,6 +217,7 @@
       const output = event.target.parentElement.querySelector('output');
       if (output) output.value = `${event.target.value}%`;
       saveDraft();
+      if (path.endsWith('.appearance.listStyle')) renderSections();
       return;
     }
     const token = event.target.dataset.globalColor || event.target.dataset.globalColorCode;

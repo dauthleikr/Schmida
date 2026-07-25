@@ -26,6 +26,20 @@
     const normalized = String(value || `section-${index + 1}`).trim().toLowerCase().replace(/[^a-z0-9_-]+/g,'-').replace(/^-+|-+$/g,'');
     return normalized || `section-${index + 1}`;
   };
+  const colorChannels = (value) => {
+    const hex = /^#[0-9a-f]{6}$/i.test(value || '') ? value.slice(1) : '000000';
+    return [0,2,4].map((offset) => parseInt(hex.slice(offset,offset + 2),16));
+  };
+  const interpolateColor = (start,end,position) => {
+    const from = colorChannels(start);
+    const to = colorChannels(end);
+    const channel = (index) => Math.round(from[index] + (to[index] - from[index]) * position).toString(16).padStart(2,'0');
+    return `#${channel(0)}${channel(1)}${channel(2)}`;
+  };
+  const readableInk = (color) => {
+    const [red,green,blue] = colorChannels(color);
+    return (red * 299 + green * 587 + blue * 114) / 1000 > 150 ? '#291117' : '#ffffff';
+  };
 
   const renderers = {
     intro: (section) => {
@@ -53,7 +67,14 @@
     },
     topics: (section) => {
       const body = section.content;
-      const items = body.items.filter((item) => item.text).map((item,index) => `<li><span>${String(index + 1).padStart(2,'0')}</span>${formatMarkup(item.text)}</li>`).join('');
+      const visibleItems = body.items.filter((item) => item.text);
+      const start = section.appearance?.gradientStart || '#fff0f2';
+      const end = section.appearance?.gradientEnd || '#d11137';
+      const items = visibleItems.map((item,index) => {
+        const position = visibleItems.length > 1 ? index / (visibleItems.length - 1) : 0;
+        const color = interpolateColor(start,end,position);
+        return `<li style="--item-color:${color};--item-ink:${readableInk(color)}"><span>${String(index + 1).padStart(2,'0')}</span>${formatMarkup(item.text)}</li>`;
+      }).join('');
       const listStyle = section.appearance?.listStyle || 'numbered-grid';
       return `<section class="section dynamic-section layout-topics"><div class="page topics-grid"><div class="topics-copy">${eyebrow(body.eyebrow)}<h2>${formatMarkup(body.title)}</h2><p>${formatMarkup(body.intro)}</p></div><ol class="topics-list" data-list-style="${escapeAttribute(listStyle)}">${items}</ol></div></section>`;
     },

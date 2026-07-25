@@ -124,10 +124,15 @@
           ['numbered-grid','Nummeriert, zweispaltig'],
           ['accent-grid','Akzentpunkte, zweispaltig'],
           ['editorial-list','Ruhige Zeilen, einspaltig'],
+          ['gradient-pills','Geordnete Verlaufspills'],
+          ['gradient-bands','Sanfte Verlaufsbänder'],
+          ['clean-tiles','Ruhige Kacheln'],
           ['playful-pills','Versetzte Akzent-Pills'],
           ['scattered-cards','Lockeres Kartenmosaik']
-        ] }
-      ],{ listStyle: 'numbered-grid' }),
+        ] },
+        { key: 'gradientStart', label: 'Verlaufsfarbe Start', type: 'color', visibleWhen: { key: 'listStyle',values: ['gradient-pills','gradient-bands'] } },
+        { key: 'gradientEnd', label: 'Verlaufsfarbe Ende', type: 'color', visibleWhen: { key: 'listStyle',values: ['gradient-pills','gradient-bands'] } }
+      ],{ listStyle: 'numbered-grid',gradientStart: '#fff0f2',gradientEnd: '#d11137' }),
       label: 'Auflistung',
       description: 'Eine flexible Auflistung mit wählbarer ein- oder zweispaltiger Darstellung.',
       defaultNavigation: 'Schwerpunkte',
@@ -211,6 +216,9 @@
     (definition.appearanceFields || []).forEach((field) => {
       if (field.type === 'select' && !field.options.some(([value]) => value === appearance[field.key])) {
         appearance[field.key] = definition.appearanceDefaults?.[field.key] || field.options[0]?.[0] || '';
+      }
+      if (field.type === 'color' && !/^#[0-9a-f]{6}$/i.test(appearance[field.key] || '')) {
+        appearance[field.key] = definition.appearanceDefaults?.[field.key] || '#000000';
       }
     });
     definition.fields.filter((field) => field.type === 'collection').forEach((field) => {

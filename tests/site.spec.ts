@@ -238,16 +238,32 @@ test('listing layout offers interchangeable visual treatments', async ({ page })
     'Nummeriert, zweispaltig',
     'Akzentpunkte, zweispaltig',
     'Ruhige Zeilen, einspaltig',
+    'Geordnete Verlaufspills',
+    'Sanfte Verlaufsbänder',
+    'Ruhige Kacheln',
     'Versetzte Akzent-Pills',
     'Lockeres Kartenmosaik'
   ]);
-  await style.selectOption('playful-pills');
+  await expect(listing.locator('[data-path$=".appearance.gradientStart"]')).toHaveCount(0);
+  await expect(listing.locator('[data-path$=".appearance.gradientEnd"]')).toHaveCount(0);
+  await style.selectOption('gradient-pills');
+  const refreshedListing = page.locator('.section-editor[data-section-id="schwerpunkte"]');
+  const startColor = refreshedListing.locator('[data-path$=".appearance.gradientStart"]');
+  const endColor = refreshedListing.locator('[data-path$=".appearance.gradientEnd"]');
+  await expect(startColor).toBeVisible();
+  await expect(endColor).toBeVisible();
+  await startColor.fill('#ff0000');
+  await endColor.fill('#0000ff');
   await page.getByRole('button',{ name:'Vorschau Desktop' }).click();
 
   const previewList = page.frameLocator('#preview-frame').locator('.content-section[data-layout="topics"] .topics-list');
-  await expect(previewList).toHaveAttribute('data-list-style','playful-pills');
+  await expect(previewList).toHaveAttribute('data-list-style','gradient-pills');
   await expect(previewList).toHaveCSS('display','flex');
   await expect(previewList.locator('li').first()).toHaveCSS('border-radius','999px');
+  await expect(previewList.locator('li').first()).toHaveCSS('transform','none');
+  await expect(previewList.locator('li').first()).toHaveCSS('background-color','rgb(255, 0, 0)');
+  await expect(previewList.locator('li').nth(3)).toHaveCSS('background-color','rgb(128, 0, 128)');
+  await expect(previewList.locator('li').last()).toHaveCSS('background-color','rgb(0, 0, 255)');
 });
 
 test('each section can be previewed directly on mobile and desktop', async ({ page }) => {

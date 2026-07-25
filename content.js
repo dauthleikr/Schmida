@@ -53,7 +53,10 @@ window.practiceContent = {
       "background": "rose",
       "customBackground": "#f7f2ef",
       "appearance": {
-        "titleSize": "standard"
+        "titleSize": "standard",
+        "listStyle": "gradient-pills",
+        "gradientStart": "#d11137",
+        "gradientEnd": "#d93684"
       },
       "content": {
         "eyebrow": "Schwerpunkte",
