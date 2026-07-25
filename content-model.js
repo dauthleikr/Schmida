@@ -27,6 +27,7 @@
   ];
   const imagePositionOptions = [
     ['center top', 'Mitte oben'],
+    ['center 30%', 'Oberes Drittel'],
     ['center center', 'Mitte'],
     ['center bottom', 'Mitte unten'],
     ['left center', 'Links'],

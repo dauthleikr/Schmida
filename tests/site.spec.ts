@@ -52,30 +52,42 @@ test('wide hero imagery fills available width without falling behind the wave', 
     const ribbon = document.querySelector('.hero-ribbon')!.getBoundingClientRect();
     const pageBox = document.querySelector('.hero-inner')!.getBoundingClientRect();
     return {
+      imageLeft:image.left,
+      imageRight:image.right,
       imageWidth:image.width,
       pageWidth:pageBox.width,
-      imageBottom:image.bottom,
-      ribbonTop:ribbon.top
-    };
-  });
-  expect(tabletLayout.imageWidth).toBeGreaterThanOrEqual(tabletLayout.pageWidth - 1);
-  expect(tabletLayout.imageBottom).toBeLessThanOrEqual(tabletLayout.ribbonTop);
-
-  await page.setViewportSize({ width:1600,height:900 });
-  await page.reload();
-
-  const desktopLayout = await page.evaluate(() => {
-    const image = document.querySelector('.hero-image-wrap')!.getBoundingClientRect();
-    const ribbon = document.querySelector('.hero-ribbon')!.getBoundingClientRect();
-    return {
-      imageRight:image.right,
       imageBottom:image.bottom,
       ribbonTop:ribbon.top,
       viewportWidth:document.documentElement.clientWidth
     };
   });
+  expect(tabletLayout.imageWidth).toBeGreaterThanOrEqual(tabletLayout.pageWidth - 1);
+  expect(tabletLayout.imageLeft).toBeLessThanOrEqual(1);
+  expect(tabletLayout.imageRight).toBeGreaterThanOrEqual(tabletLayout.viewportWidth - 1);
+  expect(tabletLayout.imageBottom).toBeLessThanOrEqual(tabletLayout.ribbonTop);
+
+  await page.setViewportSize({ width:2400,height:1200 });
+  await page.reload();
+
+  const desktopLayout = await page.evaluate(() => {
+    const imageWrap = document.querySelector('.hero-image-wrap')!.getBoundingClientRect();
+    const image = document.querySelector('.hero-image')!;
+    const ribbon = document.querySelector('.hero-ribbon')!.getBoundingClientRect();
+    const hero = document.querySelector('.hero')!.getBoundingClientRect();
+    const copy = document.querySelector('.hero-copy')!.getBoundingClientRect();
+    return {
+      imageRight:imageWrap.right,
+      imageBottom:imageWrap.bottom,
+      imagePosition:getComputedStyle(image).objectPosition,
+      ribbonTop:ribbon.top,
+      copyOffset:copy.top - hero.top,
+      viewportWidth:document.documentElement.clientWidth
+    };
+  });
   expect(desktopLayout.imageRight).toBeGreaterThanOrEqual(desktopLayout.viewportWidth - 1);
   expect(desktopLayout.imageBottom).toBeLessThanOrEqual(desktopLayout.ribbonTop);
+  expect(desktopLayout.imagePosition).toBe('50% 30%');
+  expect(desktopLayout.copyOffset).toBeLessThanOrEqual(100);
 });
 
 test('editor exports normalized schema content', async ({ page }) => {
@@ -187,7 +199,7 @@ test('rich-text controls and hero presentation remain editable', async ({ page }
 
   await page.selectOption('[data-path="heroImage.layout"]','background');
   await page.selectOption('[data-path="heroImage.blend"]','natural');
-  await page.selectOption('[data-path="heroImage.position"]','right center');
+  await page.selectOption('[data-path="heroImage.position"]','center 30%');
   await page.selectOption('[data-path="heroImage.mobileLayout"]','landscape');
   await page.selectOption('[data-path="heroImage.mobilePosition"]','center top');
   await expect(page.locator('[data-path="hero.titleSize"] option')).toHaveCount(5);
@@ -201,7 +213,7 @@ test('rich-text controls and hero presentation remain editable', async ({ page }
   await expect(preview.locator('.hero')).toHaveAttribute('data-image-blend','natural');
   await expect(preview.locator('.hero')).toHaveAttribute('data-mobile-image-layout','landscape');
   await expect(preview.locator('.hero')).toHaveAttribute('data-title-size','tiny');
-  await expect(preview.locator('.hero')).toHaveCSS('--hero-image-position','right center');
+  await expect(preview.locator('.hero')).toHaveCSS('--hero-image-position','center 30%');
   await expect(preview.locator('.hero')).toHaveCSS('--hero-mobile-image-position','center top');
   await expect(preview.locator('#psychotherapie')).toHaveAttribute('data-title-size','small');
   await expect(preview.getByRole('link',{ name:'Erstgespräch anfragen' })).toHaveAttribute('href','#kontakt');

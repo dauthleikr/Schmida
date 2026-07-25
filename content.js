@@ -20,7 +20,7 @@ window.practiceContent = {
     "alt": "Porträt von Carina Schmida",
     "layout": "landscape",
     "blend": "natural",
-    "position": "center center",
+    "position": "center 30%",
     "mobileLayout": "portrait",
     "mobilePosition": "center 38%",
     "overlay": "soft"
