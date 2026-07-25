@@ -205,7 +205,8 @@
         : { ...normalized,sections:[normalized.sections[previewSectionIndex]] };
       sessionStorage.setItem('practice-preview-content',JSON.stringify(previewContent));
       const isolated = previewSectionIndex === null ? '' : '&sectionPreview=1';
-      document.querySelector('#preview-frame').src = `index.html?preview=1${isolated}&updated=${Date.now()}`;
+      const viewport = document.querySelector('#preview-modal').dataset.viewport || 'desktop';
+      document.querySelector('#preview-frame').src = `index.html?preview=1${isolated}&previewViewport=${viewport}&updated=${Date.now()}`;
     } catch {
       status.textContent = 'Vorschau konnte nicht aktualisiert werden';
     }

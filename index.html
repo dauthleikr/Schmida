@@ -298,6 +298,11 @@
       .site-footer { align-items:flex-start; flex-direction:column; justify-content:center; gap:8px; }
     }
 
+    body[data-preview-viewport="desktop"] .section-heading-desktop { display:block; }
+    body[data-preview-viewport="desktop"] .section-heading-mobile { display:none; }
+    body[data-preview-viewport="mobile"] .section-heading-desktop { display:none; }
+    body[data-preview-viewport="mobile"] .section-heading-mobile { display:block; }
+
     @media (prefers-reduced-motion:reduce) {
       html { scroll-behavior:auto; }
       .ribbon-lines { animation:none!important; filter:none!important; opacity:.85; transform:none; }
@@ -338,6 +343,7 @@
       let source = window.practiceContent;
       const searchParams = new URLSearchParams(location.search);
       if (searchParams.has('sectionPreview')) document.body.classList.add('section-preview');
+      if (['desktop','mobile'].includes(searchParams.get('previewViewport'))) document.body.dataset.previewViewport = searchParams.get('previewViewport');
       try {
         if (searchParams.has('preview')) {
           source = JSON.parse(sessionStorage.getItem('practice-preview-content')) || source;

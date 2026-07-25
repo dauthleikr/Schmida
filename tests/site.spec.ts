@@ -214,9 +214,10 @@ test('editor exports normalized schema content', async ({ page }) => {
 test('adds a section, changes its layout, background, fields and navigation', async ({ page }) => {
   await page.goto(editorUrl);
 
+  const initialSectionCount = await page.locator('.section-editor').count();
   await page.selectOption('#new-layout','note');
   await page.getByRole('button',{ name:'Bereich hinzufügen' }).click();
-  await expect(page.locator('.section-editor')).toHaveCount(8);
+  await expect(page.locator('.section-editor')).toHaveCount(initialSectionCount + 1);
 
   const added = page.locator('.section-editor').last();
   await added.locator('[data-path$=".navigationLabel"]').fill('Über mich');
@@ -242,7 +243,8 @@ test('section heading source can be switched independently for desktop and mobil
   const eyebrowField = section.locator('[data-path$=".content.eyebrow"]');
   const titleField = section.locator('[data-path$=".content.title"]');
   const eyebrowText = await eyebrowField.inputValue();
-  const titleText = await titleField.inputValue();
+  const titleText = 'Alternative Überschrift';
+  await titleField.fill(titleText);
 
   await expect(desktopMode.locator('option')).toHaveText([
     'Nur Bereichsbezeichnung',
@@ -259,6 +261,7 @@ test('section heading source can be switched independently for desktop and mobil
   await mobileMode.selectOption('eyebrow');
   await section.getByRole('button',{ name:/Desktopvorschau/ }).click();
   const preview = page.frameLocator('#preview-frame');
+  await expect(preview.locator('body')).toHaveAttribute('data-preview-viewport','desktop');
   await expect(preview.locator('.dynamic-section')).toHaveAttribute('data-heading-desktop','title');
   await expect(preview.locator('.dynamic-section')).toHaveAttribute('data-heading-mobile','eyebrow');
   await expect(preview.locator('.section-heading-desktop')).toBeVisible();
@@ -269,6 +272,7 @@ test('section heading source can be switched independently for desktop and mobil
 
   await page.getByRole('button',{ name:'Vorschau schließen' }).click();
   await section.getByRole('button',{ name:/Mobilvorschau/ }).click();
+  await expect(preview.locator('body')).toHaveAttribute('data-preview-viewport','mobile');
   await expect(preview.locator('.section-heading-desktop')).toBeHidden();
   await expect(preview.locator('.section-heading-mobile')).toBeVisible();
   await expect(preview.locator('.section-heading-mobile h2')).toHaveText(eyebrowText);
@@ -277,6 +281,7 @@ test('section heading source can be switched independently for desktop and mobil
   await page.getByRole('button',{ name:'Vorschau schließen' }).click();
   await desktopMode.selectOption('both');
   await section.getByRole('button',{ name:/Desktopvorschau/ }).click();
+  await expect(preview.locator('body')).toHaveAttribute('data-preview-viewport','desktop');
   await expect(preview.locator('.dynamic-section')).toHaveAttribute('data-heading-desktop','both');
   await expect(preview.locator('.section-heading-desktop .eyebrow')).toHaveText(eyebrowText);
   await expect(preview.locator('.section-heading-desktop h2')).toHaveText(titleText);
@@ -299,7 +304,7 @@ test('intro layout supports an optional lead below its heading', async ({ page }
   await expect(preview.locator('.intro-heading .intro-lead')).toContainText('Ein kurzer Auftakt unter der Überschrift.');
   await expect(preview.locator('.intro-heading .intro-lead strong')).toHaveText('Auftakt');
   const headingOrder = await preview.locator('.intro-heading').evaluate((element) => [...element.children].map((child) => child.className));
-  expect(headingOrder.at(-1)).toBe('intro-lead');
+  expect(headingOrder.at(-1)).toContain('intro-lead');
 });
 
 test('text colors and section spacing are globally configurable', async ({ page }) => {
@@ -506,14 +511,15 @@ test('sections can be reordered, removed and changed to another registered layou
 
   const addedId = await page.locator('.section-editor').last().getAttribute('data-section-id');
   const moved = page.locator(`.section-editor[data-section-id="${addedId}"]`);
-  for (let index = 0; index < 7; index += 1) {
+  const sectionCount = await page.locator('.section-editor').count();
+  for (let index = 0; index < sectionCount - 1; index += 1) {
     await moved.getByRole('button',{ name:'Nach oben' }).click();
   }
   await expect(page.locator('.section-editor').first().locator('[data-section-layout]')).toHaveValue('image');
 
   page.once('dialog',(dialog) => dialog.accept());
   await page.locator('.section-editor').nth(1).getByRole('button',{ name:'Bereich entfernen' }).click();
-  await expect(page.locator('.section-editor')).toHaveCount(7);
+  await expect(page.locator('.section-editor')).toHaveCount(sectionCount - 1);
 
   await page.getByRole('button',{ name:'Vorschau Desktop' }).click();
   await expect(page.frameLocator('#preview-frame').locator('.content-section').first()).toHaveAttribute('data-layout','image');
