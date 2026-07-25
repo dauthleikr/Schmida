@@ -56,7 +56,7 @@ window.practiceContent = {
         "titleSize": "standard",
         "listStyle": "gradient-pills",
         "gradientStart": "#d11137",
-        "gradientEnd": "#d93684"
+        "gradientEnd": "#6d0918"
       },
       "content": {
         "eyebrow": "Schwerpunkte",

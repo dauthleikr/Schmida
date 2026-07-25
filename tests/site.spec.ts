@@ -12,7 +12,8 @@ test('renders the new section schema with dynamic navigation and waves', async (
   await expect(page.getByRole('navigation')).toHaveText(/Startseite[\s\S]*Psychotherapie[\s\S]*Schwerpunkte[\s\S]*Über mich[\s\S]*Praxis[\s\S]*Kontakt/);
   await expect(page.locator('.content-section')).toHaveCount(7);
   await expect(page.locator('.content-section[data-layout="topics"] .topics-list li')).toHaveCount(7);
-  await expect(page.locator('.content-section[data-layout="topics"] .topics-list')).toHaveAttribute('data-list-style','numbered-grid');
+  const savedListStyle = await page.evaluate(() => window.practiceContent.sections.find((section) => section.layout === 'topics')?.appearance?.listStyle || 'numbered-grid');
+  await expect(page.locator('.content-section[data-layout="topics"] .topics-list')).toHaveAttribute('data-list-style',savedListStyle);
   await expect(page.locator('.content-section[data-layout="timeline"]')).toHaveCount(2);
   await expect(page.locator('.ribbon-transition')).toHaveCount(7);
   await expect(page.locator('.hero-image')).toHaveJSProperty('complete',true);
@@ -244,9 +245,11 @@ test('listing layout offers interchangeable visual treatments', async ({ page })
     'Versetzte Akzent-Pills',
     'Lockeres Kartenmosaik'
   ]);
-  await expect(listing.locator('[data-path$=".appearance.gradientStart"]')).toHaveCount(0);
-  await expect(listing.locator('[data-path$=".appearance.gradientEnd"]')).toHaveCount(0);
-  await style.selectOption('gradient-pills');
+  await style.selectOption('clean-tiles');
+  const plainListing = page.locator('.section-editor[data-section-id="schwerpunkte"]');
+  await expect(plainListing.locator('[data-path$=".appearance.gradientStart"]')).toHaveCount(0);
+  await expect(plainListing.locator('[data-path$=".appearance.gradientEnd"]')).toHaveCount(0);
+  await plainListing.locator('[data-path$=".appearance.listStyle"]').selectOption('gradient-pills');
   const refreshedListing = page.locator('.section-editor[data-section-id="schwerpunkte"]');
   const startColor = refreshedListing.locator('[data-path$=".appearance.gradientStart"]');
   const endColor = refreshedListing.locator('[data-path$=".appearance.gradientEnd"]');
@@ -258,12 +261,18 @@ test('listing layout offers interchangeable visual treatments', async ({ page })
 
   const previewList = page.frameLocator('#preview-frame').locator('.content-section[data-layout="topics"] .topics-list');
   await expect(previewList).toHaveAttribute('data-list-style','gradient-pills');
-  await expect(previewList).toHaveCSS('display','flex');
+  await expect(previewList).toHaveCSS('display','grid');
   await expect(previewList.locator('li').first()).toHaveCSS('border-radius','999px');
   await expect(previewList.locator('li').first()).toHaveCSS('transform','none');
   await expect(previewList.locator('li').first()).toHaveCSS('background-color','rgb(255, 0, 0)');
   await expect(previewList.locator('li').nth(3)).toHaveCSS('background-color','rgb(128, 0, 128)');
   await expect(previewList.locator('li').last()).toHaveCSS('background-color','rgb(0, 0, 255)');
+  const pillPositions = await previewList.locator('li').evaluateAll((items) => items.slice(0,2).map((item) => {
+    const box = item.getBoundingClientRect();
+    return { left:box.left,top:box.top };
+  }));
+  expect(pillPositions[1].left).toBeCloseTo(pillPositions[0].left,0);
+  expect(pillPositions[1].top).toBeGreaterThan(pillPositions[0].top);
 });
 
 test('each section can be previewed directly on mobile and desktop', async ({ page }) => {
