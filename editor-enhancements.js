@@ -407,10 +407,14 @@
   document.querySelector('#save-content-direct').addEventListener('click',saveContentFile);
   document.querySelector('#download').addEventListener('click',download);
   document.querySelector('#download-bottom').addEventListener('click',download);
-  document.querySelector('#preview-current').addEventListener('click',() => {
-    document.querySelector('#preview-modal').showModal();
+  document.querySelectorAll('[data-preview-viewport]').forEach((button) => button.addEventListener('click',() => {
+    const dialog = document.querySelector('#preview-modal');
+    const viewport = button.dataset.previewViewport;
+    dialog.dataset.viewport = viewport;
+    dialog.querySelector('.preview-head h2').textContent = viewport === 'mobile' ? 'Vorschau Mobil' : 'Vorschau Desktop';
+    dialog.showModal();
     refreshPreview();
-  });
+  }));
   document.querySelector('#close-preview').addEventListener('click',() => document.querySelector('#preview-modal').close());
   document.querySelector('#reset').addEventListener('click',() => {
     if (!confirm('Entwurf wirklich zurücksetzen?')) return;

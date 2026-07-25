@@ -69,7 +69,7 @@ test('adds a section, changes its layout, background, fields and navigation', as
   await added.locator('[data-path$=".content.title"]').fill('Mein neuer Bereich');
   await added.locator('[data-path$=".content.note"]').fill('Ein persönlicher Hinweis.');
 
-  await page.getByRole('button',{ name:'Vorschau' }).click();
+  await page.getByRole('button',{ name:'Vorschau Desktop' }).click();
   const preview = page.frameLocator('#preview-frame');
   await expect(preview.getByRole('link',{ name:'Über mich' })).toBeVisible();
   await expect(preview.locator('.content-section[data-layout="note"]').last().locator('section')).toHaveCSS('background-color','rgb(229, 240, 234)');
@@ -97,7 +97,7 @@ test('repeatable bullets, cards and prices use reusable add and remove controls'
   await prices.locator('[data-path$=".items.3.name"]').fill('Online-Beratung');
   await prices.locator('[data-path$=".items.3.price"]').fill('EUR 90');
 
-  await page.getByRole('button',{ name:'Vorschau' }).click();
+  await page.getByRole('button',{ name:'Vorschau Desktop' }).click();
   const preview = page.frameLocator('#preview-frame');
   await expect(preview.locator('.bullet-list')).toContainText('Dynamischer Aufzählungspunkt');
   await expect(preview.locator('.price-list')).toContainText('Online-Beratung');
@@ -124,7 +124,7 @@ test('sections can be reordered, removed and changed to another registered layou
   await page.locator('.section-editor').nth(1).getByRole('button',{ name:'Bereich entfernen' }).click();
   await expect(page.locator('.section-editor')).toHaveCount(5);
 
-  await page.getByRole('button',{ name:'Vorschau' }).click();
+  await page.getByRole('button',{ name:'Vorschau Desktop' }).click();
   await expect(page.frameLocator('#preview-frame').locator('.content-section').first()).toHaveAttribute('data-layout','image');
 });
 
@@ -141,7 +141,7 @@ test('rich-text controls and hero presentation remain editable', async ({ page }
   await page.selectOption('[data-path="heroImage.blend"]','natural');
   await page.selectOption('[data-path="heroImage.position"]','right center');
   await page.locator('[data-path="hero.contactButton"]').fill('Erstgespräch anfragen');
-  await page.getByRole('button',{ name:'Vorschau' }).click();
+  await page.getByRole('button',{ name:'Vorschau Desktop' }).click();
 
   const preview = page.frameLocator('#preview-frame');
   await expect(preview.locator('.hero')).toHaveAttribute('data-image-layout','background');
@@ -174,4 +174,46 @@ test('legacy fixed content is isolated behind the schema migration adapter', asy
   }));
   expect(ranged.sections[0].content.items).toHaveLength(6);
   expect(ranged.sections[1].content.items).toHaveLength(1);
+});
+
+test('mobile and desktop previews use distinct viewports and every layout fits mobile', async ({ page }) => {
+  await page.goto(editorUrl);
+
+  await page.selectOption('#new-layout','note');
+  await page.getByRole('button',{ name:'Bereich hinzufügen' }).click();
+  await page.getByRole('button',{ name:'Vorschau Mobil' }).click();
+
+  const dialog = page.locator('#preview-modal');
+  await expect(dialog).toHaveAttribute('data-viewport','mobile');
+  await expect(dialog.getByRole('heading',{ name:'Vorschau Mobil' })).toBeVisible();
+  const mobileFrameBox = await page.locator('#preview-frame').boundingBox();
+  expect(mobileFrameBox?.width).toBe(390);
+
+  const mobilePreview = page.frameLocator('#preview-frame');
+  for (const layout of ['intro','note','cards','image','pricing','contact']) {
+    await expect(mobilePreview.locator(`.content-section[data-layout="${layout}"]`)).toHaveCount(1);
+  }
+  const mobileFit = await page.frames()[1].evaluate(() => {
+    const viewportWidth = document.documentElement.clientWidth;
+    const sectionsFit = [...document.querySelectorAll('.dynamic-section')].every((section) => {
+      const box = section.getBoundingClientRect();
+      return box.left >= -1 && box.right <= viewportWidth + 1;
+    });
+    return {
+      viewportWidth,
+      scrollWidth:document.documentElement.scrollWidth,
+      sectionsFit,
+      cardColumns:getComputedStyle(document.querySelector('.focus-grid')!).gridTemplateColumns.split(' ').length
+    };
+  });
+  expect(mobileFit.viewportWidth).toBe(390);
+  expect(mobileFit.scrollWidth).toBeLessThanOrEqual(390);
+  expect(mobileFit.sectionsFit).toBe(true);
+  expect(mobileFit.cardColumns).toBe(1);
+
+  await page.getByRole('button',{ name:'Vorschau schließen' }).click();
+  await page.getByRole('button',{ name:'Vorschau Desktop' }).click();
+  await expect(dialog).toHaveAttribute('data-viewport','desktop');
+  const desktopFrameBox = await page.locator('#preview-frame').boundingBox();
+  expect(desktopFrameBox?.width).toBeGreaterThan(900);
 });

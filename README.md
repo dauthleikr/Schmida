@@ -8,7 +8,7 @@ This is a static website that can be published directly with GitHub Pages or any
 2. Add, remove, reorder, or edit page sections. The hero and footer remain fixed.
 3. Choose one of the registered layouts for each section. The editor displays only the fields supported by that layout.
 4. Choose a section background from the coordinated palette or enter a custom hex color.
-5. Use **Vorschau** to preview the current draft.
+5. Use **Vorschau Mobil** for a 390 px phone preview or **Vorschau Desktop** for the full-width draft.
 6. In Chrome or Edge on an HTTPS deployment, use **content.js verbinden** and **In content.js speichern** to update the selected local file. Other browsers can download the generated `content.js`.
 
 Drafts are stored locally in the browser. Existing content from the former fixed-section schema is migrated automatically when loaded.

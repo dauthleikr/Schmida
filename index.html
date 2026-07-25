@@ -166,6 +166,7 @@
 
     @media (max-width:760px) {
       :root { --page:min(100% - 40px,1120px); }
+      .section { padding:78px 0; }
       .site-header,.header-inner { min-height:65px; }
       .menu-toggle { display:inline-flex; }
       .nav-list { position:absolute; top:65px; right:0; left:0; display:none; flex-direction:column; align-items:stretch; gap:0; padding:10px 20px 17px; border-bottom:1px solid rgba(255,255,255,.16); background:var(--wine-950); }
@@ -173,6 +174,7 @@
       .nav-list a { display:block; padding:11px 0; }
       .hero { min-height:auto; }
       .hero-inner,.intro-grid,.therapy-grid,.practice-grid,.costs-grid,.contact-grid,.focus-header { grid-template-columns:1fr; }
+      .intro-grid,.therapy-grid,.practice-grid,.costs-grid,.contact-grid { gap:36px; }
       .hero-inner { gap:0; padding-top:56px; }
       .hero-copy { padding-bottom:84px; transform:none; }
       .hero-image-wrap { min-height:430px; }
@@ -185,16 +187,28 @@
       .focus-card,.focus-card:nth-child(4n+1) { min-height:190px; padding-left:0; }
       .focus-card:nth-child(odd) { border-right:1px solid var(--line); }
       .focus-card:nth-child(even) { padding-left:22px; border-right:0; }
+      .therapy-note { padding:24px 0 0; border-top:2px solid var(--wine-650); border-left:0; }
+      .is-dark .therapy-note { border-color:var(--rose-300); }
+      .price-row { grid-template-columns:minmax(0,1fr) auto; }
+      .price-name { min-width:0; }
+      .price-value { max-width:18ch; text-align:right; white-space:normal; }
       .contact-details { gap:27px 20px; }
       .office-placeholder,.section-image { min-height:360px; }
+      .map { min-height:240px; }
       .ribbons::after { position:absolute; z-index:2; right:0; bottom:-1px; left:0; height:2px; background:var(--divider-bottom,var(--paper)); content:""; }
     }
 
     @media (max-width:440px) {
+      :root { --page:min(100% - 32px,1120px); }
       .brand { font-size:.93rem; }
+      h1 { font-size:clamp(3rem,16vw,4.3rem); }
+      h2 { font-size:clamp(2.2rem,12vw,3.15rem); }
       .focus-grid { grid-template-columns:1fr; }
       .focus-card,.focus-card:nth-child(even),.focus-card:nth-child(odd) { min-height:auto; padding:25px 0; border-right:0; }
+      .price-row { grid-template-columns:1fr; gap:6px; }
+      .price-value { max-width:none; text-align:left; }
       .contact-details { grid-template-columns:1fr; }
+      .map-link { margin-right:24px; }
       .site-footer { align-items:flex-start; flex-direction:column; justify-content:center; gap:8px; }
     }
 
