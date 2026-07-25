@@ -300,24 +300,43 @@
   }
 
   .timeline-list[data-timeline-style="alternating-path"] {
-    padding-left:28px;
+    position:relative;
+    display:grid;
+    gap:14px;
+    padding:0 0 0 34px;
   }
 
   .timeline-list[data-timeline-style="alternating-path"]::before {
-    left:7px;
+    top:12px;
+    bottom:12px;
+    left:8px;
+    background:linear-gradient(to bottom,var(--rose-300),var(--wine-650));
   }
 
   .timeline-list[data-timeline-style="alternating-path"] li {
+    position:relative;
     display:grid;
     grid-template-columns:1fr;
     gap:8px;
+    padding:18px 20px 20px;
+    border:1px solid color-mix(in srgb,var(--wine-650) 18%,transparent);
+    border-radius:18px;
+    background:color-mix(in srgb,var(--paper) 78%,transparent);
+    box-shadow:0 10px 30px rgba(71,26,37,.07);
   }
 
   .timeline-list[data-timeline-style="alternating-path"] li::before {
     position:absolute;
-    top:20px;
-    left:-27px;
+    top:25px;
+    left:-32px;
     display:block;
+    grid-column:auto;
+    grid-row:auto;
+    justify-self:auto;
+    width:11px;
+    height:11px;
+    border:3px solid var(--section-bg);
+    box-shadow:0 0 0 1px var(--wine-650);
   }
 
   .timeline-list[data-timeline-style="alternating-path"] .timeline-period,
@@ -331,8 +350,28 @@
     text-align:left;
   }
 
+  .timeline-list[data-timeline-style="alternating-path"] .timeline-period,
+  .timeline-list[data-timeline-style="alternating-path"] li:nth-child(even) .timeline-period {
+    justify-self:start;
+    padding:5px 9px;
+    border-radius:999px;
+    background:var(--rose-100);
+  }
+
   .timeline-list[data-timeline-style="alternating-path"] .timeline-entry,
   .timeline-list[data-timeline-style="alternating-path"] li:nth-child(even) .timeline-entry {
-    padding:16px 17px 17px;
+    padding:0;
+    border:0;
+    border-radius:0;
+    background:transparent;
+  }
+
+  .is-dark .timeline-list[data-timeline-style="alternating-path"] li {
+    border-color:rgba(255,255,255,.18);
+    background:rgba(255,255,255,.07);
+  }
+
+  .is-dark .timeline-list[data-timeline-style="alternating-path"] .timeline-period {
+    background:rgba(255,255,255,.1);
   }
 }

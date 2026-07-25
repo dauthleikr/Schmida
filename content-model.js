@@ -33,12 +33,19 @@
     ['left center', 'Links'],
     ['right center', 'Rechts']
   ];
+  const headingModeOptions = [
+    ['eyebrow', 'Nur Bereichsbezeichnung'],
+    ['title', 'Nur Titel'],
+    ['both', 'Beides']
+  ];
   const titleAppearance = (extraFields = [],extraDefaults = {}) => ({
     appearanceFields: [
+      { key: 'headingModeDesktop', label: 'Überschriftenaufbau Desktop', type: 'select', options: headingModeOptions },
+      { key: 'headingModeMobile', label: 'Überschriftenaufbau Mobil', type: 'select', options: headingModeOptions },
       { key: 'titleSize', label: 'Überschriftengröße', type: 'select', options: titleSizeOptions },
       ...extraFields
     ],
-    appearanceDefaults: { titleSize: 'standard',...extraDefaults }
+    appearanceDefaults: { headingModeDesktop: 'eyebrow',headingModeMobile: 'eyebrow',titleSize: 'standard',...extraDefaults }
   });
 
   const layouts = {
@@ -220,7 +227,13 @@
     const definition = layouts[layout];
     const background = sectionColors.some((color) => color.key === section?.background) ? section.background : definition.defaultBackground;
     const content = mergeDefaults(definition.defaults, section?.content);
-    const appearance = mergeDefaults(definition.appearanceDefaults || {}, section?.appearance);
+    const sourceAppearance = { ...(section?.appearance || {}) };
+    if (headingModeOptions.some(([value]) => value === sourceAppearance.headingMode)) {
+      if (!sourceAppearance.headingModeDesktop) sourceAppearance.headingModeDesktop = sourceAppearance.headingMode;
+      if (!sourceAppearance.headingModeMobile) sourceAppearance.headingModeMobile = sourceAppearance.headingMode;
+    }
+    delete sourceAppearance.headingMode;
+    const appearance = mergeDefaults(definition.appearanceDefaults || {}, sourceAppearance);
     (definition.appearanceFields || []).forEach((field) => {
       if (field.type === 'select' && !field.options.some(([value]) => value === appearance[field.key])) {
         appearance[field.key] = definition.appearanceDefaults?.[field.key] || field.options[0]?.[0] || '';
@@ -375,6 +388,7 @@
       customColors: source.customColors && typeof source.customColors === 'object' ? source.customColors : {},
       practiceName: String(source.practiceName || 'Praxis für Psychotherapie'),
       practitionerName: String(source.practitionerName || ''),
+      siteIcon: String(source.siteIcon || 'assets/icon4_tiny.png'),
       navigation: { home: String(source.navigation?.home || 'Startseite') },
       hero,
       heroImage,

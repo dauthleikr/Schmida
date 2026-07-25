@@ -8,6 +8,11 @@ test('renders the new section schema with dynamic navigation and waves', async (
   await page.goto(siteUrl);
 
   await expect(page).toHaveTitle('Carina Schmida, BA.pth.');
+  await expect(page.locator('link[rel="icon"]')).toHaveAttribute('href','assets/icon4_tiny.png');
+  await expect(page.locator('link[rel="apple-touch-icon"]')).toHaveAttribute('href','assets/icon4_tiny.png');
+  await expect(page.locator('.brand-mark')).toHaveAttribute('src','assets/icon4_tiny.png');
+  await expect(page.locator('.brand-mark')).toHaveJSProperty('complete',true);
+  expect(await page.locator('.brand-mark').evaluate((image:HTMLImageElement) => image.naturalWidth)).toBe(180);
   await expect(page.locator('.hero')).toHaveAttribute('data-title-size','tiny');
   await expect(page.getByRole('navigation')).toHaveText(/Startseite[\s\S]*Psychotherapie[\s\S]*Schwerpunkte[\s\S]*Über mich[\s\S]*Praxis[\s\S]*Kontakt/);
   await expect(page.locator('.content-section')).toHaveCount(7);
@@ -15,9 +20,15 @@ test('renders the new section schema with dynamic navigation and waves', async (
   const savedListStyle = await page.evaluate(() => window.practiceContent.sections.find((section) => section.layout === 'topics')?.appearance?.listStyle || 'numbered-grid');
   await expect(page.locator('.content-section[data-layout="topics"] .topics-list')).toHaveAttribute('data-list-style',savedListStyle);
   await expect(page.locator('.content-section[data-layout="timeline"]')).toHaveCount(2);
-  const sectionEyebrowSizes = await page.locator('.dynamic-section .eyebrow').evaluateAll((elements) => elements.map((element) => parseFloat(getComputedStyle(element).fontSize)));
-  expect(Math.max(...sectionEyebrowSizes) - Math.min(...sectionEyebrowSizes)).toBeLessThan(.01);
-  expect(sectionEyebrowSizes[0]).toBeCloseTo(17.12,2);
+  await expect(page.locator('.section-heading-desktop h2')).toHaveCount(7);
+  await expect(page.locator('.section-heading-mobile h2')).toHaveCount(7);
+  await expect(page.locator('.section-heading-desktop').first()).toBeVisible();
+  await expect(page.locator('.section-heading-mobile').first()).toBeHidden();
+  await expect(page.locator('.dynamic-section .eyebrow')).toHaveCount(0);
+  await expect(page.locator('.dynamic-section[data-heading-desktop="eyebrow"]')).toHaveCount(2);
+  await expect(page.locator('.dynamic-section[data-heading-desktop="title"]')).toHaveCount(5);
+  await expect(page.locator('#psychotherapie .section-heading-desktop .section-heading-accent')).toHaveCSS('color','rgb(209, 17, 55)');
+  await expect(page.locator('#kontakt .section-heading-desktop .section-heading-accent')).toHaveCSS('color','rgb(255, 154, 169)');
   await expect(page.locator('.hero .eyebrow')).toHaveCSS('font-size','11.2px');
   await expect(page.locator('.ribbon-transition')).toHaveCount(7);
   await expect(page.locator('.hero-image')).toHaveJSProperty('complete',true);
@@ -163,6 +174,13 @@ test('editor exports normalized schema content', async ({ page }) => {
     /Kontaktblock mit Karte/
   ]);
   await page.locator('[data-path="practiceName"]').fill('Praxis Sonnenweg');
+  await expect(page.locator('[data-path="siteIcon"]')).toHaveValue('assets/icon4_tiny.png');
+  await page.locator('[data-path="siteIcon"]').fill('assets/icon4_small.png');
+  await page.getByRole('button',{ name:'Vorschau Desktop' }).click();
+  const preview = page.frameLocator('#preview-frame');
+  await expect(preview.locator('.brand-mark')).toHaveAttribute('src','assets/icon4_small.png');
+  await expect(preview.locator('link[rel="icon"]')).toHaveAttribute('href','assets/icon4_small.png');
+  await page.getByRole('button',{ name:'Vorschau schließen' }).click();
   await page.getByRole('radio',{ name:'Scharlachrot' }).check();
 
   const downloadPromise = page.waitForEvent('download');
@@ -178,6 +196,7 @@ test('editor exports normalized schema content', async ({ page }) => {
   expect(output).toContain('Praxis Sonnenweg');
   expect(output).toContain('"schemaVersion": 3');
   expect(output).toContain('"internalName": "Hauptbereich Psychotherapie"');
+  expect(output).toContain('"siteIcon": "assets/icon4_small.png"');
   expect(output).toContain('"sections": [');
   expect(output).toContain('"colorTheme": "scarlet"');
   expect(output).not.toContain('"sectionLayout"');
@@ -194,6 +213,7 @@ test('adds a section, changes its layout, background, fields and navigation', as
   await added.locator('[data-path$=".navigationLabel"]').fill('Über mich');
   await added.locator('[data-section-background]').selectOption('custom');
   await added.locator('[data-section-custom-code]').fill('#e5f0ea');
+  await added.locator('[data-path$=".appearance.headingModeDesktop"]').selectOption('title');
   await added.locator('[data-path$=".content.title"]').fill('Mein neuer Bereich');
   await added.locator('[data-path$=".content.note"]').fill('Ein persönlicher Hinweis.');
 
@@ -202,6 +222,59 @@ test('adds a section, changes its layout, background, fields and navigation', as
   await expect(preview.getByRole('link',{ name:'Über mich' }).last()).toBeVisible();
   await expect(preview.locator('.content-section[data-layout="note"]').last().locator('section')).toHaveCSS('background-color','rgb(229, 240, 234)');
   await expect(preview.getByRole('heading',{ name:'Mein neuer Bereich' })).toBeVisible();
+});
+
+test('section heading source can be switched independently for desktop and mobile', async ({ page }) => {
+  await page.goto(editorUrl);
+
+  const section = page.locator('.section-editor[data-section-id="psychotherapie"]');
+  const desktopMode = section.locator('[data-path$=".appearance.headingModeDesktop"]');
+  const mobileMode = section.locator('[data-path$=".appearance.headingModeMobile"]');
+  const eyebrowField = section.locator('[data-path$=".content.eyebrow"]');
+  const titleField = section.locator('[data-path$=".content.title"]');
+  const eyebrowText = await eyebrowField.inputValue();
+  const titleText = await titleField.inputValue();
+
+  await expect(desktopMode.locator('option')).toHaveText([
+    'Nur Bereichsbezeichnung',
+    'Nur Titel',
+    'Beides'
+  ]);
+  await expect(mobileMode.locator('option')).toHaveText([
+    'Nur Bereichsbezeichnung',
+    'Nur Titel',
+    'Beides'
+  ]);
+
+  await desktopMode.selectOption('title');
+  await mobileMode.selectOption('eyebrow');
+  await section.getByRole('button',{ name:/Desktopvorschau/ }).click();
+  const preview = page.frameLocator('#preview-frame');
+  await expect(preview.locator('.dynamic-section')).toHaveAttribute('data-heading-desktop','title');
+  await expect(preview.locator('.dynamic-section')).toHaveAttribute('data-heading-mobile','eyebrow');
+  await expect(preview.locator('.section-heading-desktop')).toBeVisible();
+  await expect(preview.locator('.section-heading-mobile')).toBeHidden();
+  await expect(preview.locator('.section-heading-desktop h2')).toHaveText(titleText);
+  await expect(preview.locator('.section-heading-desktop h2')).toHaveClass(/section-heading-accent/);
+  await expect(preview.locator('.dynamic-section .eyebrow')).toHaveCount(0);
+
+  await page.getByRole('button',{ name:'Vorschau schließen' }).click();
+  await section.getByRole('button',{ name:/Mobilvorschau/ }).click();
+  await expect(preview.locator('.section-heading-desktop')).toBeHidden();
+  await expect(preview.locator('.section-heading-mobile')).toBeVisible();
+  await expect(preview.locator('.section-heading-mobile h2')).toHaveText(eyebrowText);
+  await expect(preview.locator('.section-heading-mobile h2')).toHaveClass(/section-heading-accent/);
+
+  await page.getByRole('button',{ name:'Vorschau schließen' }).click();
+  await desktopMode.selectOption('both');
+  await section.getByRole('button',{ name:/Desktopvorschau/ }).click();
+  await expect(preview.locator('.dynamic-section')).toHaveAttribute('data-heading-desktop','both');
+  await expect(preview.locator('.section-heading-desktop .eyebrow')).toHaveText(eyebrowText);
+  await expect(preview.locator('.section-heading-desktop h2')).toHaveText(titleText);
+  await expect(preview.locator('.section-heading-desktop h2')).not.toHaveClass(/section-heading-accent/);
+
+  await expect(eyebrowField).toHaveValue(eyebrowText);
+  await expect(titleField).toHaveValue(titleText);
 });
 
 test('repeatable bullets, cards and prices use reusable add and remove controls', async ({ page }) => {
@@ -303,6 +376,7 @@ test('timeline layout offers interchangeable visual treatments', async ({ page }
   await page.getByRole('button',{ name:'Vorschau schließen' }).click();
   await timeline.getByRole('button',{ name:/Mobilvorschau/ }).click();
   const mobileTimelineFrame = page.locator('#preview-frame').contentFrame();
+  await expect(mobileTimelineFrame.locator('.timeline-list')).toBeVisible();
   for (const timelineStyle of ['classic-lines','milestone-cards','year-focus','alternating-path','soft-steps']) {
     const fit = await mobileTimelineFrame.locator('.timeline-list').evaluate((element,styleName) => {
       element.setAttribute('data-timeline-style',styleName);
@@ -315,6 +389,33 @@ test('timeline layout offers interchangeable visual treatments', async ({ page }
     expect(fit.scrollWidth).toBeLessThanOrEqual(fit.viewport);
     expect(fit.right).toBeLessThanOrEqual(fit.viewport + 1);
   }
+
+  const mobileStyleSignature = async (timelineStyle:string) => mobileTimelineFrame.locator('.timeline-list').evaluate((element,styleName) => {
+    element.setAttribute('data-timeline-style',styleName);
+    const item = element.querySelector('li')!;
+    const period = item.querySelector('.timeline-period')!;
+    const listStyle = getComputedStyle(element);
+    const itemStyle = getComputedStyle(item);
+    const periodStyle = getComputedStyle(period);
+    const markerStyle = getComputedStyle(item,'::before');
+    return {
+      listGap:listStyle.gap,
+      listPaddingLeft:listStyle.paddingLeft,
+      itemPadding:itemStyle.padding,
+      itemRadius:itemStyle.borderRadius,
+      itemShadow:itemStyle.boxShadow,
+      periodPadding:periodStyle.padding,
+      periodRadius:periodStyle.borderRadius,
+      markerLeft:markerStyle.left,
+      markerGridColumn:markerStyle.gridColumnStart
+    };
+  },timelineStyle);
+  expect(await mobileStyleSignature('alternating-path')).toEqual(await mobileStyleSignature('milestone-cards'));
+
+  await mobileTimelineFrame.locator('.timeline-list').evaluate((element) => element.setAttribute('data-timeline-style','alternating-path'));
+  await expect(mobileTimelineFrame.locator('.timeline-list li').first()).toHaveCSS('border-radius','18px');
+  await expect(mobileTimelineFrame.locator('.timeline-entry').first()).toHaveCSS('border-top-width','0px');
+  await expect(mobileTimelineFrame.locator('.timeline-entry').first()).toHaveCSS('background-color','rgba(0, 0, 0, 0)');
 });
 
 test('each section can be previewed directly on mobile and desktop', async ({ page }) => {
@@ -441,11 +542,14 @@ test('legacy fixed content is isolated behind the schema migration adapter', asy
   const flexible = await page.evaluate(() => window.practiceContentModel.normalize({
     sections:[
       { id:'topics',layout:'topics',content:{ items:Array.from({ length:14 },(_,index) => ({ text:String(index) })) } },
-      { id:'timeline',layout:'timeline',content:{ items:[] },appearance:{ titleSize:'large' } }
+      { id:'timeline',layout:'timeline',content:{ items:[] },appearance:{ headingMode:'title',titleSize:'large' } }
     ]
   }));
   expect(flexible.sections[0].content.items).toHaveLength(10);
   expect(flexible.sections[1].content.items).toHaveLength(2);
+  expect(flexible.sections[1].appearance.headingModeDesktop).toBe('title');
+  expect(flexible.sections[1].appearance.headingModeMobile).toBe('title');
+  expect(flexible.sections[1].appearance.headingMode).toBeUndefined();
   expect(flexible.sections[1].appearance.titleSize).toBe('large');
 });
 
@@ -467,6 +571,8 @@ test('mobile and desktop previews use distinct viewports and every layout fits m
   expect(mobileFrameBox?.width).toBe(390);
 
   const mobilePreview = page.frameLocator('#preview-frame');
+  const expectedSectionCount = presentLayouts.length + registeredLayouts.filter((layout) => !presentLayouts.includes(layout)).length;
+  await expect(mobilePreview.locator('.content-section')).toHaveCount(expectedSectionCount);
   for (const layout of registeredLayouts) {
     expect(await mobilePreview.locator(`.content-section[data-layout="${layout}"]`).count()).toBeGreaterThanOrEqual(1);
   }

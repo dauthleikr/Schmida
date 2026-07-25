@@ -88,6 +88,7 @@
       <div class="grid">
         ${fieldMarkup({ label:'Praxisname',type:'text' },'practiceName',data.practiceName)}
         ${fieldMarkup({ label:'Name der Person',type:'text' },'practitionerName',data.practitionerName)}
+        ${fieldMarkup({ label:'Website-Icon',type:'text' },'siteIcon',data.siteIcon)}
         ${fieldMarkup({ label:'Navigation: Startseite',type:'text' },'navigation.home',data.navigation.home)}
         <div class="field grid-wide">
           <span class="field-label">Farbsystem</span>

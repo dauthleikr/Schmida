@@ -5,6 +5,7 @@ window.practiceContent = {
   "customColors": {},
   "practiceName": "Carina Schmida, BA.pth.",
   "practitionerName": "Carina Schmida",
+  "siteIcon": "assets/icon4_tiny.png",
   "navigation": {
     "home": "Startseite"
   },
@@ -36,6 +37,8 @@ window.practiceContent = {
       "background": "paper",
       "customBackground": "#f7f2ef",
       "appearance": {
+        "headingModeDesktop": "eyebrow",
+        "headingModeMobile": "eyebrow",
         "titleSize": "standard"
       },
       "content": {
@@ -53,6 +56,8 @@ window.practiceContent = {
       "background": "rose",
       "customBackground": "#f7f2ef",
       "appearance": {
+        "headingModeDesktop": "eyebrow",
+        "headingModeMobile": "eyebrow",
         "titleSize": "standard",
         "listStyle": "gradient-pills",
         "gradientStart": "#d11137",
@@ -95,6 +100,8 @@ window.practiceContent = {
       "background": "paper",
       "customBackground": "#f7f2ef",
       "appearance": {
+        "headingModeDesktop": "title",
+        "headingModeMobile": "title",
         "titleSize": "compact"
       },
       "content": {
@@ -133,6 +140,8 @@ window.practiceContent = {
       "background": "soft",
       "customBackground": "#f7f2ef",
       "appearance": {
+        "headingModeDesktop": "title",
+        "headingModeMobile": "title",
         "titleSize": "compact"
       },
       "content": {
@@ -150,6 +159,8 @@ window.practiceContent = {
       "background": "rose",
       "customBackground": "#f7f2ef",
       "appearance": {
+        "headingModeDesktop": "title",
+        "headingModeMobile": "title",
         "titleSize": "compact"
       },
       "content": {
@@ -193,6 +204,8 @@ window.practiceContent = {
       "background": "soft",
       "customBackground": "#f7f2ef",
       "appearance": {
+        "headingModeDesktop": "title",
+        "headingModeMobile": "title",
         "titleSize": "standard"
       },
       "content": {
@@ -213,6 +226,8 @@ window.practiceContent = {
       "background": "dark",
       "customBackground": "#f7f2ef",
       "appearance": {
+        "headingModeDesktop": "title",
+        "headingModeMobile": "title",
         "titleSize": "standard"
       },
       "content": {

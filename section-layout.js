@@ -19,6 +19,17 @@
     .replace(/\[([^\]]+)\]\((https?:\/\/[^\s)]+)\)/g,'<a href="$2" target="_blank" rel="noreferrer">$1</a>')
     .replace(/\n/g,'<br>');
   const eyebrow = (value) => value ? `<p class="eyebrow">${formatMarkup(value)}</p>` : '';
+  const headingMarkup = (body,mode) => {
+    if (mode === 'both') return `${eyebrow(body.eyebrow)}<h2>${formatMarkup(body.title)}</h2>`;
+    const value = mode === 'title' ? body.title : body.eyebrow;
+    return `<h2 class="section-heading-accent">${formatMarkup(value)}</h2>`;
+  };
+  const sectionHeading = (section) => {
+    const body = section.content;
+    const desktop = section.appearance?.headingModeDesktop || 'eyebrow';
+    const mobile = section.appearance?.headingModeMobile || 'eyebrow';
+    return `<div class="section-heading-variant section-heading-desktop">${headingMarkup(body,desktop)}</div><div class="section-heading-variant section-heading-mobile">${headingMarkup(body,mobile)}</div>`;
+  };
   const imageMarkup = (body, className = 'office-placeholder') => body.imageSrc
     ? `<div class="${className}" role="img" aria-label="${escapeAttribute(body.imageAlt)}" style="--section-image-position:${escapeAttribute(body.imagePosition || 'center center')}"><img class="section-image" src="${escapeAttribute(body.imageSrc)}" alt="${escapeAttribute(body.imageAlt)}">${body.caption ? `<p class="image-caption">${formatMarkup(body.caption)}</p>` : ''}</div>`
     : `<div class="${className}" role="img" aria-label="${escapeAttribute(body.imageAlt)}"><div class="office-art" aria-hidden="true"></div>${body.caption ? `<p class="image-caption">${formatMarkup(body.caption)}</p>` : ''}</div>`;
@@ -45,25 +56,25 @@
     intro: (section) => {
       const body = section.content;
       const items = body.items.filter((item) => item.text).map((item) => `<li>${formatMarkup(item.text)}</li>`).join('');
-      return `<section class="section dynamic-section layout-intro"><div class="page intro-grid"><div>${eyebrow(body.eyebrow)}<h2>${formatMarkup(body.title)}</h2></div><div><p>${formatMarkup(body.text)}</p>${items ? `<ul class="bullet-list">${items}</ul>` : ''}</div></div></section>`;
+      return `<section class="section dynamic-section layout-intro"><div class="page intro-grid"><div>${sectionHeading(section)}</div><div><p>${formatMarkup(body.text)}</p>${items ? `<ul class="bullet-list">${items}</ul>` : ''}</div></div></section>`;
     },
     note: (section) => {
       const body = section.content;
-      return `<section class="section dynamic-section layout-note"><div class="page therapy-grid"><div class="therapy-copy">${eyebrow(body.eyebrow)}<h2>${formatMarkup(body.title)}</h2><p>${formatMarkup(body.text)}</p></div><div class="therapy-note">${formatMarkup(body.note)}</div></div></section>`;
+      return `<section class="section dynamic-section layout-note"><div class="page therapy-grid"><div class="therapy-copy">${sectionHeading(section)}<p>${formatMarkup(body.text)}</p></div><div class="therapy-note">${formatMarkup(body.note)}</div></div></section>`;
     },
     cards: (section) => {
       const body = section.content;
       const columns = body.items.length > 4 ? 3 : Math.max(1,body.items.length);
       const cards = body.items.map((item) => `<article class="focus-card"><h3>${formatMarkup(item.title)}</h3><p>${formatMarkup(item.text)}</p></article>`).join('');
-      return `<section class="section dynamic-section layout-cards"><div class="page"><div class="focus-header"><div>${eyebrow(body.eyebrow)}<h2>${formatMarkup(body.title)}</h2></div><p>${formatMarkup(body.intro)}</p></div><div class="focus-grid" data-count="${body.items.length}" style="--card-columns:${columns}">${cards}</div></div></section>`;
+      return `<section class="section dynamic-section layout-cards"><div class="page"><div class="focus-header"><div>${sectionHeading(section)}</div><p>${formatMarkup(body.intro)}</p></div><div class="focus-grid" data-count="${body.items.length}" style="--card-columns:${columns}">${cards}</div></div></section>`;
     },
     image: (section) => {
       const body = section.content;
-      return `<section class="section dynamic-section layout-image"><div class="page practice-grid"><div class="practice-copy">${eyebrow(body.eyebrow)}<h2>${formatMarkup(body.title)}</h2><p>${formatMarkup(body.text)}</p></div>${imageMarkup(body)}</div></section>`;
+      return `<section class="section dynamic-section layout-image"><div class="page practice-grid"><div class="practice-copy">${sectionHeading(section)}<p>${formatMarkup(body.text)}</p></div>${imageMarkup(body)}</div></section>`;
     },
     wideImage: (section) => {
       const body = section.content;
-      return `<section class="section dynamic-section layout-wide-image"><div class="page"><div class="wide-image-copy"><div>${eyebrow(body.eyebrow)}<h2>${formatMarkup(body.title)}</h2></div><p>${formatMarkup(body.text)}</p></div>${imageMarkup(body,'wide-image-frame')}</div></section>`;
+      return `<section class="section dynamic-section layout-wide-image"><div class="page"><div class="wide-image-copy"><div>${sectionHeading(section)}</div><p>${formatMarkup(body.text)}</p></div>${imageMarkup(body,'wide-image-frame')}</div></section>`;
     },
     topics: (section) => {
       const body = section.content;
@@ -76,18 +87,18 @@
         return `<li style="--item-color:${color};--item-ink:${readableInk(color)}"><span>${String(index + 1).padStart(2,'0')}</span>${formatMarkup(item.text)}</li>`;
       }).join('');
       const listStyle = section.appearance?.listStyle || 'numbered-grid';
-      return `<section class="section dynamic-section layout-topics"><div class="page topics-grid"><div class="topics-copy">${eyebrow(body.eyebrow)}<h2>${formatMarkup(body.title)}</h2><p>${formatMarkup(body.intro)}</p></div><ol class="topics-list" data-list-style="${escapeAttribute(listStyle)}">${items}</ol></div></section>`;
+      return `<section class="section dynamic-section layout-topics"><div class="page topics-grid"><div class="topics-copy">${sectionHeading(section)}<p>${formatMarkup(body.intro)}</p></div><ol class="topics-list" data-list-style="${escapeAttribute(listStyle)}">${items}</ol></div></section>`;
     },
     timeline: (section) => {
       const body = section.content;
       const items = body.items.map((item) => `<li><span class="timeline-period">${formatMarkup(item.period)}</span><div class="timeline-entry"><h3>${formatMarkup(item.title)}</h3>${item.detail ? `<p>${formatMarkup(item.detail)}</p>` : ''}</div></li>`).join('');
       const timelineStyle = section.appearance?.timelineStyle || 'classic-lines';
-      return `<section class="section dynamic-section layout-timeline"><div class="page timeline-grid"><div class="timeline-copy">${eyebrow(body.eyebrow)}<h2>${formatMarkup(body.title)}</h2><p>${formatMarkup(body.intro)}</p></div><ol class="timeline-list" data-timeline-style="${escapeAttribute(timelineStyle)}">${items}</ol></div></section>`;
+      return `<section class="section dynamic-section layout-timeline"><div class="page timeline-grid"><div class="timeline-copy">${sectionHeading(section)}<p>${formatMarkup(body.intro)}</p></div><ol class="timeline-list" data-timeline-style="${escapeAttribute(timelineStyle)}">${items}</ol></div></section>`;
     },
     pricing: (section) => {
       const body = section.content;
       const rows = body.items.map((item) => `<div class="price-row"><div class="price-name"><span>${formatMarkup(item.name)}</span><span class="price-duration">${formatMarkup(item.duration)}</span></div><div class="price-value">${formatMarkup(item.price)}</div></div>`).join('');
-      return `<section class="section dynamic-section layout-pricing"><div class="page costs-grid"><div class="costs-copy">${eyebrow(body.eyebrow)}<h2>${formatMarkup(body.title)}</h2><p>${formatMarkup(body.intro)}</p></div><div><div class="price-list">${rows}</div>${body.note ? `<p class="reimbursement">${formatMarkup(body.note)}</p>` : ''}</div></div></section>`;
+      return `<section class="section dynamic-section layout-pricing"><div class="page costs-grid"><div class="costs-copy">${sectionHeading(section)}<p>${formatMarkup(body.intro)}</p></div><div><div class="price-list">${rows}</div>${body.note ? `<p class="reimbursement">${formatMarkup(body.note)}</p>` : ''}</div></div></section>`;
     },
     contact: (section) => {
       const body = section.content;
@@ -99,7 +110,7 @@
         body.email ? `<div><div class="detail-label">E-Mail</div>${String(body.email).includes('@') ? `<a class="detail-value" href="mailto:${escapeAttribute(body.email)}">${formatMarkup(body.email)}</a>` : `<span class="detail-value">${formatMarkup(body.email)}</span>`}</div>` : ''
       ].join('');
       const map = body.mapLink && body.mapLabel ? `<div class="map"><a class="map-link" href="${escapeAttribute(body.mapLink)}" target="_blank" rel="noreferrer">${formatMarkup(body.mapLabel)}</a></div>` : '';
-      return `<section class="section dynamic-section contact-section layout-contact"><div class="page contact-grid"><div class="contact-copy">${eyebrow(body.eyebrow)}<h2>${formatMarkup(body.title)}</h2><p>${formatMarkup(body.text)}</p></div><div class="contact-details">${details}</div></div>${map}</section>`;
+      return `<section class="section dynamic-section contact-section layout-contact"><div class="page contact-grid"><div class="contact-copy">${sectionHeading(section)}<p>${formatMarkup(body.text)}</p></div><div class="contact-details">${details}</div></div>${map}</section>`;
     }
   };
 
@@ -155,6 +166,8 @@
     sectionElement.style.setProperty('--section-bg',model.sectionColorValue(section));
     sectionElement.classList.toggle('is-dark',model.sectionIsDark(section));
     sectionElement.dataset.titleSize = section.appearance?.titleSize || 'standard';
+    sectionElement.dataset.headingDesktop = section.appearance?.headingModeDesktop || 'eyebrow';
+    sectionElement.dataset.headingMobile = section.appearance?.headingModeMobile || 'eyebrow';
     wrapper.dataset.renderedId = id;
     host.append(wrapper);
   });
