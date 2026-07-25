@@ -134,16 +134,8 @@
     .topics-list { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:0 38px; margin:5px 0 0; padding:0; list-style:none; }
     .topics-list li { display:grid; grid-template-columns:36px minmax(0,1fr); gap:12px; align-items:start; padding:19px 0; border-top:1px solid var(--line); color:var(--wine-850); font-family:var(--serif); font-size:1.22rem; line-height:1.22; }
     .topics-list li span { padding-top:.18em; color:var(--wine-650); font-family:var(--sans); font-size:.62rem; font-weight:750; letter-spacing:.1em; }
-    .is-dark .topics-list li,.is-dark .timeline-list li { border-color:rgba(255,255,255,.22); color:#fff; }
-    .is-dark .topics-list li span,.is-dark .timeline-period { color:var(--rose-300); }
-
-    .timeline-grid { display:grid; grid-template-columns:.72fr 1.28fr; gap:clamp(48px,10vw,148px); align-items:start; }
-    .timeline-copy>p { max-width:39ch; }
-    .timeline-list { margin:5px 0 0; padding:0; list-style:none; }
-    .timeline-list li { display:grid; grid-template-columns:120px minmax(0,1fr); gap:24px; padding:20px 0 22px; border-top:1px solid var(--line); }
-    .timeline-period { padding-top:.38em; color:var(--wine-650); font-size:.7rem; font-weight:750; letter-spacing:.06em; text-transform:uppercase; }
-    .timeline-list h3 { margin:0 0 4px; color:var(--wine-850); font-family:var(--serif); font-size:1.28rem; font-weight:400; line-height:1.16; }
-    .timeline-list p { margin:0; font-size:.86rem; }
+    .is-dark .topics-list li { border-color:rgba(255,255,255,.22); color:#fff; }
+    .is-dark .topics-list li span { color:var(--rose-300); }
 
     .costs-grid { display:grid; grid-template-columns:.78fr 1.22fr; gap:clamp(46px,11vw,150px); }
     .costs-copy p { max-width:35ch; }
@@ -289,8 +281,6 @@
       .price-value { max-width:none; text-align:left; }
       .contact-details { grid-template-columns:1fr; }
       .topics-list { grid-template-columns:1fr; }
-      .timeline-list li { grid-template-columns:1fr; gap:6px; }
-      .timeline-period { padding-top:0; }
       .map-link { margin-right:24px; }
       .site-footer { align-items:flex-start; flex-direction:column; justify-content:center; gap:8px; }
     }
@@ -301,6 +291,7 @@
     }
   </style>
   <link rel="stylesheet" href="listing-styles.css">
+  <link rel="stylesheet" href="timeline-styles.css">
 </head>
 <body>
   <header class="site-header">

@@ -146,9 +146,17 @@
       defaults: { eyebrow: 'Schwerpunkte', title: 'Wobei ich Sie begleiten kann.', intro: 'Eine kurze Einleitung zu den folgenden Themen.', items: [{ text: 'Erstes Thema' }, { text: 'Zweites Thema' }] }
     },
     timeline: {
-      ...titleAppearance(),
-      label: 'Vertikale Zeitleiste',
-      description: 'Eine flexible chronologische Liste für Ausbildung oder Berufserfahrung.',
+      ...titleAppearance([
+        { key: 'timelineStyle', label: 'Darstellung der Zeitleiste', type: 'select', options: [
+          ['classic-lines','Klassische Linien'],
+          ['milestone-cards','Meilenstein-Karten'],
+          ['year-focus','Große Jahreszahlen'],
+          ['alternating-path','Wechselnder Pfad'],
+          ['soft-steps','Sanfte Etappen']
+        ] }
+      ],{ timelineStyle: 'classic-lines' }),
+      label: 'Zeitleiste',
+      description: 'Eine flexible chronologische Liste mit verschiedenen Darstellungen für Ausbildung oder Berufserfahrung.',
       defaultNavigation: 'Über mich',
       defaultBackground: 'paper',
       fields: [

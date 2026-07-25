@@ -158,7 +158,7 @@ test('editor exports normalized schema content', async ({ page }) => {
     /Zweispaltiger Text mit Bild/,
     /Text über breitem Bild/,
     /Auflistung/,
-    /Vertikale Zeitleiste/,
+    /Zeitleiste/,
     /Zweispaltige Preisliste/,
     /Kontaktblock mit Karte/
   ]);
@@ -277,6 +277,44 @@ test('listing layout offers interchangeable visual treatments', async ({ page })
   }));
   expect(pillPositions[1].left).toBeCloseTo(pillPositions[0].left,0);
   expect(pillPositions[1].top).toBeGreaterThan(pillPositions[0].top);
+});
+
+test('timeline layout offers interchangeable visual treatments', async ({ page }) => {
+  await page.goto(editorUrl);
+
+  const timeline = page.locator('.section-editor:has([data-section-layout] option:checked[value="timeline"])').first();
+  const style = timeline.locator('[data-path$=".appearance.timelineStyle"]');
+  await expect(style.locator('option')).toHaveText([
+    'Klassische Linien',
+    'Meilenstein-Karten',
+    'Große Jahreszahlen',
+    'Wechselnder Pfad',
+    'Sanfte Etappen'
+  ]);
+
+  await style.selectOption('alternating-path');
+  await timeline.getByRole('button',{ name:/Desktopvorschau/ }).click();
+
+  const previewTimeline = page.frameLocator('#preview-frame').locator('.timeline-list');
+  await expect(previewTimeline).toHaveAttribute('data-timeline-style','alternating-path');
+  await expect(previewTimeline.locator('li').first()).toHaveCSS('grid-template-columns',/\d+(?:\.\d+)?px 44px \d+(?:\.\d+)?px/);
+  await expect(previewTimeline.locator('.timeline-entry').first()).toHaveCSS('border-radius','14px');
+
+  await page.getByRole('button',{ name:'Vorschau schließen' }).click();
+  await timeline.getByRole('button',{ name:/Mobilvorschau/ }).click();
+  const mobileTimelineFrame = page.locator('#preview-frame').contentFrame();
+  for (const timelineStyle of ['classic-lines','milestone-cards','year-focus','alternating-path','soft-steps']) {
+    const fit = await mobileTimelineFrame.locator('.timeline-list').evaluate((element,styleName) => {
+      element.setAttribute('data-timeline-style',styleName);
+      return {
+        viewport:document.documentElement.clientWidth,
+        scrollWidth:document.documentElement.scrollWidth,
+        right:element.getBoundingClientRect().right
+      };
+    },timelineStyle);
+    expect(fit.scrollWidth).toBeLessThanOrEqual(fit.viewport);
+    expect(fit.right).toBeLessThanOrEqual(fit.viewport + 1);
+  }
 });
 
 test('each section can be previewed directly on mobile and desktop', async ({ page }) => {

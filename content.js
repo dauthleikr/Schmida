@@ -88,26 +88,9 @@ window.practiceContent = {
       }
     },
     {
-      "id": "supervision",
-      "layout": "note",
-      "internalName": "Zweispaltiger Text mit Hervorhebung",
-      "navigationLabel": "",
-      "background": "soft",
-      "customBackground": "#f7f2ef",
-      "appearance": {
-        "titleSize": "compact"
-      },
-      "content": {
-        "eyebrow": "Qualitätssicherung",
-        "title": "In Ausbildung unter Supervision.",
-        "text": "Als Psychotherapeutin in Ausbildung unter Supervision stehe ich im regelmäßigen fachlichen Austausch mit erfahrenen Psychotherapeut:innen.",
-        "note": "Dieser zusätzliche fachliche Blick dient der Qualitätssicherung und unterstützt mich dabei, Ihre Therapie bestmöglich zu gestalten."
-      }
-    },
-    {
       "id": "berufserfahrung",
       "layout": "timeline",
-      "internalName": "Vertikale Zeitleiste",
+      "internalName": "Zeitleiste",
       "navigationLabel": "Über mich",
       "background": "paper",
       "customBackground": "#f7f2ef",
@@ -143,9 +126,26 @@ window.practiceContent = {
       }
     },
     {
+      "id": "supervision",
+      "layout": "note",
+      "internalName": "In Ausbildung unter Supervision.",
+      "navigationLabel": "",
+      "background": "soft",
+      "customBackground": "#f7f2ef",
+      "appearance": {
+        "titleSize": "compact"
+      },
+      "content": {
+        "eyebrow": "Qualitätssicherung",
+        "title": "In Ausbildung unter Supervision.",
+        "text": "Als Psychotherapeutin in Ausbildung unter Supervision stehe ich im regelmäßigen fachlichen Austausch mit erfahrenen Psychotherapeut:innen.",
+        "note": "Dieser zusätzliche fachliche Blick dient der Qualitätssicherung und unterstützt mich dabei, Ihre Therapie bestmöglich zu gestalten."
+      }
+    },
+    {
       "id": "ausbildung",
       "layout": "timeline",
-      "internalName": "Vertikale Zeitleiste",
+      "internalName": "Zeitleiste",
       "navigationLabel": "",
       "background": "rose",
       "customBackground": "#f7f2ef",

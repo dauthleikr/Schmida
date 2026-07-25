@@ -80,8 +80,9 @@
     },
     timeline: (section) => {
       const body = section.content;
-      const items = body.items.map((item) => `<li><span class="timeline-period">${formatMarkup(item.period)}</span><div><h3>${formatMarkup(item.title)}</h3>${item.detail ? `<p>${formatMarkup(item.detail)}</p>` : ''}</div></li>`).join('');
-      return `<section class="section dynamic-section layout-timeline"><div class="page timeline-grid"><div class="timeline-copy">${eyebrow(body.eyebrow)}<h2>${formatMarkup(body.title)}</h2><p>${formatMarkup(body.intro)}</p></div><ol class="timeline-list">${items}</ol></div></section>`;
+      const items = body.items.map((item) => `<li><span class="timeline-period">${formatMarkup(item.period)}</span><div class="timeline-entry"><h3>${formatMarkup(item.title)}</h3>${item.detail ? `<p>${formatMarkup(item.detail)}</p>` : ''}</div></li>`).join('');
+      const timelineStyle = section.appearance?.timelineStyle || 'classic-lines';
+      return `<section class="section dynamic-section layout-timeline"><div class="page timeline-grid"><div class="timeline-copy">${eyebrow(body.eyebrow)}<h2>${formatMarkup(body.title)}</h2><p>${formatMarkup(body.intro)}</p></div><ol class="timeline-list" data-timeline-style="${escapeAttribute(timelineStyle)}">${items}</ol></div></section>`;
     },
     pricing: (section) => {
       const body = section.content;
