@@ -4,117 +4,174 @@ import { resolve } from 'node:path';
 const siteUrl = `file:///${resolve('index.html').replace(/\\/g, '/')}`;
 const editorUrl = `file:///${resolve('editor.html').replace(/\\/g, '/')}`;
 
-test('renders editable practice content and section navigation', async ({ page }) => {
+test('renders the new section schema with dynamic navigation and waves', async ({ page }) => {
   await page.goto(siteUrl);
 
-  await expect(page).toHaveTitle('Praxis fuer Psychotherapie');
-  await expect(page.getByRole('navigation')).toHaveText(/Startseite[\s\S]*Psychotherapie[\s\S]*Kosten[\s\S]*Schwerpunkte[\s\S]*Kontakt/);
-  await expect(page.locator('.hero-image')).toHaveJSProperty('complete', true);
+  await expect(page).toHaveTitle('Carina Schmida, BA.pth.');
+  await expect(page.getByRole('navigation')).toHaveText(/Startseite[\s\S]*Psychotherapie[\s\S]*Schwerpunkte[\s\S]*Kosten[\s\S]*Kontakt/);
+  await expect(page.locator('.content-section')).toHaveCount(5);
+  await expect(page.locator('.content-section[data-layout="cards"] .focus-card')).toHaveCount(6);
+  await expect(page.locator('.ribbon-transition')).toHaveCount(5);
+  await expect(page.locator('.hero-image')).toHaveJSProperty('complete',true);
   await expect(page.locator('#contact')).toContainText('praxis@beispiel.at');
 
-  await page.getByRole('link', { name: 'Kosten' }).click();
+  await page.getByRole('link',{ name:'Kosten' }).click();
   await expect(page.locator('#costs')).toBeInViewport();
 });
 
 test('provides a usable compact navigation', async ({ page }) => {
-  await page.setViewportSize({ width: 390, height: 844 });
+  await page.setViewportSize({ width:390,height:844 });
   await page.goto(siteUrl);
 
-  const menu = page.getByRole('button', { name: 'Menue' });
+  const menu = page.getByRole('button',{ name:'Menü' });
   await menu.click();
-  await expect(menu).toHaveAttribute('aria-expanded', 'true');
-  await expect(page.getByRole('link', { name: 'Kontakt', exact: true })).toBeVisible();
-  await page.getByRole('link', { name: 'Kontakt', exact: true }).click();
+  await expect(menu).toHaveAttribute('aria-expanded','true');
+  await expect(page.getByRole('link',{ name:'Kontakt',exact:true })).toBeVisible();
+  await page.getByRole('link',{ name:'Kontakt',exact:true }).click();
   await expect(page.locator('#contact')).toBeInViewport();
 });
 
-test('editor exports the updated content without source editing', async ({ page }) => {
+test('editor exports normalized schema content', async ({ page }) => {
   await page.goto(editorUrl);
 
-  await expect(page.getByRole('heading', { name: 'Inhalte bearbeiten' })).toBeVisible();
-  await page.locator('[data-bind="practiceName"]').fill('Praxis Sonnenweg');
-  await page.getByRole('radio', { name: 'Scharlachrot' }).check();
+  await expect(page.getByRole('heading',{ name:'Inhalte bearbeiten' })).toBeVisible();
+  await page.locator('[data-path="practiceName"]').fill('Praxis Sonnenweg');
+  await page.getByRole('radio',{ name:'Scharlachrot' }).check();
 
   const downloadPromise = page.waitForEvent('download');
-  await page.getByRole('button', { name: 'content.js herunterladen' }).first().click();
+  await page.getByRole('button',{ name:'content.js herunterladen' }).first().click();
   const download = await downloadPromise;
-  const content = await download.createReadStream().then(async (stream) => {
-    let output = '';
-    for await (const chunk of stream) output += chunk;
-    return output;
+  const output = await download.createReadStream().then(async (stream) => {
+    let content = '';
+    for await (const chunk of stream) content += chunk;
+    return content;
   });
 
   expect(download.suggestedFilename()).toBe('content.js');
-  expect(content).toContain('Praxis Sonnenweg');
-  expect(content).toContain('"colorTheme": "scarlet"');
+  expect(output).toContain('Praxis Sonnenweg');
+  expect(output).toContain('"schemaVersion": 2');
+  expect(output).toContain('"sections": [');
+  expect(output).toContain('"colorTheme": "scarlet"');
+  expect(output).not.toContain('"sectionLayout"');
 });
 
-test('editor previews drafts and bounds focus areas', async ({ page }) => {
+test('adds a section, changes its layout, background, fields and navigation', async ({ page }) => {
   await page.goto(editorUrl);
 
-  await page.locator('[data-bind="practiceName"]').fill('Praxis Sonnenweg');
-  const addFocus = page.getByRole('button', { name: 'Schwerpunkt hinzufuegen' });
-  await addFocus.click();
-  await addFocus.click();
-  await expect(addFocus).toBeDisabled();
-  await expect(page.locator('[data-focus-index]')).toHaveCount(6);
+  await page.selectOption('#new-layout','note');
+  await page.getByRole('button',{ name:'Bereich hinzufügen' }).click();
+  await expect(page.locator('.section-editor')).toHaveCount(6);
 
-  await page.getByRole('button', { name: 'Vorschau' }).click();
-  await expect(page.frameLocator('#preview-frame').locator('.brand')).toContainText('Praxis Sonnenweg');
-});
+  const added = page.locator('.section-editor').last();
+  await added.locator('[data-path$=".navigationLabel"]').fill('Über mich');
+  await added.locator('[data-section-background]').selectOption('custom');
+  await added.locator('[data-section-custom-code]').fill('#e5f0ea');
+  await added.locator('[data-path$=".content.title"]').fill('Mein neuer Bereich');
+  await added.locator('[data-path$=".content.note"]').fill('Ein persönlicher Hinweis.');
 
-test('enhanced editor formats text and bounds services', async ({ page }) => {
-  await page.goto(editorUrl);
-
-  await expect(page.locator('[name="enhanced-theme"]')).toHaveCount(6);
-  const richText = page.locator('.rich-editor').first();
-  await richText.click();
-  await page.keyboard.press('Control+A');
-  await page.getByRole('button', { name: 'Fett' }).first().click();
-  await expect(page.locator('textarea').first()).toHaveValue(/^\*\*.+\*\*$/);
-
-  const addService = page.getByRole('button', { name: 'Leistung hinzufuegen' });
-  await addService.click();
-  await addService.click();
-  await expect(addService).toBeDisabled();
-  await expect(page.locator('[data-price-index]')).toHaveCount(5);
-  await expect(page.locator('[data-focus-index]').first()).toHaveCSS('grid-template-columns', /30px/);
-});
-
-test('editor controls section visibility and order', async ({ page }) => {
-  await page.goto(editorUrl);
-
-  const intro = page.locator('.section-row', { hasText: 'Psychotherapie Einstieg' });
-  const details = page.locator('.section-row', { hasText: 'Psychotherapie Vertiefung (farbig)' });
-  await intro.getByRole('checkbox').uncheck();
-  await details.getByRole('checkbox').check();
-  await details.getByRole('button', { name: 'Nach oben' }).click();
-
-  await page.getByRole('button', { name: 'Vorschau' }).click();
+  await page.getByRole('button',{ name:'Vorschau' }).click();
   const preview = page.frameLocator('#preview-frame');
-  await expect(preview.locator('section#psychotherapy.therapy')).toHaveCount(1);
-  await expect(preview.locator('.content-section[data-section-key="intro"]')).toHaveCount(0);
+  await expect(preview.getByRole('link',{ name:'Über mich' })).toBeVisible();
+  await expect(preview.locator('.content-section[data-layout="note"]').last().locator('section')).toHaveCSS('background-color','rgb(229, 240, 234)');
+  await expect(preview.getByRole('heading',{ name:'Mein neuer Bereich' })).toBeVisible();
 });
 
-test('editor configures hero image presentation', async ({ page }) => {
+test('repeatable bullets, cards and prices use reusable add and remove controls', async ({ page }) => {
   await page.goto(editorUrl);
 
-  await page.selectOption('[data-hero-image="layout"]', 'background');
-  await page.selectOption('[data-hero-image="blend"]', 'natural');
-  await page.selectOption('[data-hero-image="position"]', 'right center');
-  await page.getByRole('button', { name: 'Vorschau' }).click();
+  const intro = page.locator('.section-editor').nth(0);
+  await intro.locator('[data-collection-action="add"][data-collection-key="items"]').click();
+  await expect(intro.locator('.collection-item')).toHaveCount(1);
+  await intro.locator('[data-path$=".items.0.text"]').fill('Dynamischer Aufzählungspunkt');
 
+  const cards = page.locator('.section-editor').nth(1);
+  const removeCard = cards.locator('[data-collection-action="remove"]').first();
+  await removeCard.click();
+  await expect(cards.locator('.collection-item')).toHaveCount(5);
+  await cards.locator('[data-collection-action="add"]').click();
+  await expect(cards.locator('.collection-item')).toHaveCount(6);
+  await expect(cards.locator('[data-collection-action="add"]')).toBeDisabled();
+
+  const prices = page.locator('.section-editor').nth(3);
+  await prices.locator('[data-collection-action="add"]').click();
+  await prices.locator('[data-path$=".items.3.name"]').fill('Online-Beratung');
+  await prices.locator('[data-path$=".items.3.price"]').fill('EUR 90');
+
+  await page.getByRole('button',{ name:'Vorschau' }).click();
   const preview = page.frameLocator('#preview-frame');
-  await expect(preview.locator('.hero')).toHaveAttribute('data-image-layout', 'background');
-  await expect(preview.locator('.hero')).toHaveAttribute('data-image-blend', 'natural');
-  await expect(preview.locator('.hero')).toHaveCSS('--hero-image-position', 'right center');
+  await expect(preview.locator('.bullet-list')).toContainText('Dynamischer Aufzählungspunkt');
+  await expect(preview.locator('.price-list')).toContainText('Online-Beratung');
+  await expect(preview.locator('.price-list')).toContainText('EUR 90');
 });
 
-test('hero contact button follows the editable label', async ({ page }) => {
+test('sections can be reordered, removed and changed to another registered layout', async ({ page }) => {
   await page.goto(editorUrl);
 
-  await page.locator('[data-hero-contact]').fill('Erstgespraech anfragen');
-  await page.getByRole('button', { name: 'Vorschau' }).click();
+  await page.selectOption('#new-layout','intro');
+  await page.getByRole('button',{ name:'Bereich hinzufügen' }).click();
+  const added = page.locator('.section-editor').last();
+  await added.locator('[data-section-layout]').selectOption('image');
+  await expect(page.locator('.section-editor').last().locator('[data-path$=".content.imageSrc"]')).toBeVisible();
+
+  const addedId = await page.locator('.section-editor').last().getAttribute('data-section-id');
+  const moved = page.locator(`.section-editor[data-section-id="${addedId}"]`);
+  for (let index = 0; index < 5; index += 1) {
+    await moved.getByRole('button',{ name:'Nach oben' }).click();
+  }
+  await expect(page.locator('.section-editor').first().locator('[data-section-layout]')).toHaveValue('image');
+
+  page.once('dialog',(dialog) => dialog.accept());
+  await page.locator('.section-editor').nth(1).getByRole('button',{ name:'Bereich entfernen' }).click();
+  await expect(page.locator('.section-editor')).toHaveCount(5);
+
+  await page.getByRole('button',{ name:'Vorschau' }).click();
+  await expect(page.frameLocator('#preview-frame').locator('.content-section').first()).toHaveAttribute('data-layout','image');
+});
+
+test('rich-text controls and hero presentation remain editable', async ({ page }) => {
+  await page.goto(editorUrl);
+
+  const title = page.locator('[data-path="hero.title"]');
+  await title.fill('Ein neuer Titel');
+  await title.selectText();
+  await title.locator('xpath=..').getByRole('button',{ name:'Fett' }).click();
+  await expect(title).toHaveValue('**Ein neuer Titel**');
+
+  await page.selectOption('[data-path="heroImage.layout"]','background');
+  await page.selectOption('[data-path="heroImage.blend"]','natural');
+  await page.selectOption('[data-path="heroImage.position"]','right center');
+  await page.locator('[data-path="hero.contactButton"]').fill('Erstgespräch anfragen');
+  await page.getByRole('button',{ name:'Vorschau' }).click();
+
   const preview = page.frameLocator('#preview-frame');
-  await expect(preview.getByRole('link', { name: 'Erstgespraech anfragen' })).toHaveAttribute('href', '#contact');
+  await expect(preview.locator('.hero')).toHaveAttribute('data-image-layout','background');
+  await expect(preview.locator('.hero')).toHaveAttribute('data-image-blend','natural');
+  await expect(preview.locator('.hero')).toHaveCSS('--hero-image-position','right center');
+  await expect(preview.getByRole('link',{ name:'Erstgespräch anfragen' })).toHaveAttribute('href','#contact');
+  await expect(preview.locator('h1 strong')).toHaveText('Ein neuer Titel');
+});
+
+test('legacy fixed content is isolated behind the schema migration adapter', async ({ page }) => {
+  await page.goto(siteUrl);
+  const migrated = await page.evaluate(() => window.practiceContentModel.normalize({
+    practiceName:'Legacy Praxis',
+    navigation:{ home:'Start',costs:'Preise' },
+    sectionLayout:{ order:['costs'],enabled:{ intro:false,therapy:false,focusAreas:false,practice:false,costs:true,contact:false } },
+    costs:{ label:'Honorar',title:'Kosten',intro:'Info',entries:[['Termin','50 Minuten','100 EUR']],reimbursement:'Hinweis' }
+  }));
+
+  expect(migrated.schemaVersion).toBe(2);
+  expect(migrated.sections).toHaveLength(1);
+  expect(migrated.sections[0].layout).toBe('pricing');
+  expect(migrated.sections[0].navigationLabel).toBe('Preise');
+  expect(migrated.sections[0].content.items[0]).toEqual({ name:'Termin',duration:'50 Minuten',price:'100 EUR' });
+
+  const ranged = await page.evaluate(() => window.practiceContentModel.normalize({
+    sections:[
+      { id:'cards',layout:'cards',content:{ items:Array.from({ length:9 },(_,index) => ({ title:String(index),text:'' })) } },
+      { id:'prices',layout:'pricing',content:{ items:[] } }
+    ]
+  }));
+  expect(ranged.sections[0].content.items).toHaveLength(6);
+  expect(ranged.sections[1].content.items).toHaveLength(1);
 });
