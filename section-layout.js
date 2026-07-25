@@ -51,6 +51,16 @@
     const [red,green,blue] = colorChannels(color);
     return (red * 299 + green * 587 + blue * 114) / 1000 > 150 ? '#291117' : '#ffffff';
   };
+  const safeMapEmbedUrl = (value) => {
+    try {
+      const url = new URL(String(value || '').trim());
+      const hostname = url.hostname.toLowerCase();
+      const isGoogleHost = hostname === 'google.com' || hostname.endsWith('.google.com');
+      return url.protocol === 'https:' && isGoogleHost && url.pathname.startsWith('/maps/embed') ? url.href : '';
+    } catch {
+      return '';
+    }
+  };
 
   const renderers = {
     intro: (section) => {
@@ -75,7 +85,8 @@
     },
     wideImage: (section) => {
       const body = section.content;
-      return `<section class="section dynamic-section layout-wide-image"><div class="page"><div class="wide-image-copy"><div>${sectionHeading(section)}</div><p>${formatMarkup(body.text)}</p></div>${imageMarkup(body,'wide-image-frame')}</div></section>`;
+      const imageStyle = section.appearance?.imageStyle || 'offset-shadow';
+      return `<section class="section dynamic-section layout-wide-image" data-image-style="${escapeAttribute(imageStyle)}"><div class="page"><div class="wide-image-copy">${sectionHeading(section)}<p>${formatMarkup(body.text)}</p></div>${imageMarkup(body,'wide-image-frame')}</div></section>`;
     },
     topics: (section) => {
       const body = section.content;
@@ -110,7 +121,11 @@
         body.phoneLabel ? `<div><div class="detail-label">Telefon</div>${phoneHref ? `<a class="detail-value" href="tel:${escapeAttribute(phoneHref)}">${formatMarkup(body.phoneLabel)}</a>` : `<span class="detail-value">${formatMarkup(body.phoneLabel)}</span>`}</div>` : '',
         body.email ? `<div><div class="detail-label">E-Mail</div>${String(body.email).includes('@') ? `<a class="detail-value" href="mailto:${escapeAttribute(body.email)}">${formatMarkup(body.email)}</a>` : `<span class="detail-value">${formatMarkup(body.email)}</span>`}</div>` : ''
       ].join('');
-      const map = body.mapLink && body.mapLabel ? `<div class="map"><a class="map-link" href="${escapeAttribute(body.mapLink)}" target="_blank" rel="noreferrer">${formatMarkup(body.mapLabel)}</a></div>` : '';
+      const embedUrl = safeMapEmbedUrl(body.mapEmbed);
+      const mapLink = body.mapLink && body.mapLabel ? `<a class="map-link" href="${escapeAttribute(body.mapLink)}" target="_blank" rel="noreferrer">${formatMarkup(body.mapLabel)}</a>` : '';
+      const map = embedUrl
+        ? `<div class="map map-embed"><iframe src="${escapeAttribute(embedUrl)}" title="Standort auf Google Maps" loading="lazy" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>${mapLink}</div>`
+        : mapLink ? `<div class="map">${mapLink}</div>` : '';
       return `<section class="section dynamic-section contact-section layout-contact"><div class="page contact-grid"><div class="contact-copy">${sectionHeading(section)}<p class="section-intro-text">${formatMarkup(body.text)}</p></div><div class="contact-details">${details}</div></div>${map}</section>`;
     }
   };

@@ -110,9 +110,16 @@
       defaults: { eyebrow: 'Die Praxis', title: 'Ein ruhiger Raum für Ihr Gespräch.', text: 'Beschreiben Sie diesen Ort oder Ihr Angebot.', imageSrc: '', imageAlt: 'Foto des Praxisraums', imagePosition: 'center center', caption: 'Foto des Praxisraums folgt' }
     },
     wideImage: {
-      ...titleAppearance(),
+      ...titleAppearance([
+        { key: 'imageStyle', label: 'Bilddarstellung', type: 'select', options: [
+          ['wide-clean','Breit und randlos'],
+          ['offset-shadow','Schwebend mit Schatten'],
+          ['square-stage','Quadrat mit Akzentfläche'],
+          ['gallery-frame','Ruhiger Galerierahmen']
+        ] }
+      ],{ imageStyle: 'offset-shadow' }),
       label: 'Text über breitem Bild',
-      description: 'Einleitung über einer großzügigen, querformatigen Fotofläche.',
+      description: 'Überschrift und Text über einem Bild mit wählbarer Inszenierung.',
       defaultNavigation: 'Praxis',
       defaultBackground: 'soft',
       fields: [
@@ -205,10 +212,11 @@
         { key: 'phoneLabel', label: 'Telefonnummer', type: 'text' },
         { key: 'phoneHref', label: 'Telefon-Link', type: 'text' },
         { key: 'email', label: 'E-Mail', type: 'text' },
-        { key: 'mapLink', label: 'OpenStreetMap-Link', type: 'text' },
+        { key: 'mapEmbed', label: 'Google-Maps-Einbettungs-URL (optional)', type: 'text' },
+        { key: 'mapLink', label: 'Externer Kartenlink (optional)', type: 'text' },
         { key: 'mapLabel', label: 'Beschriftung des Kartenlinks', type: 'text' }
       ],
-      defaults: { eyebrow: 'Kontakt', title: 'Nehmen Sie Kontakt auf.', text: 'Beschreiben Sie, wie Sie erreichbar sind.', addressLine1: 'Musterstraße 12', addressLine2: '1010 Wien', phoneLabel: '+43 660 123 45 67', phoneHref: '+436601234567', email: 'praxis@beispiel.at', mapLink: 'https://www.openstreetmap.org/', mapLabel: 'Karte in OpenStreetMap öffnen' }
+      defaults: { eyebrow: 'Kontakt', title: 'Nehmen Sie Kontakt auf.', text: 'Beschreiben Sie, wie Sie erreichbar sind.', addressLine1: 'Musterstraße 12', addressLine2: '1010 Wien', phoneLabel: '+43 660 123 45 67', phoneHref: '+436601234567', email: 'praxis@beispiel.at', mapEmbed: '', mapLink: 'https://www.openstreetmap.org/', mapLabel: 'Karte in OpenStreetMap öffnen' }
     }
   };
 
@@ -359,6 +367,7 @@
             phoneLabel: source.contact?.phoneLabel || '',
             phoneHref: source.contact?.phoneHref || '',
             email: source.contact?.email || '',
+            mapEmbed: source.contact?.mapEmbed || '',
             mapLink: source.contact?.mapLink || '',
             mapLabel: source.contact?.mapLabel || ''
           }

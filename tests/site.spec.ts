@@ -36,12 +36,29 @@ test('renders the new section schema with dynamic navigation and waves', async (
   await expect(page.locator('#psychotherapie .section-heading-desktop .section-heading-accent')).toHaveCSS('color','rgb(209, 17, 55)');
   await expect(page.locator('#kontakt .section-heading-desktop .section-heading-accent')).toHaveCSS('color','rgb(255, 154, 169)');
   await expect(page.locator('#psychotherapie')).toHaveCSS('padding-top','104px');
-  await expect(page.locator('#psychotherapie .intro-grid > div:last-child > p').first()).toHaveCSS('color','rgb(81, 71, 74)');
-  await expect(page.locator('#schwerpunkte .section-intro-text')).toHaveCSS('color','rgb(105, 8, 23)');
+  const configuredTextColors = await page.evaluate(() => {
+    const bodyProbe = document.createElement('span');
+    const introProbe = document.createElement('span');
+    bodyProbe.style.color = 'var(--body-text)';
+    introProbe.style.color = 'var(--intro-text)';
+    document.body.append(bodyProbe,introProbe);
+    const body = getComputedStyle(document.querySelector('#psychotherapie .intro-grid > div:last-child > p')!);
+    const intro = getComputedStyle(document.querySelector('#schwerpunkte .section-intro-text')!);
+    const colors = {
+      body:[getComputedStyle(bodyProbe).color,body.color],
+      intro:[getComputedStyle(introProbe).color,intro.color]
+    };
+    bodyProbe.remove();
+    introProbe.remove();
+    return colors;
+  });
+  expect(configuredTextColors.body[1]).toBe(configuredTextColors.body[0]);
+  expect(configuredTextColors.intro[1]).toBe(configuredTextColors.intro[0]);
   await expect(page.locator('.hero .eyebrow')).toHaveCSS('font-size','11.2px');
   await expect(page.locator('.ribbon-transition')).toHaveCount(savedSections.length);
   await expect(page.locator('.hero-image')).toHaveJSProperty('complete',true);
-  await expect(page.locator('#kontakt')).toContainText('E-Mail-Adresse bitte ergänzen');
+  const savedContact = savedSections.find((section) => section.layout === 'contact');
+  await expect(page.locator('#kontakt')).toContainText(savedContact!.content.email);
   await expect(page.locator('.wide-image-frame .section-image')).toHaveAttribute('src','assets/office_horizontal.JPG');
   expect(await page.locator('.wide-image-frame .section-image').evaluate((image:HTMLImageElement) => image.naturalWidth)).toBeGreaterThan(0);
   await expect(page.locator('.wide-image-frame .section-image')).toHaveCSS('object-position','50% 0%');
@@ -409,6 +426,115 @@ test('listing layout offers interchangeable visual treatments', async ({ page })
   }));
   expect(pillPositions[1].left).toBeCloseTo(pillPositions[0].left,0);
   expect(pillPositions[1].top).toBeGreaterThan(pillPositions[0].top);
+});
+
+test('wide image layout stacks its copy and offers designed image treatments', async ({ page }) => {
+  await page.goto(editorUrl);
+
+  const wideImage = page.locator('.section-editor[data-section-id="praxis"]');
+  const style = wideImage.locator('[data-path$=".appearance.imageStyle"]');
+  await expect(style.locator('option')).toHaveText([
+    'Breit und randlos',
+    'Schwebend mit Schatten',
+    'Quadrat mit Akzentfläche',
+    'Ruhiger Galerierahmen'
+  ]);
+
+  await style.selectOption('offset-shadow');
+  await wideImage.getByRole('button',{ name:/Desktopvorschau/ }).click();
+  const preview = page.frameLocator('#preview-frame');
+  const section = preview.locator('.layout-wide-image');
+  const copy = section.locator('.wide-image-copy');
+  const heading = copy.locator('.section-heading-desktop');
+  const text = copy.locator(':scope > p');
+
+  await expect(section).toHaveAttribute('data-image-style','offset-shadow');
+  const stackedCopy = await Promise.all([heading.boundingBox(),text.boundingBox()]);
+  expect(stackedCopy[0]).not.toBeNull();
+  expect(stackedCopy[1]).not.toBeNull();
+  expect(stackedCopy[1]!.y).toBeGreaterThanOrEqual(stackedCopy[0]!.y + stackedCopy[0]!.height - 1);
+  const shadowTreatment = await section.locator('.wide-image-frame').evaluate((element) => {
+    const image = element.querySelector('.section-image')!;
+    const backdrop = getComputedStyle(element,'::before');
+    return {
+      backdropContent:backdrop.content,
+      backdropBackground:backdrop.backgroundColor,
+      imageShadow:getComputedStyle(image).boxShadow
+    };
+  });
+  expect(shadowTreatment.backdropContent).toBe('none');
+  expect(shadowTreatment.backdropBackground).toBe('rgba(0, 0, 0, 0)');
+  expect(shadowTreatment.imageShadow).not.toBe('none');
+  const uncroppedShadowImage = await section.locator('.section-image').evaluate((image:HTMLImageElement) => {
+    const box = image.getBoundingClientRect();
+    return {
+      renderedRatio:box.width / box.height,
+      naturalRatio:image.naturalWidth / image.naturalHeight,
+      objectFit:getComputedStyle(image).objectFit
+    };
+  });
+  expect(uncroppedShadowImage.objectFit).toBe('contain');
+  expect(uncroppedShadowImage.renderedRatio).toBeCloseTo(uncroppedShadowImage.naturalRatio,2);
+
+  await page.getByRole('button',{ name:'Vorschau schließen' }).click();
+  await wideImage.locator('[data-path$=".appearance.imageStyle"]').selectOption('square-stage');
+  await wideImage.getByRole('button',{ name:/Mobilvorschau/ }).click();
+  const mobilePreview = page.frameLocator('#preview-frame');
+  await expect(mobilePreview.locator('.layout-wide-image')).toHaveAttribute('data-image-style','square-stage');
+  const square = mobilePreview.locator('.layout-wide-image .wide-image-frame');
+  await expect(square).toBeVisible();
+  const squareBox = await square.boundingBox();
+  expect(squareBox).not.toBeNull();
+  expect(squareBox!.width).toBeCloseTo(squareBox!.height,0);
+  const uncroppedSquareImage = await square.locator('.section-image').evaluate((image:HTMLImageElement) => {
+    const box = image.getBoundingClientRect();
+    return {
+      renderedRatio:box.width / box.height,
+      naturalRatio:image.naturalWidth / image.naturalHeight,
+      objectFit:getComputedStyle(image).objectFit
+    };
+  });
+  expect(uncroppedSquareImage.objectFit).toBe('contain');
+  expect(uncroppedSquareImage.renderedRatio).toBeCloseTo(uncroppedSquareImage.naturalRatio,2);
+  const mobileFit = await square.evaluate((element) => ({
+    viewport:document.documentElement.clientWidth,
+    scrollWidth:document.documentElement.scrollWidth,
+    left:element.getBoundingClientRect().left,
+    right:element.getBoundingClientRect().right
+  }));
+  expect(mobileFit.scrollWidth).toBeLessThanOrEqual(mobileFit.viewport);
+  expect(mobileFit.left).toBeGreaterThanOrEqual(0);
+  expect(mobileFit.right).toBeLessThanOrEqual(mobileFit.viewport);
+});
+
+test('contact layout supports a safe embedded map with an external fallback', async ({ page }) => {
+  await page.route('https://www.google.com/maps/embed**',(route) => route.fulfill({
+    status:200,
+    contentType:'text/html',
+    body:'<!doctype html><title>Map test</title>'
+  }));
+  await page.goto(editorUrl);
+
+  const contact = page.locator('.section-editor[data-section-id="kontakt"]');
+  const embed = contact.locator('[data-path$=".content.mapEmbed"]');
+  await expect(embed).toBeVisible();
+  await expect(contact.locator('[data-path$=".content.mapLink"]')).toBeVisible();
+  await embed.fill('https://www.google.com/maps/embed?pb=test');
+  await contact.getByRole('button',{ name:/Desktopvorschau/ }).click();
+
+  const preview = page.frameLocator('#preview-frame');
+  const iframe = preview.locator('.map-embed iframe');
+  await expect(iframe).toHaveAttribute('src','https://www.google.com/maps/embed?pb=test');
+  await expect(iframe).toHaveAttribute('title','Standort auf Google Maps');
+  await expect(iframe).toHaveAttribute('loading','lazy');
+  await expect(iframe).toHaveAttribute('referrerpolicy','strict-origin-when-cross-origin');
+  await expect(preview.locator('.map-embed .map-link')).toBeVisible();
+
+  await page.getByRole('button',{ name:'Vorschau schließen' }).click();
+  await contact.locator('[data-path$=".content.mapEmbed"]').fill('javascript:alert(1)');
+  await contact.getByRole('button',{ name:/Desktopvorschau/ }).click();
+  await expect(preview.locator('.map-embed iframe')).toHaveCount(0);
+  await expect(preview.locator('.map .map-link')).toBeVisible();
 });
 
 test('timeline layout offers interchangeable visual treatments', async ({ page }) => {
