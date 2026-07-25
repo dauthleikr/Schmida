@@ -43,51 +43,97 @@ test('provides a usable compact navigation', async ({ page }) => {
   await expect(page.locator('#kontakt')).toBeInViewport();
 });
 
-test('wide hero imagery fills available width without falling behind the wave', async ({ page }) => {
-  await page.setViewportSize({ width:720,height:900 });
+test('hero image stays uncropped and all content remains above the ribbon', async ({ page }) => {
+  for (const viewport of [
+    { width:390,height:844 },
+    { width:720,height:900 },
+    { width:900,height:650 },
+    { width:901,height:650 },
+    { width:1280,height:720 },
+    { width:1920,height:900 },
+    { width:2400,height:1200 }
+  ]) {
+    await page.setViewportSize(viewport);
+    await page.goto(siteUrl);
+
+    const layout = await page.evaluate(() => {
+      const hero = document.querySelector('.hero')!.getBoundingClientRect();
+      const imageWrap = document.querySelector('.hero-image-wrap')!.getBoundingClientRect();
+      const image = document.querySelector('.hero-image') as HTMLImageElement;
+      const imageBox = image.getBoundingClientRect();
+      const ribbon = document.querySelector('.hero-ribbon')!.getBoundingClientRect();
+      const copy = document.querySelector('.hero-copy')!.getBoundingClientRect();
+      const firstText = document.querySelector('.hero .eyebrow')!.getBoundingClientRect();
+      const contact = document.querySelector('.hero-contact')!.getBoundingClientRect();
+      return {
+        heroTop:hero.top,
+        heroBottom:hero.bottom,
+        imageTop:imageBox.top,
+        imageRight:imageBox.right,
+        imageBottom:imageBox.bottom,
+        imageWidth:imageBox.width,
+        imageHeight:imageBox.height,
+        imageWrapBottom:imageWrap.bottom,
+        naturalRatio:image.naturalWidth / image.naturalHeight,
+        ribbonTop:ribbon.top,
+        ribbonBottom:ribbon.bottom,
+        contentTop:firstText.top,
+        copyBottom:copy.bottom,
+        contactBottom:contact.bottom,
+        viewportWidth:document.documentElement.clientWidth
+      };
+    });
+
+    expect(layout.imageBottom).toBeCloseTo(layout.imageWrapBottom,0);
+    expect(layout.imageWidth / layout.imageHeight).toBeCloseTo(layout.naturalRatio,2);
+    expect(layout.copyBottom).toBeLessThanOrEqual(layout.ribbonTop + 1);
+    expect(layout.contactBottom).toBeLessThanOrEqual(layout.ribbonTop + 1);
+
+    const expectedTopSpacing = Math.min(32,Math.max(20,viewport.width * .02));
+    expect(layout.contentTop - layout.heroTop).toBeCloseTo(expectedTopSpacing,0);
+
+    if (viewport.width <= 900) {
+      expect(layout.imageRight).toBeGreaterThanOrEqual(layout.viewportWidth - 1);
+      expect(layout.imageBottom).toBeCloseTo(layout.ribbonBottom,0);
+      expect(layout.imageBottom).toBeCloseTo(layout.heroBottom,0);
+    } else {
+      expect(layout.imageRight).toBeGreaterThanOrEqual(layout.viewportWidth - 1);
+      expect(layout.imageBottom).toBeCloseTo(layout.ribbonBottom,0);
+      expect(layout.imageBottom).toBeCloseTo(layout.heroBottom,0);
+    }
+  }
+
+  await page.setViewportSize({ width:1280,height:720 });
   await page.goto(siteUrl);
-
-  const tabletLayout = await page.evaluate(() => {
-    const image = document.querySelector('.hero-image-wrap')!.getBoundingClientRect();
-    const ribbon = document.querySelector('.hero-ribbon')!.getBoundingClientRect();
-    const pageBox = document.querySelector('.hero-inner')!.getBoundingClientRect();
-    return {
-      imageLeft:image.left,
-      imageRight:image.right,
-      imageWidth:image.width,
-      pageWidth:pageBox.width,
-      imageBottom:image.bottom,
-      ribbonTop:ribbon.top,
-      viewportWidth:document.documentElement.clientWidth
-    };
+  await page.locator('.hero-image').evaluate((image:HTMLImageElement) => {
+    image.src = 'assets/office_horizontal.JPG';
   });
-  expect(tabletLayout.imageWidth).toBeGreaterThanOrEqual(tabletLayout.pageWidth - 1);
-  expect(tabletLayout.imageLeft).toBeLessThanOrEqual(1);
-  expect(tabletLayout.imageRight).toBeGreaterThanOrEqual(tabletLayout.viewportWidth - 1);
-  expect(tabletLayout.imageBottom).toBeLessThanOrEqual(tabletLayout.ribbonTop);
+  await page.locator('.hero-image').evaluate((image:HTMLImageElement) => image.decode());
+  await page.locator('[data-hero-field="title"]').evaluate((title) => {
+    title.innerHTML = Array(8).fill('Eine zusätzliche Textzeile.').join('<br>');
+  });
 
-  await page.setViewportSize({ width:2400,height:1200 });
-  await page.reload();
-
-  const desktopLayout = await page.evaluate(() => {
-    const imageWrap = document.querySelector('.hero-image-wrap')!.getBoundingClientRect();
-    const image = document.querySelector('.hero-image')!;
-    const ribbon = document.querySelector('.hero-ribbon')!.getBoundingClientRect();
+  const changedContentLayout = await page.evaluate(() => {
     const hero = document.querySelector('.hero')!.getBoundingClientRect();
+    const image = document.querySelector('.hero-image') as HTMLImageElement;
+    const imageBox = image.getBoundingClientRect();
+    const ribbon = document.querySelector('.hero-ribbon')!.getBoundingClientRect();
     const copy = document.querySelector('.hero-copy')!.getBoundingClientRect();
     return {
-      imageRight:imageWrap.right,
-      imageBottom:imageWrap.bottom,
-      imagePosition:getComputedStyle(image).objectPosition,
+      heroBottom:hero.bottom,
+      imageBottom:imageBox.bottom,
+      imageRatio:imageBox.width / imageBox.height,
+      naturalRatio:image.naturalWidth / image.naturalHeight,
       ribbonTop:ribbon.top,
-      copyOffset:copy.top - hero.top,
-      viewportWidth:document.documentElement.clientWidth
+      ribbonBottom:ribbon.bottom,
+      copyBottom:copy.bottom
     };
   });
-  expect(desktopLayout.imageRight).toBeGreaterThanOrEqual(desktopLayout.viewportWidth - 1);
-  expect(desktopLayout.imageBottom).toBeLessThanOrEqual(desktopLayout.ribbonTop);
-  expect(desktopLayout.imagePosition).toBe('50% 30%');
-  expect(desktopLayout.copyOffset).toBeLessThanOrEqual(100);
+
+  expect(changedContentLayout.imageRatio).toBeCloseTo(changedContentLayout.naturalRatio,2);
+  expect(changedContentLayout.copyBottom).toBeLessThanOrEqual(changedContentLayout.ribbonTop + 1);
+  expect(changedContentLayout.imageBottom).toBeCloseTo(changedContentLayout.ribbonBottom,0);
+  expect(changedContentLayout.imageBottom).toBeCloseTo(changedContentLayout.heroBottom,0);
 });
 
 test('editor exports normalized schema content', async ({ page }) => {
@@ -199,9 +245,9 @@ test('rich-text controls and hero presentation remain editable', async ({ page }
 
   await page.selectOption('[data-path="heroImage.layout"]','background');
   await page.selectOption('[data-path="heroImage.blend"]','natural');
-  await page.selectOption('[data-path="heroImage.position"]','center 30%');
   await page.selectOption('[data-path="heroImage.mobileLayout"]','landscape');
-  await page.selectOption('[data-path="heroImage.mobilePosition"]','center top');
+  await expect(page.locator('[data-path="heroImage.position"]')).toHaveCount(0);
+  await expect(page.locator('[data-path="heroImage.mobilePosition"]')).toHaveCount(0);
   await expect(page.locator('[data-path="hero.titleSize"] option')).toHaveCount(5);
   await page.selectOption('[data-path="hero.titleSize"]','tiny');
   await page.locator('.section-editor[data-section-id="psychotherapie"] [data-path$=".appearance.titleSize"]').selectOption('small');
@@ -213,8 +259,6 @@ test('rich-text controls and hero presentation remain editable', async ({ page }
   await expect(preview.locator('.hero')).toHaveAttribute('data-image-blend','natural');
   await expect(preview.locator('.hero')).toHaveAttribute('data-mobile-image-layout','landscape');
   await expect(preview.locator('.hero')).toHaveAttribute('data-title-size','tiny');
-  await expect(preview.locator('.hero')).toHaveCSS('--hero-image-position','center 30%');
-  await expect(preview.locator('.hero')).toHaveCSS('--hero-mobile-image-position','center top');
   await expect(preview.locator('#psychotherapie')).toHaveAttribute('data-title-size','small');
   await expect(preview.getByRole('link',{ name:'Erstgespräch anfragen' })).toHaveAttribute('href','#kontakt');
   await expect(preview.locator('h1 strong')).toHaveText('Ein neuer Titel');
@@ -283,19 +327,23 @@ test('mobile and desktop previews use distinct viewports and every layout fits m
     const dividerArtwork = divider.querySelector('svg:not(.ribbon-transition)') as SVGElement;
     const imageBox = heroImage.getBoundingClientRect();
     const heroRibbonBox = heroRibbon.getBoundingClientRect();
+    const heroBox = document.querySelector('.hero')!.getBoundingClientRect();
     return {
       heroImageWidth:heroImage.naturalWidth,
-      heroImagePosition:getComputedStyle(heroImage).objectPosition,
+      heroImageRatio:imageBox.width / imageBox.height,
+      heroImageNaturalRatio:heroImage.naturalWidth / heroImage.naturalHeight,
       heroImageBottom:imageBox.bottom,
-      heroRibbonTop:heroRibbonBox.top,
+      heroRibbonBottom:heroRibbonBox.bottom,
+      heroBottom:heroBox.bottom,
       heroRibbonHeight:heroRibbonBox.height,
       dividerHeight:divider.getBoundingClientRect().height,
       dividerArtworkWidth:dividerArtwork.getBoundingClientRect().width
     };
   });
   expect(mobileComposition.heroImageWidth).toBeGreaterThan(0);
-  expect(mobileComposition.heroImagePosition).toBe('50% 38%');
-  expect(mobileComposition.heroImageBottom).toBeLessThanOrEqual(mobileComposition.heroRibbonTop);
+  expect(mobileComposition.heroImageRatio).toBeCloseTo(mobileComposition.heroImageNaturalRatio,2);
+  expect(mobileComposition.heroImageBottom).toBeCloseTo(mobileComposition.heroRibbonBottom,0);
+  expect(mobileComposition.heroImageBottom).toBeCloseTo(mobileComposition.heroBottom,0);
   expect(mobileComposition.heroRibbonHeight).toBeLessThanOrEqual(118);
   expect(mobileComposition.dividerHeight).toBeLessThanOrEqual(108);
   expect(mobileComposition.dividerArtworkWidth).toBeGreaterThan(780);

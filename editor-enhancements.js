@@ -97,7 +97,7 @@
   function renderHero() {
     const panel = document.querySelector('#hero-editor');
     const image = data.heroImage;
-    panel.innerHTML = `${panelHeading('Startseite','Hero-Text und Bildgestaltung bleiben als fester Einstieg erhalten.')}
+    panel.innerHTML = `${panelHeading('Startseite','Hero-Text und Bildgestaltung bleiben als fester Einstieg erhalten. Seitliche und mobile Bilder werden vollständig ohne Beschnitt dargestellt.')}
       <div class="grid">
         ${fieldMarkup({ label:'Überzeile',type:'text' },'hero.eyebrow',data.hero.eyebrow)}
         ${fieldMarkup({ label:'Titel',type:'rich',editorRows:3 },'hero.title',data.hero.title)}
@@ -110,9 +110,7 @@
             ${fieldMarkup({ label:'Alternativtext',type:'text' },'heroImage.alt',image.alt)}
             ${fieldMarkup({ label:'Bildformat Desktop',type:'select',options:[['portrait','Seitliches Porträt'],['landscape','Breite Fotofläche'],['background','Vollflächiger Hintergrund']] },'heroImage.layout',image.layout)}
             ${fieldMarkup({ label:'Bildwirkung',type:'select',options:[['duotone','Weiches Duoton'],['natural','Natürlich'],['mono','Monochrom'],['warm','Warm und weich']] },'heroImage.blend',image.blend)}
-            ${fieldMarkup({ label:'Bildausschnitt Desktop',type:'select',options:[['center top','Mitte oben'],['center 30%','Oberes Drittel'],['center center','Mitte'],['right center','Rechts Mitte'],['left center','Links Mitte'],['center bottom','Mitte unten']] },'heroImage.position',image.position)}
             ${fieldMarkup({ label:'Bildformat Mobil',type:'select',options:[['portrait','Hochformat'],['landscape','Querformat'],['hidden','Auf Mobil ausblenden']] },'heroImage.mobileLayout',image.mobileLayout)}
-            ${fieldMarkup({ label:'Bildausschnitt Mobil',type:'select',options:[['center top','Oben'],['center 38%','Etwas höher'],['center center','Mitte'],['center bottom','Unten'],['left center','Links'],['right center','Rechts']] },'heroImage.mobilePosition',image.mobilePosition)}
             ${fieldMarkup({ label:'Textüberlagerung',type:'select',options:[['soft','Sanft'],['strong','Stark'],['none','Keine']] },'heroImage.overlay',image.overlay)}
           </div>
         </div>
