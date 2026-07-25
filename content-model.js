@@ -19,6 +19,8 @@
   ];
 
   const titleSizeOptions = [
+    ['tiny', 'Sehr klein'],
+    ['small', 'Klein'],
     ['compact', 'Kompakt'],
     ['standard', 'Standard'],
     ['large', 'Groß']
@@ -368,6 +370,7 @@
     themes,
     layouts,
     sectionColors,
+    titleSizeOptions,
     normalize,
     normalizeSection,
     createSection,

@@ -13,7 +13,7 @@ window.practiceContent = {
     "title": "Gefühle annehmen.\nGedanken ordnen.\nLeben gestalten.",
     "sentence": "Verhaltenstherapie für Erwachsene und Biofeedback – in einem sicheren, wertschätzenden Rahmen.",
     "contactButton": "Erstgespräch anfragen",
-    "titleSize": "compact"
+    "titleSize": "small"
   },
   "heroImage": {
     "src": "assets/carina_close.JPG",

@@ -8,6 +8,7 @@ test('renders the new section schema with dynamic navigation and waves', async (
   await page.goto(siteUrl);
 
   await expect(page).toHaveTitle('Carina Schmida, BA.pth.');
+  await expect(page.locator('.hero')).toHaveAttribute('data-title-size','small');
   await expect(page.getByRole('navigation')).toHaveText(/Startseite[\s\S]*Psychotherapie[\s\S]*Schwerpunkte[\s\S]*Über mich[\s\S]*Praxis[\s\S]*Kontakt/);
   await expect(page.locator('.content-section')).toHaveCount(7);
   await expect(page.locator('.content-section[data-layout="topics"] .topics-list li')).toHaveCount(7);
@@ -154,8 +155,9 @@ test('rich-text controls and hero presentation remain editable', async ({ page }
   await page.selectOption('[data-path="heroImage.position"]','right center');
   await page.selectOption('[data-path="heroImage.mobileLayout"]','landscape');
   await page.selectOption('[data-path="heroImage.mobilePosition"]','center top');
-  await page.selectOption('[data-path="hero.titleSize"]','large');
-  await page.locator('.section-editor[data-section-id="psychotherapie"] [data-path$=".appearance.titleSize"]').selectOption('compact');
+  await expect(page.locator('[data-path="hero.titleSize"] option')).toHaveCount(5);
+  await page.selectOption('[data-path="hero.titleSize"]','tiny');
+  await page.locator('.section-editor[data-section-id="psychotherapie"] [data-path$=".appearance.titleSize"]').selectOption('small');
   await page.locator('[data-path="hero.contactButton"]').fill('Erstgespräch anfragen');
   await page.getByRole('button',{ name:'Vorschau Desktop' }).click();
 
@@ -163,10 +165,10 @@ test('rich-text controls and hero presentation remain editable', async ({ page }
   await expect(preview.locator('.hero')).toHaveAttribute('data-image-layout','background');
   await expect(preview.locator('.hero')).toHaveAttribute('data-image-blend','natural');
   await expect(preview.locator('.hero')).toHaveAttribute('data-mobile-image-layout','landscape');
-  await expect(preview.locator('.hero')).toHaveAttribute('data-title-size','large');
+  await expect(preview.locator('.hero')).toHaveAttribute('data-title-size','tiny');
   await expect(preview.locator('.hero')).toHaveCSS('--hero-image-position','right center');
   await expect(preview.locator('.hero')).toHaveCSS('--hero-mobile-image-position','center top');
-  await expect(preview.locator('#psychotherapie')).toHaveAttribute('data-title-size','compact');
+  await expect(preview.locator('#psychotherapie')).toHaveAttribute('data-title-size','small');
   await expect(preview.getByRole('link',{ name:'Erstgespräch anfragen' })).toHaveAttribute('href','#kontakt');
   await expect(preview.locator('h1 strong')).toHaveText('Ein neuer Titel');
 });
