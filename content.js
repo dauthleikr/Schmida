@@ -10,10 +10,10 @@ window.practiceContent = {
   },
   "hero": {
     "eyebrow": "Psychotherapeutin in Ausbildung unter Supervision",
-    "title": "Gefühle annehmen.\nGedanken ordnen.\nLeben gestalten.",
-    "sentence": "Verhaltenstherapie für Erwachsene und Biofeedback – in einem sicheren, wertschätzenden Rahmen.",
+    "title": "Jeder Mensch verdient es, gehört zu werden.",
+    "sentence": "Ich begleite Sie einfühlsam und kompetent auf Ihrem Weg zu mehr Klarheit, Stabilität und Wohlbefinden.",
     "contactButton": "Erstgespräch anfragen",
-    "titleSize": "small"
+    "titleSize": "tiny"
   },
   "heroImage": {
     "src": "assets/carina_close2.JPG",
@@ -38,17 +38,10 @@ window.practiceContent = {
         "titleSize": "standard"
       },
       "content": {
-        "eyebrow": "Angebot",
-        "title": "Belastendes erkennen und schrittweise verändern.",
-        "text": "Ob bei Ängsten, Depressionen oder anderen psychischen Krisen – als Verhaltenstherapeutin unterstütze ich Sie dabei, belastende Gefühle, Gedanken und Verhaltensweisen zu erkennen und schrittweise zu verändern.\n\nRespekt, Wertschätzung und Empathie bilden die Basis unserer Zusammenarbeit. In einem sicheren, geschützten Rahmen können Sie sich öffnen, vorhandene Stärken und Ressourcen wiederentdecken, hilfreiche Strategien erlernen und neue Wege erkunden.\n\nMein Ziel ist, dass Sie mehr Klarheit und Selbstwirksamkeit gewinnen – und damit mehr Lebensfreude und Wohlbefinden in Ihr Leben einziehen können.",
-        "items": [
-          {
-            "text": "Verhaltenstherapie für Erwachsene"
-          },
-          {
-            "text": "Biofeedback"
-          }
-        ]
+        "eyebrow": "Psychotherapie",
+        "title": "Manchmal hilft es, nicht allein weitergehen zu müssen",
+        "text": "Ob bei Ängsten, Depressionen oder anderen psychischen Krisen – als Verhaltenstherapeutin unterstütze ich Sie dabei, belastende Gefühle, Gedanken und Verhaltensweisen zu erkennen und schrittweise zu verändern.\n\nRespekt, Wertschätzung und Empathie bilden die Basis unserer Zusammenarbeit. In einem sicheren, geschützten Rahmen können Sie sich öffnen, vorhandene Stärken und Ressourcen wiederentdecken, hilfreiche Strategien erlernen und neue Wege erkunden.\n\nMein Ziel ist, dass Sie mehr Klarheit und Selbstwirksamkeit gewinnen – und damit mehr Lebensfreude und Wohlbefinden in Ihr Leben einziehen können.\n\nIch würde mich freuen, Sie kennenlernen und ein Stück auf Ihrem Weg in eine möglichst unbeschwerte Zukunft begleiten zu dürfen.",
+        "items": []
       }
     },
     {
