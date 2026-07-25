@@ -17,7 +17,8 @@ window.practiceContent = {
     "title": "Jeder Mensch verdient es, gehört zu werden.",
     "sentence": "Ich begleite Sie einfühlsam und kompetent auf Ihrem Weg zu mehr Klarheit, Stabilität und Wohlbefinden.",
     "contactButton": "Erstgespräch anfragen",
-    "titleSize": "tiny"
+    "titleSize": "small",
+    "titleWidthDesktop": 42
   },
   "heroImage": {
     "src": "assets/carina_close2.JPG",

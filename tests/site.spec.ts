@@ -13,7 +13,15 @@ test('renders the new section schema with dynamic navigation and waves', async (
   await expect(page.locator('.brand-mark')).toHaveAttribute('src','assets/icon4_tiny.png');
   await expect(page.locator('.brand-mark')).toHaveJSProperty('complete',true);
   expect(await page.locator('.brand-mark').evaluate((image:HTMLImageElement) => image.naturalWidth)).toBe(180);
-  await expect(page.locator('.hero')).toHaveAttribute('data-title-size','tiny');
+  await expect(page.locator('.header-inner')).toHaveCSS('min-height','74px');
+  const savedHeroTitleSize = await page.evaluate(() => window.currentPracticeContent.hero.titleSize);
+  await expect(page.locator('.hero')).toHaveAttribute('data-title-size',savedHeroTitleSize);
+  const heroColumns = await page.locator('.hero').evaluate((element) => {
+    const title = element.querySelector('[data-hero-field="title"]')!.getBoundingClientRect();
+    const image = element.querySelector('.hero-image-wrap')!.getBoundingClientRect();
+    return { titleRight:title.right,imageLeft:image.left };
+  });
+  expect(heroColumns.titleRight).toBeLessThanOrEqual(heroColumns.imageLeft);
   await expect(page.getByRole('navigation')).toHaveText(/Startseite[\s\S]*Psychotherapie[\s\S]*Schwerpunkte[\s\S]*Über mich[\s\S]*Praxis[\s\S]*Kontakt/);
   const savedSections = await page.evaluate(() => window.currentPracticeContent.sections);
   await expect(page.locator('.content-section')).toHaveCount(savedSections.length);
@@ -81,6 +89,7 @@ test('renders the new section schema with dynamic navigation and waves', async (
 test('provides a usable compact navigation', async ({ page }) => {
   await page.setViewportSize({ width:390,height:844 });
   await page.goto(siteUrl);
+  await expect(page.locator('.header-inner')).toHaveCSS('min-height','65px');
 
   const menu = page.getByRole('button',{ name:'Menü' });
   await menu.click();
@@ -751,6 +760,11 @@ test('rich-text controls and hero presentation remain editable', async ({ page }
   await expect(page.locator('output[for="heroImage.blendWidthMobile"]')).toHaveText('45%');
   await expect(page.locator('[data-path="hero.titleSize"] option')).toHaveCount(5);
   await page.selectOption('[data-path="hero.titleSize"]','tiny');
+  await page.locator('[data-path="hero.titleWidthDesktop"]').evaluate((input:HTMLInputElement) => {
+    input.value = '46';
+    input.dispatchEvent(new Event('input',{ bubbles:true }));
+  });
+  await expect(page.locator('output[for="hero.titleWidthDesktop"]')).toHaveText('46%');
   await page.locator('.section-editor[data-section-id="psychotherapie"] [data-path$=".appearance.titleSize"]').selectOption('small');
   await page.locator('[data-path="hero.contactButton"]').fill('Erstgespräch anfragen');
   await page.getByRole('button',{ name:'Vorschau Desktop' }).click();
@@ -760,6 +774,7 @@ test('rich-text controls and hero presentation remain editable', async ({ page }
   await expect(preview.locator('.hero')).toHaveAttribute('data-image-blend','natural');
   await expect(preview.locator('.hero')).toHaveAttribute('data-mobile-image-layout','portrait');
   await expect(preview.locator('.hero')).toHaveAttribute('data-title-size','tiny');
+  await expect(preview.locator('.hero')).toHaveCSS('--hero-title-width-desktop','46%');
   await expect(preview.locator('.hero')).toHaveCSS('--hero-blend-desktop','55%');
   await expect(preview.locator('.hero')).toHaveCSS('--hero-blend-mobile','45%');
   await expect(preview.locator('#psychotherapie')).toHaveAttribute('data-title-size','small');
@@ -813,6 +828,11 @@ test('legacy fixed content is isolated behind the schema migration adapter', asy
 
   const spacing = await page.evaluate(() => window.practiceContentModel.normalize({ sectionSpacing:{ desktop:999,mobile:2 } }).sectionSpacing);
   expect(spacing).toEqual({ desktop:180,mobile:36 });
+  const heroWidths = await page.evaluate(() => [
+    window.practiceContentModel.normalize({ hero:{ titleWidthDesktop:99 } }).hero.titleWidthDesktop,
+    window.practiceContentModel.normalize({ hero:{ titleWidthDesktop:2 } }).hero.titleWidthDesktop
+  ]);
+  expect(heroWidths).toEqual([55,30]);
 });
 
 test('mobile and desktop previews use distinct viewports and every layout fits mobile', async ({ page }) => {

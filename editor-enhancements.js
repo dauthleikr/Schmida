@@ -115,6 +115,7 @@
         ${fieldMarkup({ label:'Überzeile',type:'text' },'hero.eyebrow',data.hero.eyebrow)}
         ${fieldMarkup({ label:'Titel',type:'rich',editorRows:3 },'hero.title',data.hero.title)}
         ${fieldMarkup({ label:'Titelgröße',type:'select',options:model.titleSizeOptions },'hero.titleSize',data.hero.titleSize)}
+        ${fieldMarkup({ label:'Titelbreite Desktop',type:'range',min:30,max:55,step:1,unit:'%',help:'Breite der Textspalte bei seitlichen Desktop-Bildern. Der übrige Platz bleibt vollständig dem Bild vorbehalten.' },'hero.titleWidthDesktop',data.hero.titleWidthDesktop)}
         ${fieldMarkup({ label:'Einleitung',type:'rich',editorRows:4 },'hero.sentence',data.hero.sentence)}
         ${fieldMarkup({ label:'Kontakt-Button',type:'text' },'hero.contactButton',data.hero.contactButton)}
         <div class="hero-settings grid-wide">
