@@ -54,7 +54,8 @@
     topics: (section) => {
       const body = section.content;
       const items = body.items.filter((item) => item.text).map((item,index) => `<li><span>${String(index + 1).padStart(2,'0')}</span>${formatMarkup(item.text)}</li>`).join('');
-      return `<section class="section dynamic-section layout-topics"><div class="page topics-grid"><div class="topics-copy">${eyebrow(body.eyebrow)}<h2>${formatMarkup(body.title)}</h2><p>${formatMarkup(body.intro)}</p></div><ol class="topics-list">${items}</ol></div></section>`;
+      const listStyle = section.appearance?.listStyle || 'numbered-grid';
+      return `<section class="section dynamic-section layout-topics"><div class="page topics-grid"><div class="topics-copy">${eyebrow(body.eyebrow)}<h2>${formatMarkup(body.title)}</h2><p>${formatMarkup(body.intro)}</p></div><ol class="topics-list" data-list-style="${escapeAttribute(listStyle)}">${items}</ol></div></section>`;
     },
     timeline: (section) => {
       const body = section.content;

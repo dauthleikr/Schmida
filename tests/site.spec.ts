@@ -12,6 +12,7 @@ test('renders the new section schema with dynamic navigation and waves', async (
   await expect(page.getByRole('navigation')).toHaveText(/Startseite[\s\S]*Psychotherapie[\s\S]*Schwerpunkte[\s\S]*Über mich[\s\S]*Praxis[\s\S]*Kontakt/);
   await expect(page.locator('.content-section')).toHaveCount(7);
   await expect(page.locator('.content-section[data-layout="topics"] .topics-list li')).toHaveCount(7);
+  await expect(page.locator('.content-section[data-layout="topics"] .topics-list')).toHaveAttribute('data-list-style','numbered-grid');
   await expect(page.locator('.content-section[data-layout="timeline"]')).toHaveCount(2);
   await expect(page.locator('.ribbon-transition')).toHaveCount(7);
   await expect(page.locator('.hero-image')).toHaveJSProperty('complete',true);
@@ -140,7 +141,8 @@ test('editor exports normalized schema content', async ({ page }) => {
   await page.goto(editorUrl);
 
   await expect(page.getByRole('heading',{ name:'Inhalte bearbeiten' })).toBeVisible();
-  await expect(page.locator('.section-editor').first().locator('.section-title')).toHaveText('Zweispaltiger Text mit Liste');
+  const storedInternalName = await page.evaluate(() => window.practiceContent.sections[0].internalName);
+  await expect(page.locator('.section-editor').first().locator('.section-title')).toHaveText(storedInternalName);
   await expect(page.locator('.section-editor').first().locator('.section-title')).not.toHaveText('Manchmal hilft es, nicht allein weitergehen zu müssen');
   await page.locator('[data-path="sections.0.internalName"]').fill('Hauptbereich Psychotherapie');
   await expect(page.locator('.section-editor').first().locator('.section-title')).toHaveText('Hauptbereich Psychotherapie');
@@ -150,7 +152,7 @@ test('editor exports normalized schema content', async ({ page }) => {
     /Kartenraster/,
     /Zweispaltiger Text mit Bild/,
     /Text über breitem Bild/,
-    /Nummerierte Zweispaltenliste/,
+    /Auflistung/,
     /Vertikale Zeitleiste/,
     /Zweispaltige Preisliste/,
     /Kontaktblock mit Karte/
@@ -225,6 +227,50 @@ test('repeatable bullets, cards and prices use reusable add and remove controls'
   await expect(preview.locator('.bullet-list')).toContainText('Dynamischer Aufzählungspunkt');
   await expect(preview.locator('.price-list')).toContainText('Online-Beratung');
   await expect(preview.locator('.price-list')).toContainText('EUR 90');
+});
+
+test('listing layout offers interchangeable visual treatments', async ({ page }) => {
+  await page.goto(editorUrl);
+
+  const listing = page.locator('.section-editor[data-section-id="schwerpunkte"]');
+  const style = listing.locator('[data-path$=".appearance.listStyle"]');
+  await expect(style.locator('option')).toHaveText([
+    'Nummeriert, zweispaltig',
+    'Akzentpunkte, zweispaltig',
+    'Ruhige Zeilen, einspaltig',
+    'Versetzte Akzent-Pills',
+    'Lockeres Kartenmosaik'
+  ]);
+  await style.selectOption('playful-pills');
+  await page.getByRole('button',{ name:'Vorschau Desktop' }).click();
+
+  const previewList = page.frameLocator('#preview-frame').locator('.content-section[data-layout="topics"] .topics-list');
+  await expect(previewList).toHaveAttribute('data-list-style','playful-pills');
+  await expect(previewList).toHaveCSS('display','flex');
+  await expect(previewList.locator('li').first()).toHaveCSS('border-radius','999px');
+});
+
+test('each section can be previewed directly on mobile and desktop', async ({ page }) => {
+  await page.goto(editorUrl);
+
+  const section = page.locator('.section-editor[data-section-id="schwerpunkte"]');
+  await section.getByRole('button',{ name:'Mobilvorschau für Schwerpunkte' }).click();
+  const dialog = page.locator('#preview-modal');
+  await expect(dialog).toHaveAttribute('data-viewport','mobile');
+  await expect(dialog.getByRole('heading')).toContainText('Schwerpunkte · Mobil');
+
+  const focusedPreview = page.frameLocator('#preview-frame');
+  await expect(focusedPreview.locator('body')).toHaveClass(/section-preview/);
+  await expect(focusedPreview.locator('.content-section')).toHaveCount(1);
+  await expect(focusedPreview.locator('.content-section')).toHaveAttribute('data-section-id','schwerpunkte');
+  await expect(focusedPreview.locator('.hero')).toBeHidden();
+  await expect(focusedPreview.locator('.ribbons')).toBeHidden();
+
+  await page.getByRole('button',{ name:'Vorschau schließen' }).click();
+  await section.getByRole('button',{ name:'Desktopvorschau für Schwerpunkte' }).click();
+  await expect(dialog).toHaveAttribute('data-viewport','desktop');
+  await expect(dialog.getByRole('heading')).toContainText('Schwerpunkte · Desktop');
+  await expect(focusedPreview.locator('.content-section')).toHaveCount(1);
 });
 
 test('sections can be reordered, removed and changed to another registered layout', async ({ page }) => {

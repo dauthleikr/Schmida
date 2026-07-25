@@ -33,11 +33,12 @@
     ['left center', 'Links'],
     ['right center', 'Rechts']
   ];
-  const titleAppearance = () => ({
+  const titleAppearance = (extraFields = [],extraDefaults = {}) => ({
     appearanceFields: [
-      { key: 'titleSize', label: 'Überschriftengröße', type: 'select', options: titleSizeOptions }
+      { key: 'titleSize', label: 'Überschriftengröße', type: 'select', options: titleSizeOptions },
+      ...extraFields
     ],
-    appearanceDefaults: { titleSize: 'standard' }
+    appearanceDefaults: { titleSize: 'standard',...extraDefaults }
   });
 
   const layouts = {
@@ -118,16 +119,24 @@
       defaults: { eyebrow: 'Die Praxis', title: 'Ein ruhiger Ort für Ihr Gespräch.', text: 'Beschreiben Sie diesen Ort oder Ihr Angebot.', imageSrc: '', imageAlt: 'Foto des Praxisraums', imagePosition: 'center center', caption: '' }
     },
     topics: {
-      ...titleAppearance(),
-      label: 'Nummerierte Zweispaltenliste',
-      description: 'Eine ruhige, flexible Liste für mehrere Schwerpunkte ohne erzwungene Beschreibungen.',
+      ...titleAppearance([
+        { key: 'listStyle', label: 'Darstellung der Auflistung', type: 'select', options: [
+          ['numbered-grid','Nummeriert, zweispaltig'],
+          ['accent-grid','Akzentpunkte, zweispaltig'],
+          ['editorial-list','Ruhige Zeilen, einspaltig'],
+          ['playful-pills','Versetzte Akzent-Pills'],
+          ['scattered-cards','Lockeres Kartenmosaik']
+        ] }
+      ],{ listStyle: 'numbered-grid' }),
+      label: 'Auflistung',
+      description: 'Eine flexible Auflistung mit wählbarer ein- oder zweispaltiger Darstellung.',
       defaultNavigation: 'Schwerpunkte',
       defaultBackground: 'rose',
       fields: [
         { key: 'eyebrow', label: 'Bereichsbezeichnung', type: 'text' },
         { key: 'title', label: 'Titel', type: 'rich', editorRows: 3 },
         { key: 'intro', label: 'Einleitung', type: 'rich', editorRows: 4 },
-        { key: 'items', label: 'Themen', type: 'collection', min: 2, max: 10, addLabel: 'Thema hinzufügen', itemFields: [{ key: 'text', label: 'Thema', type: 'text' }] }
+        { key: 'items', label: 'Einträge', type: 'collection', min: 2, max: 10, addLabel: 'Eintrag hinzufügen', itemFields: [{ key: 'text', label: 'Eintrag', type: 'text' }] }
       ],
       defaults: { eyebrow: 'Schwerpunkte', title: 'Wobei ich Sie begleiten kann.', intro: 'Eine kurze Einleitung zu den folgenden Themen.', items: [{ text: 'Erstes Thema' }, { text: 'Zweites Thema' }] }
     },

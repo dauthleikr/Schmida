@@ -6,6 +6,7 @@
   const legacyDraftKeys = ['practice-content-draft-v2','practice-content-draft-v1'];
   let connectedFile;
   let previewTimer;
+  let previewSectionIndex = null;
 
   const clone = model.clone;
   const escapeHtml = (value) => String(value ?? '').replace(/[&<>"']/g,(character) => ({
@@ -142,6 +143,8 @@
       <header class="section-editor-head">
         <div><h3 class="section-title">${escapeHtml(section.internalName)}</h3><p class="section-meta">Bereich ${index + 1} · ${escapeHtml(definition.label)} · ${section.navigationLabel ? `Navigation: ${escapeHtml(section.navigationLabel)}` : 'nicht in der Navigation'}</p></div>
         <div class="section-actions">
+          <button class="section-preview-button" type="button" data-section-preview="mobile" aria-label="Mobilvorschau für ${escapeHtml(section.internalName)}">Mobil</button>
+          <button class="section-preview-button" type="button" data-section-preview="desktop" aria-label="Desktopvorschau für ${escapeHtml(section.internalName)}">Desktop</button>
           <button class="icon-button" type="button" data-section-action="up" aria-label="Nach oben" ${index === 0 ? 'disabled' : ''}>↑</button>
           <button class="icon-button" type="button" data-section-action="down" aria-label="Nach unten" ${index === data.sections.length - 1 ? 'disabled' : ''}>↓</button>
           <button class="icon-button" type="button" data-section-action="remove" aria-label="Bereich entfernen">&times;</button>
@@ -187,8 +190,13 @@
 
   const refreshPreview = () => {
     try {
-      sessionStorage.setItem('practice-preview-content',JSON.stringify(model.normalize(data)));
-      document.querySelector('#preview-frame').src = `index.html?preview=1&updated=${Date.now()}`;
+      const normalized = model.normalize(data);
+      const previewContent = previewSectionIndex === null
+        ? normalized
+        : { ...normalized,sections:[normalized.sections[previewSectionIndex]] };
+      sessionStorage.setItem('practice-preview-content',JSON.stringify(previewContent));
+      const isolated = previewSectionIndex === null ? '' : '&sectionPreview=1';
+      document.querySelector('#preview-frame').src = `index.html?preview=1${isolated}&updated=${Date.now()}`;
     } catch {
       status.textContent = 'Vorschau konnte nicht aktualisiert werden';
     }
@@ -314,6 +322,18 @@
       return;
     }
 
+    const sectionPreview = event.target.closest('[data-section-preview]')?.dataset.sectionPreview;
+    if (sectionPreview) {
+      const index = Number(event.target.closest('[data-section-index]').dataset.sectionIndex);
+      const dialog = document.querySelector('#preview-modal');
+      previewSectionIndex = index;
+      dialog.dataset.viewport = sectionPreview;
+      dialog.querySelector('.preview-head h2').textContent = `${data.sections[index].internalName} · ${sectionPreview === 'mobile' ? 'Mobil' : 'Desktop'}`;
+      dialog.showModal();
+      refreshPreview();
+      return;
+    }
+
     const collectionAction = event.target.closest('[data-collection-action]')?.dataset.collectionAction;
     if (collectionAction) {
       const button = event.target.closest('[data-collection-action]');
@@ -426,6 +446,7 @@
   document.querySelectorAll('[data-preview-viewport]').forEach((button) => button.addEventListener('click',() => {
     const dialog = document.querySelector('#preview-modal');
     const viewport = button.dataset.previewViewport;
+    previewSectionIndex = null;
     dialog.dataset.viewport = viewport;
     dialog.querySelector('.preview-head h2').textContent = viewport === 'mobile' ? 'Vorschau Mobil' : 'Vorschau Desktop';
     dialog.showModal();
