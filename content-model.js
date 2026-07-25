@@ -126,12 +126,14 @@
         { key: 'eyebrow', label: 'Bereichsbezeichnung', type: 'text' },
         { key: 'title', label: 'Titel', type: 'rich', editorRows: 3 },
         { key: 'text', label: 'Text', type: 'rich', editorRows: 5 },
-        { key: 'imageSrc', label: 'Bilddatei', type: 'text' },
-        { key: 'imageAlt', label: 'Alternativtext', type: 'text' },
-        { key: 'imagePosition', label: 'Bildausschnitt', type: 'select', options: imagePositionOptions },
-        { key: 'caption', label: 'Bildbeschriftung', type: 'text' }
+        { key: 'images', label: 'Bilder im Karussell', type: 'collection', min: 1, max: 10, addLabel: 'Bild hinzufügen', itemFields: [
+          { key: 'imageSrc', label: 'Bilddatei', type: 'text' },
+          { key: 'imageAlt', label: 'Alternativtext', type: 'text' },
+          { key: 'imagePosition', label: 'Bildausschnitt', type: 'select', options: imagePositionOptions },
+          { key: 'caption', label: 'Bildbeschriftung', type: 'text' }
+        ] }
       ],
-      defaults: { eyebrow: 'Die Praxis', title: 'Ein ruhiger Ort für Ihr Gespräch.', text: 'Beschreiben Sie diesen Ort oder Ihr Angebot.', imageSrc: '', imageAlt: 'Foto des Praxisraums', imagePosition: 'center center', caption: '' }
+      defaults: { eyebrow: 'Die Praxis', title: 'Ein ruhiger Ort für Ihr Gespräch.', text: 'Beschreiben Sie diesen Ort oder Ihr Angebot.', images: [{ imageSrc: '', imageAlt: 'Foto des Praxisraums', imagePosition: 'center center', caption: '' }] }
     },
     topics: {
       ...titleAppearance([
@@ -235,7 +237,22 @@
     const layout = layouts[section?.layout] ? section.layout : 'intro';
     const definition = layouts[layout];
     const background = sectionColors.some((color) => color.key === section?.background) ? section.background : definition.defaultBackground;
-    const content = mergeDefaults(definition.defaults, section?.content);
+    const sourceContent = section?.content ? clone(section.content) : {};
+    if (layout === 'wideImage' && !Array.isArray(sourceContent.images)) {
+      sourceContent.images = [{
+        imageSrc: sourceContent.imageSrc || '',
+        imageAlt: sourceContent.imageAlt || 'Foto des Praxisraums',
+        imagePosition: sourceContent.imagePosition || 'center center',
+        caption: sourceContent.caption || ''
+      }];
+    }
+    if (layout === 'wideImage') {
+      delete sourceContent.imageSrc;
+      delete sourceContent.imageAlt;
+      delete sourceContent.imagePosition;
+      delete sourceContent.caption;
+    }
+    const content = mergeDefaults(definition.defaults, sourceContent);
     const sourceAppearance = { ...(section?.appearance || {}) };
     if (headingModeOptions.some(([value]) => value === sourceAppearance.headingMode)) {
       if (!sourceAppearance.headingModeDesktop) sourceAppearance.headingModeDesktop = sourceAppearance.headingMode;

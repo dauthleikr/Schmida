@@ -3,7 +3,7 @@ window.practiceContent = {
   "schemaVersion": 3,
   "colorTheme": "crimson",
   "customColors": {
-    "--body-text": "#2b2727",
+    "--body-text": "#302c2c",
     "--intro-text": "#000000"
   },
   "practiceName": "Carina Schmida, BA.pth.",
@@ -204,10 +204,20 @@ window.practiceContent = {
         "eyebrow": "Praxis",
         "title": "Praxis",
         "text": "Die helle, ruhige Praxis bietet einen geschützten Raum für Gespräche, neue Perspektiven und persönliche Entwicklung.",
-        "imageSrc": "assets/office_horizontal.JPG",
-        "imageAlt": "Heller Praxisraum mit zwei Sesseln",
-        "imagePosition": "center top",
-        "caption": "Praxisraum"
+        "images": [
+          {
+            "imageSrc": "assets/office_horizontal.JPG",
+            "imageAlt": "Foto des Praxisraums",
+            "imagePosition": "center top",
+            "caption": "Praxisraum"
+          },
+          {
+            "imageSrc": "assets/office2.JPG",
+            "imageAlt": "Foto des Praxisraums",
+            "imagePosition": "center center",
+            "caption": "Praxisraum"
+          }
+        ]
       }
     },
     {

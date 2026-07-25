@@ -30,9 +30,9 @@
     const mobile = section.appearance?.headingModeMobile || 'eyebrow';
     return `<div class="section-heading-variant section-heading-desktop">${headingMarkup(body,desktop)}</div><div class="section-heading-variant section-heading-mobile">${headingMarkup(body,mobile)}</div>`;
   };
-  const imageMarkup = (body, className = 'office-placeholder') => body.imageSrc
-    ? `<div class="${className}" role="img" aria-label="${escapeAttribute(body.imageAlt)}" style="--section-image-position:${escapeAttribute(body.imagePosition || 'center center')}"><img class="section-image" src="${escapeAttribute(body.imageSrc)}" alt="${escapeAttribute(body.imageAlt)}">${body.caption ? `<p class="image-caption">${formatMarkup(body.caption)}</p>` : ''}</div>`
-    : `<div class="${className}" role="img" aria-label="${escapeAttribute(body.imageAlt)}"><div class="office-art" aria-hidden="true"></div>${body.caption ? `<p class="image-caption">${formatMarkup(body.caption)}</p>` : ''}</div>`;
+  const imageMarkup = (body, className = 'office-placeholder', attributes = '', imageAttributes = '') => body.imageSrc
+    ? `<div class="${className}" ${attributes} role="img" aria-label="${escapeAttribute(body.imageAlt)}" style="--section-image-position:${escapeAttribute(body.imagePosition || 'center center')}"><img class="section-image" src="${escapeAttribute(body.imageSrc)}" alt="${escapeAttribute(body.imageAlt)}" ${imageAttributes}>${body.caption ? `<p class="image-caption">${formatMarkup(body.caption)}</p>` : ''}</div>`
+    : `<div class="${className}" ${attributes} role="img" aria-label="${escapeAttribute(body.imageAlt)}"><div class="office-art" aria-hidden="true"></div>${body.caption ? `<p class="image-caption">${formatMarkup(body.caption)}</p>` : ''}</div>`;
   const sectionId = (value, index) => {
     const normalized = String(value || `section-${index + 1}`).trim().toLowerCase().replace(/[^a-z0-9_-]+/g,'-').replace(/^-+|-+$/g,'');
     return normalized || `section-${index + 1}`;
@@ -86,7 +86,19 @@
     wideImage: (section) => {
       const body = section.content;
       const imageStyle = section.appearance?.imageStyle || 'offset-shadow';
-      return `<section class="section dynamic-section layout-wide-image" data-image-style="${escapeAttribute(imageStyle)}"><div class="page"><div class="wide-image-copy">${sectionHeading(section)}<p>${formatMarkup(body.text)}</p></div>${imageMarkup(body,'wide-image-frame')}</div></section>`;
+      const images = body.images?.length ? body.images : [{ imageSrc: '',imageAlt: 'Foto des Praxisraums',imagePosition: 'center center',caption: '' }];
+      const slides = images.map((image,index) => imageMarkup(
+        image,
+        'wide-image-frame carousel-slide',
+        `data-carousel-slide="${index}" data-active="${index === 0}" aria-hidden="${index !== 0}"`,
+        'loading="lazy" decoding="async" fetchpriority="low"'
+      )).join('');
+      const controls = images.length > 1 ? `<div class="carousel-controls">
+        <button class="carousel-arrow" type="button" data-carousel-previous aria-label="Vorheriges Bild">←</button>
+        <div class="carousel-dots" role="group" aria-label="Bild auswählen">${images.map((_,index) => `<button type="button" data-carousel-dot="${index}" data-active="${index === 0}" aria-label="Bild ${index + 1} anzeigen" aria-pressed="${index === 0}"></button>`).join('')}</div>
+        <button class="carousel-arrow" type="button" data-carousel-next aria-label="Nächstes Bild">→</button>
+      </div>` : '';
+      return `<section class="section dynamic-section layout-wide-image" data-image-style="${escapeAttribute(imageStyle)}"><div class="page"><div class="wide-image-copy">${sectionHeading(section)}<p>${formatMarkup(body.text)}</p></div><div class="wide-image-carousel" data-carousel data-autoplay-delay="5000"><div class="carousel-stage">${slides}</div>${controls}</div></div></section>`;
     },
     topics: (section) => {
       const body = section.content;
@@ -124,7 +136,7 @@
       const embedUrl = safeMapEmbedUrl(body.mapEmbed);
       const mapLink = body.mapLink && body.mapLabel ? `<a class="map-link" href="${escapeAttribute(body.mapLink)}" target="_blank" rel="noreferrer">${formatMarkup(body.mapLabel)}</a>` : '';
       const map = embedUrl
-        ? `<div class="map map-embed"><iframe src="${escapeAttribute(embedUrl)}" title="Standort auf Google Maps" loading="lazy" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>${mapLink}</div>`
+        ? `<div class="map map-embed">${mapLink}<iframe src="${escapeAttribute(embedUrl)}" title="Standort auf Google Maps" loading="lazy" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe></div>`
         : mapLink ? `<div class="map">${mapLink}</div>` : '';
       return `<section class="section dynamic-section contact-section layout-contact"><div class="page contact-grid"><div class="contact-copy">${sectionHeading(section)}<p class="section-intro-text">${formatMarkup(body.text)}</p></div><div class="contact-details">${details}</div></div>${map}</section>`;
     }
@@ -189,6 +201,71 @@
   });
 
   const wrappers = [...host.querySelectorAll('.content-section')];
+  const initializeCarousel = (carousel) => {
+    const slides = [...carousel.querySelectorAll('[data-carousel-slide]')];
+    const dots = [...carousel.querySelectorAll('[data-carousel-dot]')];
+    if (slides.length < 2) return;
+
+    const delay = Math.max(3000,Number(carousel.dataset.autoplayDelay) || 5000);
+    const reducedMotion = matchMedia('(prefers-reduced-motion:reduce)').matches;
+    let current = 0;
+    let timer;
+    let userInteracted = reducedMotion;
+    let temporarilyPaused = false;
+
+    const stop = () => {
+      clearInterval(timer);
+      timer = undefined;
+    };
+    const show = (next) => {
+      current = (next + slides.length) % slides.length;
+      slides.forEach((slide,index) => {
+        const active = index === current;
+        slide.dataset.active = String(active);
+        slide.setAttribute('aria-hidden',String(!active));
+      });
+      dots.forEach((dot,index) => {
+        const active = index === current;
+        dot.dataset.active = String(active);
+        dot.setAttribute('aria-pressed',String(active));
+      });
+    };
+    const start = () => {
+      stop();
+      if (!userInteracted && !temporarilyPaused) timer = setInterval(() => show(current + 1),delay);
+    };
+    const browse = (next) => {
+      userInteracted = true;
+      carousel.dataset.autoplayStopped = 'true';
+      stop();
+      show(next);
+    };
+
+    carousel.querySelector('[data-carousel-previous]')?.addEventListener('click',() => browse(current - 1));
+    carousel.querySelector('[data-carousel-next]')?.addEventListener('click',() => browse(current + 1));
+    dots.forEach((dot,index) => dot.addEventListener('click',() => browse(index)));
+    carousel.addEventListener('mouseenter',() => {
+      temporarilyPaused = true;
+      stop();
+    });
+    carousel.addEventListener('mouseleave',() => {
+      temporarilyPaused = false;
+      start();
+    });
+    carousel.addEventListener('focusin',() => {
+      temporarilyPaused = true;
+      stop();
+    });
+    carousel.addEventListener('focusout',(event) => {
+      if (carousel.contains(event.relatedTarget)) return;
+      temporarilyPaused = false;
+      start();
+    });
+
+    start();
+  };
+  wrappers.forEach((wrapper) => wrapper.querySelectorAll('[data-carousel]').forEach(initializeCarousel));
+
   wrappers.forEach((wrapper,index) => {
     const section = content.sections.find((candidate) => candidate.id === wrapper.dataset.sectionId);
     const nextWrapper = wrappers[index + 1];

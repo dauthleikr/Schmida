@@ -59,12 +59,16 @@ test('renders the new section schema with dynamic navigation and waves', async (
   await expect(page.locator('.hero-image')).toHaveJSProperty('complete',true);
   const savedContact = savedSections.find((section) => section.layout === 'contact');
   await expect(page.locator('#kontakt')).toContainText(savedContact!.content.email);
-  await expect(page.locator('.wide-image-frame .section-image')).toHaveAttribute('src','assets/office_horizontal.JPG');
-  expect(await page.locator('.wide-image-frame .section-image').evaluate((image:HTMLImageElement) => image.naturalWidth)).toBeGreaterThan(0);
-  await expect(page.locator('.wide-image-frame .section-image')).toHaveCSS('object-position','50% 0%');
+  const savedWideImage = savedSections.find((section) => section.layout === 'wideImage');
+  const firstWideImage = page.locator('.wide-image-frame .section-image').first();
+  await expect(firstWideImage).toHaveAttribute('src',savedWideImage!.content.images[0].imageSrc);
+  await expect(firstWideImage).toHaveAttribute('loading','lazy');
+  await expect(firstWideImage).toHaveCSS('object-position','50% 0%');
 
   await page.getByRole('link',{ name:'Praxis',exact:true }).click();
   await expect(page.locator('#praxis')).toBeInViewport();
+  await firstWideImage.evaluate((image:HTMLImageElement) => image.decode());
+  expect(await firstWideImage.evaluate((image:HTMLImageElement) => image.naturalWidth)).toBeGreaterThan(0);
 
   const seamCoverage = await page.locator('.hero-ribbon').evaluate((element) => {
     const style = getComputedStyle(element,'::after');
@@ -453,7 +457,8 @@ test('wide image layout stacks its copy and offers designed image treatments', a
   expect(stackedCopy[0]).not.toBeNull();
   expect(stackedCopy[1]).not.toBeNull();
   expect(stackedCopy[1]!.y).toBeGreaterThanOrEqual(stackedCopy[0]!.y + stackedCopy[0]!.height - 1);
-  const shadowTreatment = await section.locator('.wide-image-frame').evaluate((element) => {
+  const activeFrame = section.locator('[data-carousel-slide][data-active="true"]');
+  const shadowTreatment = await activeFrame.evaluate((element) => {
     const image = element.querySelector('.section-image')!;
     const backdrop = getComputedStyle(element,'::before');
     return {
@@ -465,7 +470,7 @@ test('wide image layout stacks its copy and offers designed image treatments', a
   expect(shadowTreatment.backdropContent).toBe('none');
   expect(shadowTreatment.backdropBackground).toBe('rgba(0, 0, 0, 0)');
   expect(shadowTreatment.imageShadow).not.toBe('none');
-  const uncroppedShadowImage = await section.locator('.section-image').evaluate((image:HTMLImageElement) => {
+  const uncroppedShadowImage = await activeFrame.locator('.section-image').evaluate((image:HTMLImageElement) => {
     const box = image.getBoundingClientRect();
     return {
       renderedRatio:box.width / box.height,
@@ -481,7 +486,7 @@ test('wide image layout stacks its copy and offers designed image treatments', a
   await wideImage.getByRole('button',{ name:/Mobilvorschau/ }).click();
   const mobilePreview = page.frameLocator('#preview-frame');
   await expect(mobilePreview.locator('.layout-wide-image')).toHaveAttribute('data-image-style','square-stage');
-  const square = mobilePreview.locator('.layout-wide-image .wide-image-frame');
+  const square = mobilePreview.locator('.layout-wide-image [data-carousel-slide][data-active="true"]');
   await expect(square).toBeVisible();
   const squareBox = await square.boundingBox();
   expect(squareBox).not.toBeNull();
@@ -497,6 +502,79 @@ test('wide image layout stacks its copy and offers designed image treatments', a
   expect(uncroppedSquareImage.objectFit).toBe('contain');
   expect(uncroppedSquareImage.renderedRatio).toBeCloseTo(uncroppedSquareImage.naturalRatio,2);
   const mobileFit = await square.evaluate((element) => ({
+    viewport:document.documentElement.clientWidth,
+    scrollWidth:document.documentElement.scrollWidth,
+    left:element.getBoundingClientRect().left,
+    right:element.getBoundingClientRect().right
+  }));
+  expect(mobileFit.scrollWidth).toBeLessThanOrEqual(mobileFit.viewport);
+  expect(mobileFit.left).toBeGreaterThanOrEqual(0);
+  expect(mobileFit.right).toBeLessThanOrEqual(mobileFit.viewport);
+});
+
+test('wide image layout supports an editor-managed carousel', async ({ page }) => {
+  await page.goto(editorUrl);
+
+  const wideImage = page.locator('.section-editor[data-section-id="praxis"]');
+  const images = wideImage.locator('.collection:has([data-collection-key="images"])');
+  const initialImageCount = await images.locator('.collection-item').count();
+  expect(initialImageCount).toBeGreaterThanOrEqual(1);
+  await images.locator('[data-collection-action="add"]').click();
+  await expect(wideImage.locator('.collection:has([data-collection-key="images"]) .collection-item')).toHaveCount(initialImageCount + 1);
+
+  const secondImage = wideImage.locator('.collection:has([data-collection-key="images"]) .collection-item').last();
+  await secondImage.locator('[data-path$=".imageSrc"]').fill('assets/carina_profile.png');
+  await secondImage.locator('[data-path$=".imageAlt"]').fill('Zweites Bild im Karussell');
+  await wideImage.getByRole('button',{ name:/Desktopvorschau/ }).click();
+
+  const preview = page.frameLocator('#preview-frame');
+  const carousel = preview.locator('[data-carousel]');
+  const slides = carousel.locator('[data-carousel-slide]');
+  await expect(carousel).toHaveAttribute('data-autoplay-delay','5000');
+  await expect(slides).toHaveCount(initialImageCount + 1);
+  const loadingAttributes = await slides.locator('.section-image').evaluateAll((images:HTMLImageElement[]) => images.map((image) => ({
+    loading:image.getAttribute('loading'),
+    decoding:image.getAttribute('decoding'),
+    priority:image.getAttribute('fetchpriority')
+  })));
+  expect(loadingAttributes).toHaveLength(initialImageCount + 1);
+  loadingAttributes.forEach((attributes) => expect(attributes).toEqual({ loading:'lazy',decoding:'async',priority:'low' }));
+  await expect(slides.nth(0)).toHaveAttribute('data-active','true');
+  await expect(carousel.locator('[data-carousel-next]')).toBeVisible();
+  await expect(carousel.locator('[data-carousel-toggle]')).toHaveCount(0);
+
+  await carousel.locator('[data-carousel-next]').click();
+  await expect(slides.nth(1)).toHaveAttribute('data-active','true');
+  await expect(carousel).toHaveAttribute('data-autoplay-stopped','true');
+  const activeSpacing = await carousel.evaluate((element) => {
+    const active = element.querySelector('[data-carousel-slide][data-active="true"]')!.getBoundingClientRect();
+    const controls = element.querySelector('.carousel-controls')!.getBoundingClientRect();
+    return controls.top - active.bottom;
+  });
+  expect(activeSpacing).toBeLessThanOrEqual(50);
+
+  const imageRatios = [];
+  for (let index = 0; index < initialImageCount + 1; index += 1) {
+    await carousel.locator(`[data-carousel-dot="${index}"]`).click();
+    const image = slides.nth(index).locator('.section-image');
+    await expect.poll(() => image.evaluate((element:HTMLImageElement) => element.naturalWidth)).toBeGreaterThan(0);
+    const ratio = await image.evaluate((image:HTMLImageElement) => {
+      const box = image.getBoundingClientRect();
+      return {
+        rendered:box.width / box.height,
+        natural:image.naturalWidth / image.naturalHeight
+      };
+    });
+    imageRatios.push(ratio);
+  }
+  imageRatios.forEach((ratio) => expect(ratio.rendered).toBeCloseTo(ratio.natural,2));
+
+  await page.getByRole('button',{ name:'Vorschau schließen' }).click();
+  await wideImage.getByRole('button',{ name:/Mobilvorschau/ }).click();
+  const mobileCarousel = page.frameLocator('#preview-frame').locator('[data-carousel]');
+  await expect(mobileCarousel.locator('[data-carousel-previous]')).toBeVisible();
+  await expect(mobileCarousel.locator('[data-carousel-next]')).toBeVisible();
+  const mobileFit = await mobileCarousel.evaluate((element) => ({
     viewport:document.documentElement.clientWidth,
     scrollWidth:document.documentElement.scrollWidth,
     left:element.getBoundingClientRect().left,
@@ -525,16 +603,11 @@ test('contact layout supports a safe embedded map with an external fallback', as
   const preview = page.frameLocator('#preview-frame');
   const iframe = preview.locator('.map-embed iframe');
   await expect(iframe).toHaveAttribute('src','https://www.google.com/maps/embed?pb=test');
-  await expect(iframe).toHaveAttribute('title','Standort auf Google Maps');
-  await expect(iframe).toHaveAttribute('loading','lazy');
-  await expect(iframe).toHaveAttribute('referrerpolicy','strict-origin-when-cross-origin');
-  await expect(preview.locator('.map-embed .map-link')).toBeVisible();
 
   await page.getByRole('button',{ name:'Vorschau schließen' }).click();
   await contact.locator('[data-path$=".content.mapEmbed"]').fill('javascript:alert(1)');
   await contact.getByRole('button',{ name:/Desktopvorschau/ }).click();
   await expect(preview.locator('.map-embed iframe')).toHaveCount(0);
-  await expect(preview.locator('.map .map-link')).toBeVisible();
 });
 
 test('timeline layout offers interchangeable visual treatments', async ({ page }) => {

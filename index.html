@@ -141,6 +141,21 @@
     .wide-image-frame::before { content:none; }
     .wide-image-frame .section-image { position:relative; z-index:1; width:100%; height:auto; min-height:0; max-height:none; object-fit:contain; }
     .wide-image-frame .image-caption { z-index:2; }
+    .wide-image-carousel { position:relative; }
+    .carousel-stage { position:relative; }
+    .carousel-slide { position:absolute; top:0; left:50%; opacity:0; visibility:hidden; pointer-events:none; transform:translateX(-50%); transition:opacity .55s ease,visibility 0s linear .55s; }
+    .carousel-slide[data-active="true"] { position:relative; z-index:1; left:auto; opacity:1; visibility:visible; pointer-events:auto; transform:none; transition-delay:0s; }
+    .carousel-controls { display:flex; min-height:44px; align-items:center; justify-content:center; gap:12px; margin-top:clamp(30px,4vw,48px); }
+    .carousel-arrow,.carousel-dots button { border:1px solid rgba(71,26,37,.28); background:rgba(255,255,255,.45); color:var(--wine-850); cursor:pointer; }
+    .carousel-arrow { display:grid; width:44px; height:44px; place-items:center; border-radius:50%; font-size:1.2rem; line-height:1; }
+    .carousel-arrow:hover,.carousel-dots button:hover { border-color:var(--wine-650); color:var(--wine-650); }
+    .carousel-arrow:focus-visible,.carousel-dots button:focus-visible { outline:3px solid var(--rose-300); outline-offset:3px; }
+    .carousel-dots { display:flex; align-items:center; gap:8px; padding:0 4px; }
+    .carousel-dots button { width:9px; height:9px; padding:0; border:0; border-radius:50%; background:rgba(71,26,37,.28); }
+    .carousel-dots button[data-active="true"] { width:24px; border-radius:999px; background:var(--wine-650); }
+    .is-dark .carousel-arrow { border-color:rgba(255,255,255,.3); background:rgba(255,255,255,.08); color:#fff; }
+    .is-dark .carousel-dots button { background:rgba(255,255,255,.35); }
+    .is-dark .carousel-dots button[data-active="true"] { background:var(--rose-300); }
 
     .layout-wide-image[data-image-style="offset-shadow"] .wide-image-frame {
       width:100%;
@@ -303,6 +318,8 @@
       .wide-image-copy { margin-bottom:36px; }
       .wide-image-frame { min-height:0; }
       .layout-wide-image[data-image-style="square-stage"] .wide-image-frame { --image-offset:10px; }
+      .carousel-controls { flex-wrap:wrap; gap:9px; margin-top:28px; }
+      .carousel-arrow { width:42px; height:42px; }
       .topics-list { gap:0 24px; }
       .map { min-height:240px; }
       .map-embed,.map-embed iframe { min-height:330px; }
