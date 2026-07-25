@@ -2,12 +2,12 @@
   const clone = (value) => JSON.parse(JSON.stringify(value));
 
   const themes = {
-    wine: { label: 'Weinrot', '--wine-950': '#291117', '--wine-850': '#471a25', '--wine-750': '#6b2736', '--wine-650': '#863547', '--header-bg': '#291117', '--ribbon-hot': '#9d1c30', '--rose-300': '#dfa8ad', '--rose-100': '#f4e4e4', '--practice-bg': '#f2edeb', '--paper': '#fcfaf8', '--line': '#dfd5d2' },
-    garnet: { label: 'Granatrot', '--wine-950': '#260810', '--wine-850': '#54111e', '--wine-750': '#7e1b2a', '--wine-650': '#a92b3b', '--header-bg': '#260810', '--ribbon-hot': '#9d172c', '--rose-300': '#e7a6ab', '--rose-100': '#f9ecec', '--practice-bg': '#f3eded', '--paper': '#fffafa', '--line': '#e6d1d2' },
-    ruby: { label: 'Rubinrot', '--wine-950': '#32040f', '--wine-850': '#631028', '--wine-750': '#a90e38', '--wine-650': '#c8174a', '--header-bg': '#32040f', '--ribbon-hot': '#c61032', '--rose-300': '#ff9bb5', '--rose-100': '#fff0f3', '--practice-bg': '#f5eeee', '--paper': '#fffafa', '--line': '#efd3da' },
-    crimson: { label: 'Karminrot', '--wine-950': '#31030a', '--wine-850': '#690817', '--wine-750': '#a70b24', '--wine-650': '#d11137', '--header-bg': '#31030a', '--ribbon-hot': '#d10b30', '--rose-300': '#ff9aa9', '--rose-100': '#fff0f2', '--practice-bg': '#f6eeee', '--paper': '#fffafb', '--line': '#f0d1d7' },
-    scarlet: { label: 'Scharlachrot', '--wine-950': '#31080d', '--wine-850': '#69151f', '--wine-750': '#ad1826', '--wine-650': '#d33a3f', '--header-bg': '#31080d', '--ribbon-hot': '#c72224', '--rose-300': '#ffae9f', '--rose-100': '#fff1ed', '--practice-bg': '#f6efec', '--paper': '#fffaf8', '--line': '#efd8d2' },
-    vermilion: { label: 'Zinnoberrot', '--wine-950': '#32100c', '--wine-850': '#6b251b', '--wine-750': '#a43b28', '--wine-650': '#d45639', '--header-bg': '#32100c', '--ribbon-hot': '#c9402c', '--rose-300': '#ffad98', '--rose-100': '#fff1ed', '--practice-bg': '#f2edeb', '--paper': '#fffaf8', '--line': '#efd8cf' }
+    wine: { label: 'Weinrot', '--wine-950': '#291117', '--wine-850': '#471a25', '--wine-750': '#6b2736', '--wine-650': '#863547', '--header-bg': '#291117', '--ribbon-hot': '#9d1c30', '--rose-300': '#dfa8ad', '--rose-100': '#f4e4e4', '--practice-bg': '#f2edeb', '--paper': '#fcfaf8', '--body-text': '#51474a', '--intro-text': '#471a25', '--line': '#dfd5d2' },
+    garnet: { label: 'Granatrot', '--wine-950': '#260810', '--wine-850': '#54111e', '--wine-750': '#7e1b2a', '--wine-650': '#a92b3b', '--header-bg': '#260810', '--ribbon-hot': '#9d172c', '--rose-300': '#e7a6ab', '--rose-100': '#f9ecec', '--practice-bg': '#f3eded', '--paper': '#fffafa', '--body-text': '#51474a', '--intro-text': '#54111e', '--line': '#e6d1d2' },
+    ruby: { label: 'Rubinrot', '--wine-950': '#32040f', '--wine-850': '#631028', '--wine-750': '#a90e38', '--wine-650': '#c8174a', '--header-bg': '#32040f', '--ribbon-hot': '#c61032', '--rose-300': '#ff9bb5', '--rose-100': '#fff0f3', '--practice-bg': '#f5eeee', '--paper': '#fffafa', '--body-text': '#51474a', '--intro-text': '#631028', '--line': '#efd3da' },
+    crimson: { label: 'Karminrot', '--wine-950': '#31030a', '--wine-850': '#690817', '--wine-750': '#a70b24', '--wine-650': '#d11137', '--header-bg': '#31030a', '--ribbon-hot': '#d10b30', '--rose-300': '#ff9aa9', '--rose-100': '#fff0f2', '--practice-bg': '#f6eeee', '--paper': '#fffafb', '--body-text': '#51474a', '--intro-text': '#690817', '--line': '#f0d1d7' },
+    scarlet: { label: 'Scharlachrot', '--wine-950': '#31080d', '--wine-850': '#69151f', '--wine-750': '#ad1826', '--wine-650': '#d33a3f', '--header-bg': '#31080d', '--ribbon-hot': '#c72224', '--rose-300': '#ffae9f', '--rose-100': '#fff1ed', '--practice-bg': '#f6efec', '--paper': '#fffaf8', '--body-text': '#51474a', '--intro-text': '#69151f', '--line': '#efd8d2' },
+    vermilion: { label: 'Zinnoberrot', '--wine-950': '#32100c', '--wine-850': '#6b251b', '--wine-750': '#a43b28', '--wine-650': '#d45639', '--header-bg': '#32100c', '--ribbon-hot': '#c9402c', '--rose-300': '#ffad98', '--rose-100': '#fff1ed', '--practice-bg': '#f2edeb', '--paper': '#fffaf8', '--body-text': '#51474a', '--intro-text': '#6b251b', '--line': '#efd8cf' }
   };
 
   const sectionColors = [
@@ -58,10 +58,11 @@
       fields: [
         { key: 'eyebrow', label: 'Bereichsbezeichnung', type: 'text' },
         { key: 'title', label: 'Titel', type: 'rich', editorRows: 3 },
+        { key: 'intro', label: 'Einleitung', type: 'rich', editorRows: 4 },
         { key: 'text', label: 'Text', type: 'rich', editorRows: 6 },
         { key: 'items', label: 'Aufzählungspunkte', type: 'collection', min: 0, max: 8, addLabel: 'Punkt hinzufügen', itemFields: [{ key: 'text', label: 'Text', type: 'rich', editorRows: 2 }] }
       ],
-      defaults: { eyebrow: 'Psychotherapie', title: 'Eine große Überschrift.', text: 'Beschreiben Sie diesen Bereich.', items: [{ text: 'Ein wichtiger Punkt' }] }
+      defaults: { eyebrow: 'Psychotherapie', title: 'Eine große Überschrift.', intro: '', text: 'Beschreiben Sie diesen Bereich.', items: [{ text: 'Ein wichtiger Punkt' }] }
     },
     note: {
       ...titleAppearance(),
@@ -375,6 +376,7 @@
     const sections = Array.isArray(source.sections) ? source.sections : migrateLegacySections(source);
     const hero = mergeDefaults({ eyebrow: '', title: '', sentence: '', contactButton: 'Kontakt aufnehmen', titleSize: 'standard' }, source.hero);
     const heroImage = mergeDefaults({ src: 'therapist.png', alt: '', layout: 'portrait', blend: 'duotone', position: 'center top', mobileLayout: 'portrait', mobilePosition: 'center center', overlay: 'soft', blendWidthDesktop: 32, blendWidthMobile: 28 }, source.heroImage);
+    const sectionSpacing = mergeDefaults({ desktop: 104,mobile: 64 },source.sectionSpacing);
     if (!titleSizeOptions.some(([value]) => value === hero.titleSize)) hero.titleSize = 'standard';
     if (!['portrait','landscape','background'].includes(heroImage.layout)) heroImage.layout = 'portrait';
     if (!['portrait','landscape','hidden'].includes(heroImage.mobileLayout)) heroImage.mobileLayout = 'portrait';
@@ -382,6 +384,8 @@
     if (!['soft','strong','none'].includes(heroImage.overlay)) heroImage.overlay = 'soft';
     heroImage.blendWidthDesktop = Math.min(80,Math.max(5,Number(heroImage.blendWidthDesktop) || 32));
     heroImage.blendWidthMobile = Math.min(80,Math.max(5,Number(heroImage.blendWidthMobile) || 28));
+    sectionSpacing.desktop = Math.min(180,Math.max(48,Number(sectionSpacing.desktop) || 104));
+    sectionSpacing.mobile = Math.min(120,Math.max(36,Number(sectionSpacing.mobile) || 64));
     return {
       schemaVersion: 3,
       colorTheme: themes[source.colorTheme] ? source.colorTheme : 'wine',
@@ -392,6 +396,7 @@
       navigation: { home: String(source.navigation?.home || 'Startseite') },
       hero,
       heroImage,
+      sectionSpacing,
       sections: sections.map(normalizeSection),
       footer: mergeDefaults({ copyright: '' }, source.footer)
     };

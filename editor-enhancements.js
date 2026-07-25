@@ -62,7 +62,8 @@
       return `<div class="field${wide}"><label for="${escapeHtml(path)}">${escapeHtml(field.label)}</label><select id="${escapeHtml(path)}" data-path="${escapeHtml(path)}">${field.options.map(([key,label]) => `<option value="${escapeHtml(key)}" ${key === value ? 'selected' : ''}>${escapeHtml(label)}</option>`).join('')}</select></div>`;
     }
     if (field.type === 'range') {
-      return `<div class="field${wide}"><label class="range-label" for="${escapeHtml(path)}"><span>${escapeHtml(field.label)}</span><output for="${escapeHtml(path)}">${escapeHtml(value)}%</output></label><input type="range" id="${escapeHtml(path)}" data-path="${escapeHtml(path)}" min="${field.min}" max="${field.max}" step="${field.step || 1}" value="${escapeHtml(value)}"><p class="help">${escapeHtml(field.help || '')}</p></div>`;
+      const unit = field.unit || '%';
+      return `<div class="field${wide}"><label class="range-label" for="${escapeHtml(path)}"><span>${escapeHtml(field.label)}</span><output for="${escapeHtml(path)}" data-unit="${escapeHtml(unit)}">${escapeHtml(value)}${escapeHtml(unit)}</output></label><input type="range" id="${escapeHtml(path)}" data-path="${escapeHtml(path)}" min="${field.min}" max="${field.max}" step="${field.step || 1}" value="${escapeHtml(value)}"><p class="help">${escapeHtml(field.help || '')}</p></div>`;
     }
     if (field.type === 'color') {
       return `<div class="field${wide}"><label for="${escapeHtml(path)}">${escapeHtml(field.label)}</label><input type="color" id="${escapeHtml(path)}" data-path="${escapeHtml(path)}" value="${escapeHtml(value)}"></div>`;
@@ -75,6 +76,8 @@
     ['--header-bg','Header'],
     ['--wine-650','Akzent'],
     ['--ribbon-hot','Wellenlinien'],
+    ['--body-text','Fließtext'],
+    ['--intro-text','Einleitungstext'],
     ['--rose-100','Zartrosa'],
     ['--practice-bg','Warmgrau'],
     ['--paper','Papier']
@@ -90,6 +93,8 @@
         ${fieldMarkup({ label:'Name der Person',type:'text' },'practitionerName',data.practitionerName)}
         ${fieldMarkup({ label:'Website-Icon',type:'text' },'siteIcon',data.siteIcon)}
         ${fieldMarkup({ label:'Navigation: Startseite',type:'text' },'navigation.home',data.navigation.home)}
+        ${fieldMarkup({ label:'Bereichsabstand Desktop',type:'range',min:48,max:180,step:4,unit:'px',help:'Vertikaler Innenabstand ober- und unterhalb jedes Seitenbereichs.' },'sectionSpacing.desktop',data.sectionSpacing.desktop,{ compact:true })}
+        ${fieldMarkup({ label:'Bereichsabstand Mobil',type:'range',min:36,max:120,step:4,unit:'px',help:'Vertikaler Innenabstand auf schmalen Bildschirmen.' },'sectionSpacing.mobile',data.sectionSpacing.mobile,{ compact:true })}
         <div class="field grid-wide">
           <span class="field-label">Farbsystem</span>
           <div class="theme-options">
@@ -216,7 +221,7 @@
         card.querySelector('.section-title').textContent = event.target.value.trim() || model.layouts[data.sections[index].layout].label;
       }
       const output = event.target.parentElement.querySelector('output');
-      if (output) output.value = `${event.target.value}%`;
+      if (output) output.value = `${event.target.value}${output.dataset.unit || '%'}`;
       saveDraft();
       if (path.endsWith('.appearance.listStyle')) renderSections();
       return;

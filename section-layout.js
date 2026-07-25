@@ -56,7 +56,8 @@
     intro: (section) => {
       const body = section.content;
       const items = body.items.filter((item) => item.text).map((item) => `<li>${formatMarkup(item.text)}</li>`).join('');
-      return `<section class="section dynamic-section layout-intro"><div class="page intro-grid"><div>${sectionHeading(section)}</div><div><p>${formatMarkup(body.text)}</p>${items ? `<ul class="bullet-list">${items}</ul>` : ''}</div></div></section>`;
+      const intro = body.intro ? `<p class="intro-lead section-intro-text">${formatMarkup(body.intro)}</p>` : '';
+      return `<section class="section dynamic-section layout-intro"><div class="page intro-grid"><div class="intro-heading">${sectionHeading(section)}${intro}</div><div><p>${formatMarkup(body.text)}</p>${items ? `<ul class="bullet-list">${items}</ul>` : ''}</div></div></section>`;
     },
     note: (section) => {
       const body = section.content;
@@ -66,7 +67,7 @@
       const body = section.content;
       const columns = body.items.length > 4 ? 3 : Math.max(1,body.items.length);
       const cards = body.items.map((item) => `<article class="focus-card"><h3>${formatMarkup(item.title)}</h3><p>${formatMarkup(item.text)}</p></article>`).join('');
-      return `<section class="section dynamic-section layout-cards"><div class="page"><div class="focus-header"><div>${sectionHeading(section)}</div><p>${formatMarkup(body.intro)}</p></div><div class="focus-grid" data-count="${body.items.length}" style="--card-columns:${columns}">${cards}</div></div></section>`;
+      return `<section class="section dynamic-section layout-cards"><div class="page"><div class="focus-header"><div>${sectionHeading(section)}</div><p class="section-intro-text">${formatMarkup(body.intro)}</p></div><div class="focus-grid" data-count="${body.items.length}" style="--card-columns:${columns}">${cards}</div></div></section>`;
     },
     image: (section) => {
       const body = section.content;
@@ -87,18 +88,18 @@
         return `<li style="--item-color:${color};--item-ink:${readableInk(color)}"><span>${String(index + 1).padStart(2,'0')}</span>${formatMarkup(item.text)}</li>`;
       }).join('');
       const listStyle = section.appearance?.listStyle || 'numbered-grid';
-      return `<section class="section dynamic-section layout-topics"><div class="page topics-grid"><div class="topics-copy">${sectionHeading(section)}<p>${formatMarkup(body.intro)}</p></div><ol class="topics-list" data-list-style="${escapeAttribute(listStyle)}">${items}</ol></div></section>`;
+      return `<section class="section dynamic-section layout-topics"><div class="page topics-grid"><div class="topics-copy">${sectionHeading(section)}<p class="section-intro-text">${formatMarkup(body.intro)}</p></div><ol class="topics-list" data-list-style="${escapeAttribute(listStyle)}">${items}</ol></div></section>`;
     },
     timeline: (section) => {
       const body = section.content;
       const items = body.items.map((item) => `<li><span class="timeline-period">${formatMarkup(item.period)}</span><div class="timeline-entry"><h3>${formatMarkup(item.title)}</h3>${item.detail ? `<p>${formatMarkup(item.detail)}</p>` : ''}</div></li>`).join('');
       const timelineStyle = section.appearance?.timelineStyle || 'classic-lines';
-      return `<section class="section dynamic-section layout-timeline"><div class="page timeline-grid"><div class="timeline-copy">${sectionHeading(section)}<p>${formatMarkup(body.intro)}</p></div><ol class="timeline-list" data-timeline-style="${escapeAttribute(timelineStyle)}">${items}</ol></div></section>`;
+      return `<section class="section dynamic-section layout-timeline"><div class="page timeline-grid"><div class="timeline-copy">${sectionHeading(section)}<p class="section-intro-text">${formatMarkup(body.intro)}</p></div><ol class="timeline-list" data-timeline-style="${escapeAttribute(timelineStyle)}">${items}</ol></div></section>`;
     },
     pricing: (section) => {
       const body = section.content;
       const rows = body.items.map((item) => `<div class="price-row"><div class="price-name"><span>${formatMarkup(item.name)}</span><span class="price-duration">${formatMarkup(item.duration)}</span></div><div class="price-value">${formatMarkup(item.price)}</div></div>`).join('');
-      return `<section class="section dynamic-section layout-pricing"><div class="page costs-grid"><div class="costs-copy">${sectionHeading(section)}<p>${formatMarkup(body.intro)}</p></div><div><div class="price-list">${rows}</div>${body.note ? `<p class="reimbursement">${formatMarkup(body.note)}</p>` : ''}</div></div></section>`;
+      return `<section class="section dynamic-section layout-pricing"><div class="page costs-grid"><div class="costs-copy">${sectionHeading(section)}<p class="section-intro-text">${formatMarkup(body.intro)}</p></div><div><div class="price-list">${rows}</div>${body.note ? `<p class="reimbursement">${formatMarkup(body.note)}</p>` : ''}</div></div></section>`;
     },
     contact: (section) => {
       const body = section.content;
@@ -110,7 +111,7 @@
         body.email ? `<div><div class="detail-label">E-Mail</div>${String(body.email).includes('@') ? `<a class="detail-value" href="mailto:${escapeAttribute(body.email)}">${formatMarkup(body.email)}</a>` : `<span class="detail-value">${formatMarkup(body.email)}</span>`}</div>` : ''
       ].join('');
       const map = body.mapLink && body.mapLabel ? `<div class="map"><a class="map-link" href="${escapeAttribute(body.mapLink)}" target="_blank" rel="noreferrer">${formatMarkup(body.mapLabel)}</a></div>` : '';
-      return `<section class="section dynamic-section contact-section layout-contact"><div class="page contact-grid"><div class="contact-copy">${sectionHeading(section)}<p>${formatMarkup(body.text)}</p></div><div class="contact-details">${details}</div></div>${map}</section>`;
+      return `<section class="section dynamic-section contact-section layout-contact"><div class="page contact-grid"><div class="contact-copy">${sectionHeading(section)}<p class="section-intro-text">${formatMarkup(body.text)}</p></div><div class="contact-details">${details}</div></div>${map}</section>`;
     }
   };
 

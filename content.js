@@ -43,7 +43,8 @@ window.practiceContent = {
       },
       "content": {
         "eyebrow": "Psychotherapie",
-        "title": "Manchmal hilft es, nicht allein weitergehen zu müssen",
+        "title": "",
+        "intro": "Manchmal hilft es, nicht allein weitergehen zu müssen.",
         "text": "Ob bei Ängsten, Depressionen oder anderen psychischen Krisen – als Verhaltenstherapeutin unterstütze ich Sie dabei, belastende Gefühle, Gedanken und Verhaltensweisen zu erkennen und schrittweise zu verändern.\n\nRespekt, Wertschätzung und Empathie bilden die Basis unserer Zusammenarbeit. In einem sicheren, geschützten Rahmen können Sie sich öffnen, vorhandene Stärken und Ressourcen wiederentdecken, hilfreiche Strategien erlernen und neue Wege erkunden.\n\nMein Ziel ist, dass Sie mehr Klarheit und Selbstwirksamkeit gewinnen – und damit mehr Lebensfreude und Wohlbefinden in Ihr Leben einziehen können.\n\nIch würde mich freuen, Sie kennenlernen und ein Stück auf Ihrem Weg in eine möglichst unbeschwerte Zukunft begleiten zu dürfen.",
         "items": []
       }
@@ -95,19 +96,20 @@ window.practiceContent = {
     {
       "id": "berufserfahrung",
       "layout": "timeline",
-      "internalName": "Zeitleiste",
+      "internalName": "Vertikale Zeitleiste",
       "navigationLabel": "Über mich",
       "background": "paper",
       "customBackground": "#f7f2ef",
       "appearance": {
-        "headingModeDesktop": "title",
-        "headingModeMobile": "title",
-        "titleSize": "compact"
+        "headingModeDesktop": "eyebrow",
+        "headingModeMobile": "eyebrow",
+        "titleSize": "compact",
+        "timelineStyle": "alternating-path"
       },
       "content": {
         "eyebrow": "Über mich",
         "title": "Psychosoziale Berufserfahrung.",
-        "intro": "Meine bisherigen Tätigkeiten im psychosozialen Bereich:",
+        "intro": "Als Psychotherapeutin in Ausbildung unter Supervision stehe ich im regelmäßigen fachlichen Austausch mit erfahrenen Psychotherapeut:innen.\n\nMeine bisherigen Tätigkeiten im psychosozialen Bereich:",
         "items": [
           {
             "period": "Seit 2024",
@@ -133,39 +135,21 @@ window.practiceContent = {
       }
     },
     {
-      "id": "supervision",
-      "layout": "note",
-      "internalName": "In Ausbildung unter Supervision.",
-      "navigationLabel": "",
-      "background": "soft",
-      "customBackground": "#f7f2ef",
-      "appearance": {
-        "headingModeDesktop": "title",
-        "headingModeMobile": "title",
-        "titleSize": "compact"
-      },
-      "content": {
-        "eyebrow": "Qualitätssicherung",
-        "title": "In Ausbildung unter Supervision.",
-        "text": "Als Psychotherapeutin in Ausbildung unter Supervision stehe ich im regelmäßigen fachlichen Austausch mit erfahrenen Psychotherapeut:innen.",
-        "note": "Dieser zusätzliche fachliche Blick dient der Qualitätssicherung und unterstützt mich dabei, Ihre Therapie bestmöglich zu gestalten."
-      }
-    },
-    {
       "id": "ausbildung",
       "layout": "timeline",
-      "internalName": "Zeitleiste",
+      "internalName": "Vertikale Zeitleiste",
       "navigationLabel": "",
       "background": "rose",
       "customBackground": "#f7f2ef",
       "appearance": {
-        "headingModeDesktop": "title",
-        "headingModeMobile": "title",
-        "titleSize": "compact"
+        "headingModeDesktop": "eyebrow",
+        "headingModeMobile": "eyebrow",
+        "titleSize": "compact",
+        "timelineStyle": "classic-lines"
       },
       "content": {
-        "eyebrow": "Qualifikation",
-        "title": "Ausbildung.",
+        "eyebrow": "Ausbildung",
+        "title": "Ausbildung",
         "intro": "Meine psychotherapeutische und ergänzende Ausbildung:",
         "items": [
           {
@@ -205,13 +189,13 @@ window.practiceContent = {
       "customBackground": "#f7f2ef",
       "appearance": {
         "headingModeDesktop": "title",
-        "headingModeMobile": "title",
+        "headingModeMobile": "eyebrow",
         "titleSize": "standard"
       },
       "content": {
-        "eyebrow": "Der Rahmen",
-        "title": "Ein ruhiger Ort für Ihr Gespräch.",
-        "text": "Die Gespräche finden in einer hellen, ruhigen Praxis statt. Der geschützte Rahmen schafft Raum, um Belastendes anzusprechen, Gedanken zu ordnen und neue Perspektiven zu entwickeln.",
+        "eyebrow": "Praxis",
+        "title": "Praxis",
+        "text": "Die helle, ruhige Praxis bietet einen geschützten Raum für Gespräche, neue Perspektiven und persönliche Entwicklung.",
         "imageSrc": "assets/office_horizontal.JPG",
         "imageAlt": "Heller Praxisraum mit zwei Sesseln",
         "imagePosition": "center top",
@@ -226,8 +210,8 @@ window.practiceContent = {
       "background": "dark",
       "customBackground": "#f7f2ef",
       "appearance": {
-        "headingModeDesktop": "title",
-        "headingModeMobile": "title",
+        "headingModeDesktop": "eyebrow",
+        "headingModeMobile": "eyebrow",
         "titleSize": "standard"
       },
       "content": {

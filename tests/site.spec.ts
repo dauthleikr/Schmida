@@ -15,22 +15,31 @@ test('renders the new section schema with dynamic navigation and waves', async (
   expect(await page.locator('.brand-mark').evaluate((image:HTMLImageElement) => image.naturalWidth)).toBe(180);
   await expect(page.locator('.hero')).toHaveAttribute('data-title-size','tiny');
   await expect(page.getByRole('navigation')).toHaveText(/Startseite[\s\S]*Psychotherapie[\s\S]*Schwerpunkte[\s\S]*Über mich[\s\S]*Praxis[\s\S]*Kontakt/);
-  await expect(page.locator('.content-section')).toHaveCount(7);
-  await expect(page.locator('.content-section[data-layout="topics"] .topics-list li')).toHaveCount(7);
-  const savedListStyle = await page.evaluate(() => window.practiceContent.sections.find((section) => section.layout === 'topics')?.appearance?.listStyle || 'numbered-grid');
+  const savedSections = await page.evaluate(() => window.currentPracticeContent.sections);
+  await expect(page.locator('.content-section')).toHaveCount(savedSections.length);
+  const savedTopics = savedSections.find((section) => section.layout === 'topics')!;
+  await expect(page.locator('.content-section[data-layout="topics"] .topics-list li')).toHaveCount(savedTopics.content.items.filter((item) => item.text).length);
+  const savedListStyle = savedTopics.appearance.listStyle || 'numbered-grid';
   await expect(page.locator('.content-section[data-layout="topics"] .topics-list')).toHaveAttribute('data-list-style',savedListStyle);
-  await expect(page.locator('.content-section[data-layout="timeline"]')).toHaveCount(2);
-  await expect(page.locator('.section-heading-desktop h2')).toHaveCount(7);
-  await expect(page.locator('.section-heading-mobile h2')).toHaveCount(7);
+  await expect(page.locator('.content-section[data-layout="timeline"]')).toHaveCount(savedSections.filter((section) => section.layout === 'timeline').length);
+  await expect(page.locator('.section-heading-desktop h2')).toHaveCount(savedSections.length);
+  await expect(page.locator('.section-heading-mobile h2')).toHaveCount(savedSections.length);
   await expect(page.locator('.section-heading-desktop').first()).toBeVisible();
   await expect(page.locator('.section-heading-mobile').first()).toBeHidden();
-  await expect(page.locator('.dynamic-section .eyebrow')).toHaveCount(0);
-  await expect(page.locator('.dynamic-section[data-heading-desktop="eyebrow"]')).toHaveCount(2);
-  await expect(page.locator('.dynamic-section[data-heading-desktop="title"]')).toHaveCount(5);
+  const headingModes = savedSections.map((section) => section.appearance);
+  const desktopEyebrows = headingModes.filter((appearance) => appearance.headingModeDesktop === 'eyebrow').length;
+  const desktopTitles = headingModes.filter((appearance) => appearance.headingModeDesktop === 'title').length;
+  const bothVariants = headingModes.reduce((count,appearance) => count + Number(appearance.headingModeDesktop === 'both') + Number(appearance.headingModeMobile === 'both'),0);
+  await expect(page.locator('.dynamic-section .eyebrow')).toHaveCount(bothVariants);
+  await expect(page.locator('.dynamic-section[data-heading-desktop="eyebrow"]')).toHaveCount(desktopEyebrows);
+  await expect(page.locator('.dynamic-section[data-heading-desktop="title"]')).toHaveCount(desktopTitles);
   await expect(page.locator('#psychotherapie .section-heading-desktop .section-heading-accent')).toHaveCSS('color','rgb(209, 17, 55)');
   await expect(page.locator('#kontakt .section-heading-desktop .section-heading-accent')).toHaveCSS('color','rgb(255, 154, 169)');
+  await expect(page.locator('#psychotherapie')).toHaveCSS('padding-top','104px');
+  await expect(page.locator('#psychotherapie .intro-grid > div:last-child > p').first()).toHaveCSS('color','rgb(81, 71, 74)');
+  await expect(page.locator('#schwerpunkte .section-intro-text')).toHaveCSS('color','rgb(105, 8, 23)');
   await expect(page.locator('.hero .eyebrow')).toHaveCSS('font-size','11.2px');
-  await expect(page.locator('.ribbon-transition')).toHaveCount(7);
+  await expect(page.locator('.ribbon-transition')).toHaveCount(savedSections.length);
   await expect(page.locator('.hero-image')).toHaveJSProperty('complete',true);
   await expect(page.locator('#kontakt')).toContainText('E-Mail-Adresse bitte ergänzen');
   await expect(page.locator('.wide-image-frame .section-image')).toHaveAttribute('src','assets/office_horizontal.JPG');
@@ -175,11 +184,11 @@ test('editor exports normalized schema content', async ({ page }) => {
   ]);
   await page.locator('[data-path="practiceName"]').fill('Praxis Sonnenweg');
   await expect(page.locator('[data-path="siteIcon"]')).toHaveValue('assets/icon4_tiny.png');
-  await page.locator('[data-path="siteIcon"]').fill('assets/icon4_small.png');
+  await page.locator('[data-path="siteIcon"]').fill('assets/wave-mark-128.png');
   await page.getByRole('button',{ name:'Vorschau Desktop' }).click();
   const preview = page.frameLocator('#preview-frame');
-  await expect(preview.locator('.brand-mark')).toHaveAttribute('src','assets/icon4_small.png');
-  await expect(preview.locator('link[rel="icon"]')).toHaveAttribute('href','assets/icon4_small.png');
+  await expect(preview.locator('.brand-mark')).toHaveAttribute('src','assets/wave-mark-128.png');
+  await expect(preview.locator('link[rel="icon"]')).toHaveAttribute('href','assets/wave-mark-128.png');
   await page.getByRole('button',{ name:'Vorschau schließen' }).click();
   await page.getByRole('radio',{ name:'Scharlachrot' }).check();
 
@@ -196,7 +205,7 @@ test('editor exports normalized schema content', async ({ page }) => {
   expect(output).toContain('Praxis Sonnenweg');
   expect(output).toContain('"schemaVersion": 3');
   expect(output).toContain('"internalName": "Hauptbereich Psychotherapie"');
-  expect(output).toContain('"siteIcon": "assets/icon4_small.png"');
+  expect(output).toContain('"siteIcon": "assets/wave-mark-128.png"');
   expect(output).toContain('"sections": [');
   expect(output).toContain('"colorTheme": "scarlet"');
   expect(output).not.toContain('"sectionLayout"');
@@ -275,6 +284,51 @@ test('section heading source can be switched independently for desktop and mobil
 
   await expect(eyebrowField).toHaveValue(eyebrowText);
   await expect(titleField).toHaveValue(titleText);
+});
+
+test('intro layout supports an optional lead below its heading', async ({ page }) => {
+  await page.goto(editorUrl);
+
+  const section = page.locator('.section-editor[data-section-id="psychotherapie"]');
+  const intro = section.locator('[data-path$=".content.intro"]');
+  await expect(intro).toBeVisible();
+  await intro.fill('Ein kurzer **Auftakt** unter der Überschrift.');
+  await section.getByRole('button',{ name:/Desktopvorschau/ }).click();
+
+  const preview = page.frameLocator('#preview-frame');
+  await expect(preview.locator('.intro-heading .intro-lead')).toContainText('Ein kurzer Auftakt unter der Überschrift.');
+  await expect(preview.locator('.intro-heading .intro-lead strong')).toHaveText('Auftakt');
+  const headingOrder = await preview.locator('.intro-heading').evaluate((element) => [...element.children].map((child) => child.className));
+  expect(headingOrder.at(-1)).toBe('intro-lead');
+});
+
+test('text colors and section spacing are globally configurable', async ({ page }) => {
+  await page.goto(editorUrl);
+
+  await page.locator('[data-global-color-code="--body-text"]').fill('#33282b');
+  await page.locator('[data-global-color-code="--intro-text"]').fill('#511020');
+  const desktopSpacing = page.locator('[data-path="sectionSpacing.desktop"]');
+  const mobileSpacing = page.locator('[data-path="sectionSpacing.mobile"]');
+  await desktopSpacing.evaluate((input:HTMLInputElement) => {
+    input.value = '80';
+    input.dispatchEvent(new Event('input',{ bubbles:true }));
+  });
+  await mobileSpacing.evaluate((input:HTMLInputElement) => {
+    input.value = '48';
+    input.dispatchEvent(new Event('input',{ bubbles:true }));
+  });
+  await expect(page.locator('output[for="sectionSpacing.desktop"]')).toHaveText('80px');
+  await expect(page.locator('output[for="sectionSpacing.mobile"]')).toHaveText('48px');
+
+  await page.getByRole('button',{ name:'Vorschau Desktop' }).click();
+  const preview = page.frameLocator('#preview-frame');
+  await expect(preview.locator('#psychotherapie')).toHaveCSS('padding-top','80px');
+  await expect(preview.locator('#psychotherapie .intro-grid > div:last-child > p').first()).toHaveCSS('color','rgb(51, 40, 43)');
+  await expect(preview.locator('#schwerpunkte .section-intro-text')).toHaveCSS('color','rgb(81, 16, 32)');
+
+  await page.getByRole('button',{ name:'Vorschau schließen' }).click();
+  await page.getByRole('button',{ name:'Vorschau Mobil' }).click();
+  await expect(preview.locator('#psychotherapie')).toHaveCSS('padding-top','48px');
 });
 
 test('repeatable bullets, cards and prices use reusable add and remove controls', async ({ page }) => {
@@ -551,6 +605,9 @@ test('legacy fixed content is isolated behind the schema migration adapter', asy
   expect(flexible.sections[1].appearance.headingModeMobile).toBe('title');
   expect(flexible.sections[1].appearance.headingMode).toBeUndefined();
   expect(flexible.sections[1].appearance.titleSize).toBe('large');
+
+  const spacing = await page.evaluate(() => window.practiceContentModel.normalize({ sectionSpacing:{ desktop:999,mobile:2 } }).sectionSpacing);
+  expect(spacing).toEqual({ desktop:180,mobile:36 });
 });
 
 test('mobile and desktop previews use distinct viewports and every layout fits mobile', async ({ page }) => {
