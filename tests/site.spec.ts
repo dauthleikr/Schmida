@@ -8,15 +8,24 @@ test('renders the new section schema with dynamic navigation and waves', async (
   await page.goto(siteUrl);
 
   await expect(page).toHaveTitle('Carina Schmida, BA.pth.');
-  await expect(page.getByRole('navigation')).toHaveText(/Startseite[\s\S]*Psychotherapie[\s\S]*Schwerpunkte[\s\S]*Kosten[\s\S]*Kontakt/);
-  await expect(page.locator('.content-section')).toHaveCount(5);
-  await expect(page.locator('.content-section[data-layout="cards"] .focus-card')).toHaveCount(6);
-  await expect(page.locator('.ribbon-transition')).toHaveCount(5);
+  await expect(page.getByRole('navigation')).toHaveText(/Startseite[\s\S]*Psychotherapie[\s\S]*Schwerpunkte[\s\S]*Über mich[\s\S]*Praxis[\s\S]*Kontakt/);
+  await expect(page.locator('.content-section')).toHaveCount(7);
+  await expect(page.locator('.content-section[data-layout="topics"] .topics-list li')).toHaveCount(7);
+  await expect(page.locator('.content-section[data-layout="timeline"]')).toHaveCount(2);
+  await expect(page.locator('.ribbon-transition')).toHaveCount(7);
   await expect(page.locator('.hero-image')).toHaveJSProperty('complete',true);
-  await expect(page.locator('#contact')).toContainText('praxis@beispiel.at');
+  await expect(page.locator('#kontakt')).toContainText('E-Mail-Adresse bitte ergänzen');
+  await expect(page.locator('.wide-image-frame .section-image')).toHaveAttribute('src','assets/derived/office-wide.jpg');
 
-  await page.getByRole('link',{ name:'Kosten' }).click();
-  await expect(page.locator('#costs')).toBeInViewport();
+  await page.getByRole('link',{ name:'Praxis',exact:true }).click();
+  await expect(page.locator('#praxis')).toBeInViewport();
+
+  const seamCoverage = await page.locator('.hero-ribbon').evaluate((element) => {
+    const style = getComputedStyle(element,'::after');
+    return { height:style.height,background:style.backgroundColor };
+  });
+  expect(seamCoverage.height).toBe('4px');
+  expect(seamCoverage.background).not.toBe('rgba(0, 0, 0, 0)');
 });
 
 test('provides a usable compact navigation', async ({ page }) => {
@@ -28,7 +37,7 @@ test('provides a usable compact navigation', async ({ page }) => {
   await expect(menu).toHaveAttribute('aria-expanded','true');
   await expect(page.getByRole('link',{ name:'Kontakt',exact:true })).toBeVisible();
   await page.getByRole('link',{ name:'Kontakt',exact:true }).click();
-  await expect(page.locator('#contact')).toBeInViewport();
+  await expect(page.locator('#kontakt')).toBeInViewport();
 });
 
 test('editor exports normalized schema content', async ({ page }) => {
@@ -49,7 +58,7 @@ test('editor exports normalized schema content', async ({ page }) => {
 
   expect(download.suggestedFilename()).toBe('content.js');
   expect(output).toContain('Praxis Sonnenweg');
-  expect(output).toContain('"schemaVersion": 2');
+  expect(output).toContain('"schemaVersion": 3');
   expect(output).toContain('"sections": [');
   expect(output).toContain('"colorTheme": "scarlet"');
   expect(output).not.toContain('"sectionLayout"');
@@ -60,7 +69,7 @@ test('adds a section, changes its layout, background, fields and navigation', as
 
   await page.selectOption('#new-layout','note');
   await page.getByRole('button',{ name:'Bereich hinzufügen' }).click();
-  await expect(page.locator('.section-editor')).toHaveCount(6);
+  await expect(page.locator('.section-editor')).toHaveCount(8);
 
   const added = page.locator('.section-editor').last();
   await added.locator('[data-path$=".navigationLabel"]').fill('Über mich');
@@ -71,7 +80,7 @@ test('adds a section, changes its layout, background, fields and navigation', as
 
   await page.getByRole('button',{ name:'Vorschau Desktop' }).click();
   const preview = page.frameLocator('#preview-frame');
-  await expect(preview.getByRole('link',{ name:'Über mich' })).toBeVisible();
+  await expect(preview.getByRole('link',{ name:'Über mich' }).last()).toBeVisible();
   await expect(preview.locator('.content-section[data-layout="note"]').last().locator('section')).toHaveCSS('background-color','rgb(229, 240, 234)');
   await expect(preview.getByRole('heading',{ name:'Mein neuer Bereich' })).toBeVisible();
 });
@@ -79,23 +88,24 @@ test('adds a section, changes its layout, background, fields and navigation', as
 test('repeatable bullets, cards and prices use reusable add and remove controls', async ({ page }) => {
   await page.goto(editorUrl);
 
-  const intro = page.locator('.section-editor').nth(0);
+  const intro = page.locator('.section-editor[data-section-id="psychotherapie"]');
   await intro.locator('[data-collection-action="add"][data-collection-key="items"]').click();
-  await expect(intro.locator('.collection-item')).toHaveCount(1);
-  await intro.locator('[data-path$=".items.0.text"]').fill('Dynamischer Aufzählungspunkt');
+  await expect(intro.locator('.collection-item')).toHaveCount(3);
+  await intro.locator('[data-path$=".items.2.text"]').fill('Dynamischer Aufzählungspunkt');
 
-  const cards = page.locator('.section-editor').nth(1);
-  const removeCard = cards.locator('[data-collection-action="remove"]').first();
-  await removeCard.click();
-  await expect(cards.locator('.collection-item')).toHaveCount(5);
-  await cards.locator('[data-collection-action="add"]').click();
+  await page.selectOption('#new-layout','cards');
+  await page.getByRole('button',{ name:'Bereich hinzufügen' }).click();
+  const cards = page.locator('.section-editor').last();
+  for (let index = 0; index < 4; index += 1) await cards.locator('[data-collection-action="add"]').click();
   await expect(cards.locator('.collection-item')).toHaveCount(6);
   await expect(cards.locator('[data-collection-action="add"]')).toBeDisabled();
 
-  const prices = page.locator('.section-editor').nth(3);
+  await page.selectOption('#new-layout','pricing');
+  await page.getByRole('button',{ name:'Bereich hinzufügen' }).click();
+  const prices = page.locator('.section-editor').last();
   await prices.locator('[data-collection-action="add"]').click();
-  await prices.locator('[data-path$=".items.3.name"]').fill('Online-Beratung');
-  await prices.locator('[data-path$=".items.3.price"]').fill('EUR 90');
+  await prices.locator('[data-path$=".items.1.name"]').fill('Online-Beratung');
+  await prices.locator('[data-path$=".items.1.price"]').fill('EUR 90');
 
   await page.getByRole('button',{ name:'Vorschau Desktop' }).click();
   const preview = page.frameLocator('#preview-frame');
@@ -115,14 +125,14 @@ test('sections can be reordered, removed and changed to another registered layou
 
   const addedId = await page.locator('.section-editor').last().getAttribute('data-section-id');
   const moved = page.locator(`.section-editor[data-section-id="${addedId}"]`);
-  for (let index = 0; index < 5; index += 1) {
+  for (let index = 0; index < 7; index += 1) {
     await moved.getByRole('button',{ name:'Nach oben' }).click();
   }
   await expect(page.locator('.section-editor').first().locator('[data-section-layout]')).toHaveValue('image');
 
   page.once('dialog',(dialog) => dialog.accept());
   await page.locator('.section-editor').nth(1).getByRole('button',{ name:'Bereich entfernen' }).click();
-  await expect(page.locator('.section-editor')).toHaveCount(5);
+  await expect(page.locator('.section-editor')).toHaveCount(7);
 
   await page.getByRole('button',{ name:'Vorschau Desktop' }).click();
   await expect(page.frameLocator('#preview-frame').locator('.content-section').first()).toHaveAttribute('data-layout','image');
@@ -140,14 +150,18 @@ test('rich-text controls and hero presentation remain editable', async ({ page }
   await page.selectOption('[data-path="heroImage.layout"]','background');
   await page.selectOption('[data-path="heroImage.blend"]','natural');
   await page.selectOption('[data-path="heroImage.position"]','right center');
+  await page.selectOption('[data-path="hero.titleSize"]','large');
+  await page.locator('.section-editor[data-section-id="psychotherapie"] [data-path$=".appearance.titleSize"]').selectOption('compact');
   await page.locator('[data-path="hero.contactButton"]').fill('Erstgespräch anfragen');
   await page.getByRole('button',{ name:'Vorschau Desktop' }).click();
 
   const preview = page.frameLocator('#preview-frame');
   await expect(preview.locator('.hero')).toHaveAttribute('data-image-layout','background');
   await expect(preview.locator('.hero')).toHaveAttribute('data-image-blend','natural');
+  await expect(preview.locator('.hero')).toHaveAttribute('data-title-size','large');
   await expect(preview.locator('.hero')).toHaveCSS('--hero-image-position','right center');
-  await expect(preview.getByRole('link',{ name:'Erstgespräch anfragen' })).toHaveAttribute('href','#contact');
+  await expect(preview.locator('#psychotherapie')).toHaveAttribute('data-title-size','compact');
+  await expect(preview.getByRole('link',{ name:'Erstgespräch anfragen' })).toHaveAttribute('href','#kontakt');
   await expect(preview.locator('h1 strong')).toHaveText('Ein neuer Titel');
 });
 
@@ -160,7 +174,7 @@ test('legacy fixed content is isolated behind the schema migration adapter', asy
     costs:{ label:'Honorar',title:'Kosten',intro:'Info',entries:[['Termin','50 Minuten','100 EUR']],reimbursement:'Hinweis' }
   }));
 
-  expect(migrated.schemaVersion).toBe(2);
+  expect(migrated.schemaVersion).toBe(3);
   expect(migrated.sections).toHaveLength(1);
   expect(migrated.sections[0].layout).toBe('pricing');
   expect(migrated.sections[0].navigationLabel).toBe('Preise');
@@ -174,13 +188,27 @@ test('legacy fixed content is isolated behind the schema migration adapter', asy
   }));
   expect(ranged.sections[0].content.items).toHaveLength(6);
   expect(ranged.sections[1].content.items).toHaveLength(1);
+
+  const flexible = await page.evaluate(() => window.practiceContentModel.normalize({
+    sections:[
+      { id:'topics',layout:'topics',content:{ items:Array.from({ length:14 },(_,index) => ({ text:String(index) })) } },
+      { id:'timeline',layout:'timeline',content:{ items:[] },appearance:{ titleSize:'large' } }
+    ]
+  }));
+  expect(flexible.sections[0].content.items).toHaveLength(10);
+  expect(flexible.sections[1].content.items).toHaveLength(2);
+  expect(flexible.sections[1].appearance.titleSize).toBe('large');
 });
 
 test('mobile and desktop previews use distinct viewports and every layout fits mobile', async ({ page }) => {
   await page.goto(editorUrl);
 
-  await page.selectOption('#new-layout','note');
-  await page.getByRole('button',{ name:'Bereich hinzufügen' }).click();
+  const registeredLayouts = await page.evaluate(() => Object.keys(window.practiceContentModel.layouts));
+  const presentLayouts = await page.locator('[data-section-layout]').evaluateAll((elements) => elements.map((element) => (element as HTMLSelectElement).value));
+  for (const layout of registeredLayouts.filter((layout) => !presentLayouts.includes(layout))) {
+    await page.selectOption('#new-layout',layout);
+    await page.getByRole('button',{ name:'Bereich hinzufügen' }).click();
+  }
   await page.getByRole('button',{ name:'Vorschau Mobil' }).click();
 
   const dialog = page.locator('#preview-modal');
@@ -190,8 +218,8 @@ test('mobile and desktop previews use distinct viewports and every layout fits m
   expect(mobileFrameBox?.width).toBe(390);
 
   const mobilePreview = page.frameLocator('#preview-frame');
-  for (const layout of ['intro','note','cards','image','pricing','contact']) {
-    await expect(mobilePreview.locator(`.content-section[data-layout="${layout}"]`)).toHaveCount(1);
+  for (const layout of registeredLayouts) {
+    expect(await mobilePreview.locator(`.content-section[data-layout="${layout}"]`).count()).toBeGreaterThanOrEqual(1);
   }
   const mobileFit = await page.frames()[1].evaluate(() => {
     const viewportWidth = document.documentElement.clientWidth;

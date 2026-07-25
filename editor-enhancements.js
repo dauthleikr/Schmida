@@ -2,8 +2,8 @@
   const model = window.practiceContentModel;
   const editor = document.querySelector('#editor');
   const status = document.querySelector('#status');
-  const draftKey = 'practice-content-draft-v2';
-  const legacyDraftKey = 'practice-content-draft-v1';
+  const draftKey = 'practice-content-draft-v3';
+  const legacyDraftKeys = ['practice-content-draft-v2','practice-content-draft-v1'];
   let connectedFile;
   let previewTimer;
 
@@ -29,8 +29,6 @@
     try {
       const current = localStorage.getItem(draftKey);
       if (current) return JSON.parse(current);
-      const legacy = localStorage.getItem(legacyDraftKey);
-      if (legacy) return JSON.parse(legacy);
     } catch {}
     return window.practiceContent;
   };
@@ -58,6 +56,9 @@
     const wide = compact || field.type === 'text' ? '' : ' grid-wide';
     if (field.type === 'rich') {
       return `<div class="field${wide}"><label for="${escapeHtml(path)}">${escapeHtml(field.label)}</label>${toolbar}<textarea id="${escapeHtml(path)}" data-path="${escapeHtml(path)}" rows="${field.editorRows || 4}">${escapeHtml(value)}</textarea></div>`;
+    }
+    if (field.type === 'select') {
+      return `<div class="field${wide}"><label for="${escapeHtml(path)}">${escapeHtml(field.label)}</label><select id="${escapeHtml(path)}" data-path="${escapeHtml(path)}">${field.options.map(([key,label]) => `<option value="${escapeHtml(key)}" ${key === value ? 'selected' : ''}>${escapeHtml(label)}</option>`).join('')}</select></div>`;
     }
     return `<div class="field${wide}"><label for="${escapeHtml(path)}">${escapeHtml(field.label)}</label><input id="${escapeHtml(path)}" data-path="${escapeHtml(path)}" value="${escapeHtml(value)}"></div>`;
   };
@@ -96,21 +97,21 @@
   function renderHero() {
     const panel = document.querySelector('#hero-editor');
     const image = data.heroImage;
-    const select = (path,label,options,value) => `<div class="field"><label for="${path}">${label}</label><select id="${path}" data-path="${path}">${options.map(([key,text]) => `<option value="${key}" ${key === value ? 'selected' : ''}>${text}</option>`).join('')}</select></div>`;
     panel.innerHTML = `${panelHeading('Startseite','Hero-Text und Bildgestaltung bleiben als fester Einstieg erhalten.')}
       <div class="grid">
         ${fieldMarkup({ label:'Überzeile',type:'text' },'hero.eyebrow',data.hero.eyebrow)}
         ${fieldMarkup({ label:'Titel',type:'rich',editorRows:3 },'hero.title',data.hero.title)}
+        ${fieldMarkup({ label:'Titelgröße',type:'select',options:[['compact','Kompakt'],['standard','Standard'],['large','Groß']] },'hero.titleSize',data.hero.titleSize)}
         ${fieldMarkup({ label:'Einleitung',type:'rich',editorRows:4 },'hero.sentence',data.hero.sentence)}
         ${fieldMarkup({ label:'Kontakt-Button',type:'text' },'hero.contactButton',data.hero.contactButton)}
         <div class="hero-settings grid-wide">
           <div class="grid">
             ${fieldMarkup({ label:'Bilddatei',type:'text' },'heroImage.src',image.src)}
             ${fieldMarkup({ label:'Alternativtext',type:'text' },'heroImage.alt',image.alt)}
-            ${select('heroImage.layout','Bildformat',[['portrait','Seitliches Porträt'],['landscape','Breite Fotofläche'],['background','Vollflächiger Hintergrund']],image.layout)}
-            ${select('heroImage.blend','Bildwirkung',[['duotone','Weiches Duoton'],['natural','Natürlich'],['mono','Monochrom'],['warm','Warm und weich']],image.blend)}
-            ${select('heroImage.position','Bildposition',[['center top','Mitte oben'],['center center','Mitte'],['right center','Rechts Mitte'],['left center','Links Mitte']],image.position)}
-            ${select('heroImage.overlay','Textüberlagerung',[['soft','Sanft'],['strong','Stark'],['none','Keine']],image.overlay)}
+            ${fieldMarkup({ label:'Bildformat',type:'select',options:[['portrait','Seitliches Porträt'],['landscape','Breite Fotofläche'],['background','Vollflächiger Hintergrund']] },'heroImage.layout',image.layout)}
+            ${fieldMarkup({ label:'Bildwirkung',type:'select',options:[['duotone','Weiches Duoton'],['natural','Natürlich'],['mono','Monochrom'],['warm','Warm und weich']] },'heroImage.blend',image.blend)}
+            ${fieldMarkup({ label:'Bildposition',type:'select',options:[['center top','Mitte oben'],['center center','Mitte'],['right center','Rechts Mitte'],['left center','Links Mitte']] },'heroImage.position',image.position)}
+            ${fieldMarkup({ label:'Textüberlagerung',type:'select',options:[['soft','Sanft'],['strong','Stark'],['none','Keine']] },'heroImage.overlay',image.overlay)}
           </div>
         </div>
       </div>`;
@@ -147,6 +148,7 @@
           <div class="field"><label>Layout</label><select data-section-layout>${Object.entries(model.layouts).map(([key,item]) => `<option value="${key}" ${section.layout === key ? 'selected' : ''}>${escapeHtml(item.label)}</option>`).join('')}</select></div>
           <div class="field"><label>Navigation</label><input data-path="sections.${index}.navigationLabel" value="${escapeHtml(section.navigationLabel)}"><p class="help">Leer lassen, um den Bereich nicht im Menü zu zeigen.</p></div>
           <div class="field"><label>Hintergrund</label><select data-section-background>${colorOptions}</select>${section.background === 'custom' ? `<div class="background-custom"><input type="color" data-section-custom-color value="${escapeHtml(section.customBackground)}"><input data-section-custom-code value="${escapeHtml(section.customBackground)}" spellcheck="false"></div>` : ''}</div>
+          ${(definition.appearanceFields || []).map((field) => fieldMarkup(field,`sections.${index}.appearance.${field.key}`,section.appearance[field.key],{ compact:true })).join('')}
           <p class="layout-description">${escapeHtml(definition.description)}</p>
         </div>
         <div class="section-fields">
@@ -245,6 +247,7 @@
       replacement.navigationLabel = oldSection.navigationLabel;
       replacement.background = oldSection.background;
       replacement.customBackground = oldSection.customBackground;
+      replacement.appearance = { ...replacement.appearance,...oldSection.appearance };
       Object.keys(replacement.content).forEach((key) => {
         if (typeof replacement.content[key] === 'string' && typeof oldSection.content[key] === 'string') replacement.content[key] = oldSection.content[key];
       });
@@ -419,7 +422,7 @@
   document.querySelector('#reset').addEventListener('click',() => {
     if (!confirm('Entwurf wirklich zurücksetzen?')) return;
     localStorage.removeItem(draftKey);
-    localStorage.removeItem(legacyDraftKey);
+    legacyDraftKeys.forEach((key) => localStorage.removeItem(key));
     data = model.normalize(window.practiceContent);
     renderAll();
     status.textContent = 'Entwurf zurückgesetzt';

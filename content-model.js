@@ -18,8 +18,21 @@
     { key: 'custom', label: 'Eigene Farbe', value: null }
   ];
 
+  const titleSizeOptions = [
+    ['compact', 'Kompakt'],
+    ['standard', 'Standard'],
+    ['large', 'Groß']
+  ];
+  const titleAppearance = () => ({
+    appearanceFields: [
+      { key: 'titleSize', label: 'Überschriftengröße', type: 'select', options: titleSizeOptions }
+    ],
+    appearanceDefaults: { titleSize: 'standard' }
+  });
+
   const layouts = {
     intro: {
+      ...titleAppearance(),
       label: 'Text und Aufzählung',
       description: 'Große Überschrift links, Fließtext und optionale Punkte rechts.',
       defaultNavigation: 'Psychotherapie',
@@ -33,6 +46,7 @@
       defaults: { eyebrow: 'Psychotherapie', title: 'Eine große Überschrift.', text: 'Beschreiben Sie diesen Bereich.', items: [{ text: 'Ein wichtiger Punkt' }] }
     },
     note: {
+      ...titleAppearance(),
       label: 'Text mit hervorgehobenem Hinweis',
       description: 'Textspalte mit einer großen, seitlich abgesetzten Notiz.',
       defaultNavigation: '',
@@ -46,6 +60,7 @@
       defaults: { eyebrow: 'Psychotherapie', title: 'Eine große Überschrift.', text: 'Beschreiben Sie diesen Bereich.', note: 'Dieser Text wird besonders hervorgehoben.' }
     },
     cards: {
+      ...titleAppearance(),
       label: 'Kartenraster',
       description: 'Einleitung mit einem Raster aus zwei bis sechs Karten.',
       defaultNavigation: 'Schwerpunkte',
@@ -59,6 +74,7 @@
       defaults: { eyebrow: 'Schwerpunkte', title: 'Womit Sie zu mir kommen können.', intro: 'Eine kurze Einleitung zu den folgenden Themen.', items: [{ title: 'Erstes Thema', text: 'Kurze Beschreibung.' }, { title: 'Zweites Thema', text: 'Kurze Beschreibung.' }] }
     },
     image: {
+      ...titleAppearance(),
       label: 'Text mit Bild',
       description: 'Text links und ein großes Bild oder der bestehende Praxis-Platzhalter rechts.',
       defaultNavigation: '',
@@ -73,7 +89,52 @@
       ],
       defaults: { eyebrow: 'Die Praxis', title: 'Ein ruhiger Raum für Ihr Gespräch.', text: 'Beschreiben Sie diesen Ort oder Ihr Angebot.', imageSrc: '', imageAlt: 'Foto des Praxisraums', caption: 'Foto des Praxisraums folgt' }
     },
+    wideImage: {
+      ...titleAppearance(),
+      label: 'Text mit breitem Bild',
+      description: 'Einleitung über einer großzügigen, querformatigen Fotofläche.',
+      defaultNavigation: 'Praxis',
+      defaultBackground: 'soft',
+      fields: [
+        { key: 'eyebrow', label: 'Bereichsbezeichnung', type: 'text' },
+        { key: 'title', label: 'Titel', type: 'rich', editorRows: 3 },
+        { key: 'text', label: 'Text', type: 'rich', editorRows: 5 },
+        { key: 'imageSrc', label: 'Bilddatei', type: 'text' },
+        { key: 'imageAlt', label: 'Alternativtext', type: 'text' },
+        { key: 'caption', label: 'Bildbeschriftung', type: 'text' }
+      ],
+      defaults: { eyebrow: 'Die Praxis', title: 'Ein ruhiger Ort für Ihr Gespräch.', text: 'Beschreiben Sie diesen Ort oder Ihr Angebot.', imageSrc: '', imageAlt: 'Foto des Praxisraums', caption: '' }
+    },
+    topics: {
+      ...titleAppearance(),
+      label: 'Kompakte Themenliste',
+      description: 'Eine ruhige, flexible Liste für mehrere Schwerpunkte ohne erzwungene Beschreibungen.',
+      defaultNavigation: 'Schwerpunkte',
+      defaultBackground: 'rose',
+      fields: [
+        { key: 'eyebrow', label: 'Bereichsbezeichnung', type: 'text' },
+        { key: 'title', label: 'Titel', type: 'rich', editorRows: 3 },
+        { key: 'intro', label: 'Einleitung', type: 'rich', editorRows: 4 },
+        { key: 'items', label: 'Themen', type: 'collection', min: 2, max: 10, addLabel: 'Thema hinzufügen', itemFields: [{ key: 'text', label: 'Thema', type: 'text' }] }
+      ],
+      defaults: { eyebrow: 'Schwerpunkte', title: 'Wobei ich Sie begleiten kann.', intro: 'Eine kurze Einleitung zu den folgenden Themen.', items: [{ text: 'Erstes Thema' }, { text: 'Zweites Thema' }] }
+    },
+    timeline: {
+      ...titleAppearance(),
+      label: 'Werdegang',
+      description: 'Eine flexible chronologische Liste für Ausbildung oder Berufserfahrung.',
+      defaultNavigation: 'Über mich',
+      defaultBackground: 'paper',
+      fields: [
+        { key: 'eyebrow', label: 'Bereichsbezeichnung', type: 'text' },
+        { key: 'title', label: 'Titel', type: 'rich', editorRows: 3 },
+        { key: 'intro', label: 'Einleitung', type: 'rich', editorRows: 4 },
+        { key: 'items', label: 'Stationen', type: 'collection', min: 2, max: 12, addLabel: 'Station hinzufügen', itemFields: [{ key: 'period', label: 'Zeitraum', type: 'text' }, { key: 'title', label: 'Station', type: 'text' }, { key: 'detail', label: 'Zusatz', type: 'text' }] }
+      ],
+      defaults: { eyebrow: 'Über mich', title: 'Ausbildung und Erfahrung.', intro: 'Eine kurze Einleitung zum Werdegang.', items: [{ period: 'Seit 2024', title: 'Erste Station', detail: 'Ort oder Institution' }, { period: '2023', title: 'Zweite Station', detail: 'Ort oder Institution' }] }
+    },
     pricing: {
+      ...titleAppearance(),
       label: 'Preisliste',
       description: 'Einleitung links und eine strukturierte Liste aus Leistungen und Preisen rechts.',
       defaultNavigation: 'Kosten',
@@ -88,6 +149,7 @@
       defaults: { eyebrow: 'Kosten', title: 'Transparent von Anfang an.', intro: 'Beschreiben Sie hier die Rahmenbedingungen.', items: [{ name: 'Einzeltherapie', duration: '50 Minuten', price: 'EUR 110' }], note: 'Ergänzender Hinweis zu Kosten oder Erstattung.' }
     },
     contact: {
+      ...titleAppearance(),
       label: 'Kontakt',
       description: 'Kontakttext, Adresse, Telefon, E-Mail und eine Kartenfläche.',
       defaultNavigation: 'Kontakt',
@@ -124,6 +186,12 @@
     const definition = layouts[layout];
     const background = sectionColors.some((color) => color.key === section?.background) ? section.background : definition.defaultBackground;
     const content = mergeDefaults(definition.defaults, section?.content);
+    const appearance = mergeDefaults(definition.appearanceDefaults || {}, section?.appearance);
+    (definition.appearanceFields || []).forEach((field) => {
+      if (field.type === 'select' && !field.options.some(([value]) => value === appearance[field.key])) {
+        appearance[field.key] = definition.appearanceDefaults?.[field.key] || field.options[0]?.[0] || '';
+      }
+    });
     definition.fields.filter((field) => field.type === 'collection').forEach((field) => {
       const sourceItems = Array.isArray(content[field.key]) ? content[field.key] : [];
       const maximum = Number.isFinite(field.max) ? field.max : sourceItems.length;
@@ -138,6 +206,7 @@
       navigationLabel: String(section?.navigationLabel ?? definition.defaultNavigation),
       background,
       customBackground: /^#[0-9a-f]{6}$/i.test(section?.customBackground || '') ? section.customBackground : '#f7f2ef',
+      appearance,
       content
     };
   };
@@ -253,14 +322,16 @@
   const normalize = (input) => {
     const source = input && typeof input === 'object' ? clone(input) : {};
     const sections = Array.isArray(source.sections) ? source.sections : migrateLegacySections(source);
+    const hero = mergeDefaults({ eyebrow: '', title: '', sentence: '', contactButton: 'Kontakt aufnehmen', titleSize: 'standard' }, source.hero);
+    if (!titleSizeOptions.some(([value]) => value === hero.titleSize)) hero.titleSize = 'standard';
     return {
-      schemaVersion: 2,
+      schemaVersion: 3,
       colorTheme: themes[source.colorTheme] ? source.colorTheme : 'wine',
       customColors: source.customColors && typeof source.customColors === 'object' ? source.customColors : {},
       practiceName: String(source.practiceName || 'Praxis für Psychotherapie'),
       practitionerName: String(source.practitionerName || ''),
       navigation: { home: String(source.navigation?.home || 'Startseite') },
-      hero: mergeDefaults({ eyebrow: '', title: '', sentence: '', contactButton: 'Kontakt aufnehmen' }, source.hero),
+      hero,
       heroImage: mergeDefaults({ src: 'therapist.png', alt: '', layout: 'portrait', blend: 'duotone', position: 'center top', overlay: 'soft' }, source.heroImage),
       sections: sections.map(normalizeSection),
       footer: mergeDefaults({ copyright: '' }, source.footer)

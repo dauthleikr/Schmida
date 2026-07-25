@@ -19,6 +19,9 @@
     .replace(/\[([^\]]+)\]\((https?:\/\/[^\s)]+)\)/g,'<a href="$2" target="_blank" rel="noreferrer">$1</a>')
     .replace(/\n/g,'<br>');
   const eyebrow = (value) => value ? `<p class="eyebrow">${formatMarkup(value)}</p>` : '';
+  const imageMarkup = (body, className = 'office-placeholder') => body.imageSrc
+    ? `<div class="${className}" role="img" aria-label="${escapeAttribute(body.imageAlt)}"><img class="section-image" src="${escapeAttribute(body.imageSrc)}" alt="${escapeAttribute(body.imageAlt)}">${body.caption ? `<p class="image-caption">${formatMarkup(body.caption)}</p>` : ''}</div>`
+    : `<div class="${className}" role="img" aria-label="${escapeAttribute(body.imageAlt)}"><div class="office-art" aria-hidden="true"></div>${body.caption ? `<p class="image-caption">${formatMarkup(body.caption)}</p>` : ''}</div>`;
   const sectionId = (value, index) => {
     const normalized = String(value || `section-${index + 1}`).trim().toLowerCase().replace(/[^a-z0-9_-]+/g,'-').replace(/^-+|-+$/g,'');
     return normalized || `section-${index + 1}`;
@@ -42,10 +45,21 @@
     },
     image: (section) => {
       const body = section.content;
-      const image = body.imageSrc
-        ? `<div class="office-placeholder" role="img" aria-label="${escapeAttribute(body.imageAlt)}"><img class="section-image" src="${escapeAttribute(body.imageSrc)}" alt="${escapeAttribute(body.imageAlt)}">${body.caption ? `<p class="image-caption">${formatMarkup(body.caption)}</p>` : ''}</div>`
-        : `<div class="office-placeholder" role="img" aria-label="${escapeAttribute(body.imageAlt)}"><div class="office-art" aria-hidden="true"></div>${body.caption ? `<p class="image-caption">${formatMarkup(body.caption)}</p>` : ''}</div>`;
-      return `<section class="section dynamic-section layout-image"><div class="page practice-grid"><div class="practice-copy">${eyebrow(body.eyebrow)}<h2>${formatMarkup(body.title)}</h2><p>${formatMarkup(body.text)}</p></div>${image}</div></section>`;
+      return `<section class="section dynamic-section layout-image"><div class="page practice-grid"><div class="practice-copy">${eyebrow(body.eyebrow)}<h2>${formatMarkup(body.title)}</h2><p>${formatMarkup(body.text)}</p></div>${imageMarkup(body)}</div></section>`;
+    },
+    wideImage: (section) => {
+      const body = section.content;
+      return `<section class="section dynamic-section layout-wide-image"><div class="page"><div class="wide-image-copy"><div>${eyebrow(body.eyebrow)}<h2>${formatMarkup(body.title)}</h2></div><p>${formatMarkup(body.text)}</p></div>${imageMarkup(body,'wide-image-frame')}</div></section>`;
+    },
+    topics: (section) => {
+      const body = section.content;
+      const items = body.items.filter((item) => item.text).map((item,index) => `<li><span>${String(index + 1).padStart(2,'0')}</span>${formatMarkup(item.text)}</li>`).join('');
+      return `<section class="section dynamic-section layout-topics"><div class="page topics-grid"><div class="topics-copy">${eyebrow(body.eyebrow)}<h2>${formatMarkup(body.title)}</h2><p>${formatMarkup(body.intro)}</p></div><ol class="topics-list">${items}</ol></div></section>`;
+    },
+    timeline: (section) => {
+      const body = section.content;
+      const items = body.items.map((item) => `<li><span class="timeline-period">${formatMarkup(item.period)}</span><div><h3>${formatMarkup(item.title)}</h3>${item.detail ? `<p>${formatMarkup(item.detail)}</p>` : ''}</div></li>`).join('');
+      return `<section class="section dynamic-section layout-timeline"><div class="page timeline-grid"><div class="timeline-copy">${eyebrow(body.eyebrow)}<h2>${formatMarkup(body.title)}</h2><p>${formatMarkup(body.intro)}</p></div><ol class="timeline-list">${items}</ol></div></section>`;
     },
     pricing: (section) => {
       const body = section.content;
@@ -55,7 +69,14 @@
     contact: (section) => {
       const body = section.content;
       const phoneHref = String(body.phoneHref || '').replace(/[^\d+]/g,'');
-      return `<section class="section dynamic-section contact-section layout-contact"><div class="page contact-grid"><div class="contact-copy">${eyebrow(body.eyebrow)}<h2>${formatMarkup(body.title)}</h2><p>${formatMarkup(body.text)}</p></div><div class="contact-details"><div><div class="detail-label">Praxis</div><p class="detail-value">${formatMarkup(body.addressLine1)}<br>${formatMarkup(body.addressLine2)}</p></div><div><div class="detail-label">Telefon</div><a class="detail-value" href="tel:${escapeAttribute(phoneHref)}">${formatMarkup(body.phoneLabel)}</a></div><div><div class="detail-label">E-Mail</div><a class="detail-value" href="mailto:${escapeAttribute(body.email)}">${formatMarkup(body.email)}</a></div></div></div><div class="map"><a class="map-link" href="${escapeAttribute(body.mapLink)}" target="_blank" rel="noreferrer">${formatMarkup(body.mapLabel)}</a></div></section>`;
+      const address = [body.addressLine1,body.addressLine2].filter(Boolean);
+      const details = [
+        address.length ? `<div><div class="detail-label">Praxis</div><p class="detail-value">${address.map(formatMarkup).join('<br>')}</p></div>` : '',
+        body.phoneLabel ? `<div><div class="detail-label">Telefon</div>${phoneHref ? `<a class="detail-value" href="tel:${escapeAttribute(phoneHref)}">${formatMarkup(body.phoneLabel)}</a>` : `<span class="detail-value">${formatMarkup(body.phoneLabel)}</span>`}</div>` : '',
+        body.email ? `<div><div class="detail-label">E-Mail</div>${String(body.email).includes('@') ? `<a class="detail-value" href="mailto:${escapeAttribute(body.email)}">${formatMarkup(body.email)}</a>` : `<span class="detail-value">${formatMarkup(body.email)}</span>`}</div>` : ''
+      ].join('');
+      const map = body.mapLink && body.mapLabel ? `<div class="map"><a class="map-link" href="${escapeAttribute(body.mapLink)}" target="_blank" rel="noreferrer">${formatMarkup(body.mapLabel)}</a></div>` : '';
+      return `<section class="section dynamic-section contact-section layout-contact"><div class="page contact-grid"><div class="contact-copy">${eyebrow(body.eyebrow)}<h2>${formatMarkup(body.title)}</h2><p>${formatMarkup(body.text)}</p></div><div class="contact-details">${details}</div></div>${map}</section>`;
     }
   };
 
@@ -110,6 +131,7 @@
     sectionElement.id = id;
     sectionElement.style.setProperty('--section-bg',model.sectionColorValue(section));
     sectionElement.classList.toggle('is-dark',model.sectionIsDark(section));
+    sectionElement.dataset.titleSize = section.appearance?.titleSize || 'standard';
     wrapper.dataset.renderedId = id;
     host.append(wrapper);
   });
