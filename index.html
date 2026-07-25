@@ -30,6 +30,9 @@ html[data-theme="ruby"]{--wine-950:#32040f;--wine-850:#631028;--wine-750:#a90e38
   .ribbons .ribbon-transition-soft, .hero-ribbon .ribbon-transition-soft { fill:none; stroke:var(--divider-bottom, var(--paper)); stroke-width:28; opacity:.22; filter:blur(8px); }
   .ribbons > svg:not(.ribbon-transition) { position:relative; z-index:1; }
   .hero-ribbon > svg:not(.ribbon-transition) { position:relative; z-index:1; }
+  @media (max-width:760px) {
+    .ribbons::after { position:absolute; z-index:2; right:0; bottom:-1px; left:0; height:2px; background:var(--divider-bottom, var(--paper)); content:""; }
+  }
   .hero-image { object-position:var(--hero-image-position, center top); }
   .hero[data-image-blend="natural"] .hero-image { filter:saturate(.92) contrast(.98); mix-blend-mode:normal; opacity:1; }
   .hero[data-image-blend="mono"] .hero-image { filter:grayscale(1) contrast(1.08); mix-blend-mode:luminosity; opacity:.92; }
