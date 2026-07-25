@@ -23,6 +23,13 @@
     ['standard', 'Standard'],
     ['large', 'Groß']
   ];
+  const imagePositionOptions = [
+    ['center top', 'Mitte oben'],
+    ['center center', 'Mitte'],
+    ['center bottom', 'Mitte unten'],
+    ['left center', 'Links'],
+    ['right center', 'Rechts']
+  ];
   const titleAppearance = () => ({
     appearanceFields: [
       { key: 'titleSize', label: 'Überschriftengröße', type: 'select', options: titleSizeOptions }
@@ -85,9 +92,10 @@
         { key: 'text', label: 'Text', type: 'rich', editorRows: 5 },
         { key: 'imageSrc', label: 'Bilddatei (optional)', type: 'text' },
         { key: 'imageAlt', label: 'Alternativtext', type: 'text' },
+        { key: 'imagePosition', label: 'Bildausschnitt', type: 'select', options: imagePositionOptions },
         { key: 'caption', label: 'Bildbeschriftung', type: 'text' }
       ],
-      defaults: { eyebrow: 'Die Praxis', title: 'Ein ruhiger Raum für Ihr Gespräch.', text: 'Beschreiben Sie diesen Ort oder Ihr Angebot.', imageSrc: '', imageAlt: 'Foto des Praxisraums', caption: 'Foto des Praxisraums folgt' }
+      defaults: { eyebrow: 'Die Praxis', title: 'Ein ruhiger Raum für Ihr Gespräch.', text: 'Beschreiben Sie diesen Ort oder Ihr Angebot.', imageSrc: '', imageAlt: 'Foto des Praxisraums', imagePosition: 'center center', caption: 'Foto des Praxisraums folgt' }
     },
     wideImage: {
       ...titleAppearance(),
@@ -101,9 +109,10 @@
         { key: 'text', label: 'Text', type: 'rich', editorRows: 5 },
         { key: 'imageSrc', label: 'Bilddatei', type: 'text' },
         { key: 'imageAlt', label: 'Alternativtext', type: 'text' },
+        { key: 'imagePosition', label: 'Bildausschnitt', type: 'select', options: imagePositionOptions },
         { key: 'caption', label: 'Bildbeschriftung', type: 'text' }
       ],
-      defaults: { eyebrow: 'Die Praxis', title: 'Ein ruhiger Ort für Ihr Gespräch.', text: 'Beschreiben Sie diesen Ort oder Ihr Angebot.', imageSrc: '', imageAlt: 'Foto des Praxisraums', caption: '' }
+      defaults: { eyebrow: 'Die Praxis', title: 'Ein ruhiger Ort für Ihr Gespräch.', text: 'Beschreiben Sie diesen Ort oder Ihr Angebot.', imageSrc: '', imageAlt: 'Foto des Praxisraums', imagePosition: 'center center', caption: '' }
     },
     topics: {
       ...titleAppearance(),
@@ -323,7 +332,12 @@
     const source = input && typeof input === 'object' ? clone(input) : {};
     const sections = Array.isArray(source.sections) ? source.sections : migrateLegacySections(source);
     const hero = mergeDefaults({ eyebrow: '', title: '', sentence: '', contactButton: 'Kontakt aufnehmen', titleSize: 'standard' }, source.hero);
+    const heroImage = mergeDefaults({ src: 'therapist.png', alt: '', layout: 'portrait', blend: 'duotone', position: 'center top', mobileLayout: 'portrait', mobilePosition: 'center center', overlay: 'soft' }, source.heroImage);
     if (!titleSizeOptions.some(([value]) => value === hero.titleSize)) hero.titleSize = 'standard';
+    if (!['portrait','landscape','background'].includes(heroImage.layout)) heroImage.layout = 'portrait';
+    if (!['portrait','landscape','hidden'].includes(heroImage.mobileLayout)) heroImage.mobileLayout = 'portrait';
+    if (!['duotone','natural','mono','warm'].includes(heroImage.blend)) heroImage.blend = 'duotone';
+    if (!['soft','strong','none'].includes(heroImage.overlay)) heroImage.overlay = 'soft';
     return {
       schemaVersion: 3,
       colorTheme: themes[source.colorTheme] ? source.colorTheme : 'wine',
@@ -332,7 +346,7 @@
       practitionerName: String(source.practitionerName || ''),
       navigation: { home: String(source.navigation?.home || 'Startseite') },
       hero,
-      heroImage: mergeDefaults({ src: 'therapist.png', alt: '', layout: 'portrait', blend: 'duotone', position: 'center top', overlay: 'soft' }, source.heroImage),
+      heroImage,
       sections: sections.map(normalizeSection),
       footer: mergeDefaults({ copyright: '' }, source.footer)
     };

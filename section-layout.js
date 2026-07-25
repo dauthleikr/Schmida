@@ -20,7 +20,7 @@
     .replace(/\n/g,'<br>');
   const eyebrow = (value) => value ? `<p class="eyebrow">${formatMarkup(value)}</p>` : '';
   const imageMarkup = (body, className = 'office-placeholder') => body.imageSrc
-    ? `<div class="${className}" role="img" aria-label="${escapeAttribute(body.imageAlt)}"><img class="section-image" src="${escapeAttribute(body.imageSrc)}" alt="${escapeAttribute(body.imageAlt)}">${body.caption ? `<p class="image-caption">${formatMarkup(body.caption)}</p>` : ''}</div>`
+    ? `<div class="${className}" role="img" aria-label="${escapeAttribute(body.imageAlt)}" style="--section-image-position:${escapeAttribute(body.imagePosition || 'center center')}"><img class="section-image" src="${escapeAttribute(body.imageSrc)}" alt="${escapeAttribute(body.imageAlt)}">${body.caption ? `<p class="image-caption">${formatMarkup(body.caption)}</p>` : ''}</div>`
     : `<div class="${className}" role="img" aria-label="${escapeAttribute(body.imageAlt)}"><div class="office-art" aria-hidden="true"></div>${body.caption ? `<p class="image-caption">${formatMarkup(body.caption)}</p>` : ''}</div>`;
   const sectionId = (value, index) => {
     const normalized = String(value || `section-${index + 1}`).trim().toLowerCase().replace(/[^a-z0-9_-]+/g,'-').replace(/^-+|-+$/g,'');

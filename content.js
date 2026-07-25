@@ -16,11 +16,13 @@ window.practiceContent = {
     "titleSize": "compact"
   },
   "heroImage": {
-    "src": "assets/derived/carina-hero.jpg",
+    "src": "assets/carina_close.JPG",
     "alt": "Porträt von Carina Schmida",
     "layout": "portrait",
     "blend": "natural",
     "position": "center center",
+    "mobileLayout": "landscape",
+    "mobilePosition": "center 38%",
     "overlay": "soft"
   },
   "sections": [
@@ -193,8 +195,9 @@ window.practiceContent = {
         "eyebrow": "Der Rahmen",
         "title": "Ein ruhiger Ort für Ihr Gespräch.",
         "text": "Die Gespräche finden in einer hellen, ruhigen Praxis statt. Der geschützte Rahmen schafft Raum, um Belastendes anzusprechen, Gedanken zu ordnen und neue Perspektiven zu entwickeln.",
-        "imageSrc": "assets/derived/office-wide.jpg",
+        "imageSrc": "assets/office_horizontal.JPG",
         "imageAlt": "Heller Praxisraum mit zwei Sesseln",
+        "imagePosition": "center top",
         "caption": "Praxisraum"
       }
     },

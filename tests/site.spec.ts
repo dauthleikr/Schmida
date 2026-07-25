@@ -15,7 +15,9 @@ test('renders the new section schema with dynamic navigation and waves', async (
   await expect(page.locator('.ribbon-transition')).toHaveCount(7);
   await expect(page.locator('.hero-image')).toHaveJSProperty('complete',true);
   await expect(page.locator('#kontakt')).toContainText('E-Mail-Adresse bitte ergänzen');
-  await expect(page.locator('.wide-image-frame .section-image')).toHaveAttribute('src','assets/derived/office-wide.jpg');
+  await expect(page.locator('.wide-image-frame .section-image')).toHaveAttribute('src','assets/office_horizontal.JPG');
+  expect(await page.locator('.wide-image-frame .section-image').evaluate((image:HTMLImageElement) => image.naturalWidth)).toBeGreaterThan(0);
+  await expect(page.locator('.wide-image-frame .section-image')).toHaveCSS('object-position','50% 0%');
 
   await page.getByRole('link',{ name:'Praxis',exact:true }).click();
   await expect(page.locator('#praxis')).toBeInViewport();
@@ -150,6 +152,8 @@ test('rich-text controls and hero presentation remain editable', async ({ page }
   await page.selectOption('[data-path="heroImage.layout"]','background');
   await page.selectOption('[data-path="heroImage.blend"]','natural');
   await page.selectOption('[data-path="heroImage.position"]','right center');
+  await page.selectOption('[data-path="heroImage.mobileLayout"]','landscape');
+  await page.selectOption('[data-path="heroImage.mobilePosition"]','center top');
   await page.selectOption('[data-path="hero.titleSize"]','large');
   await page.locator('.section-editor[data-section-id="psychotherapie"] [data-path$=".appearance.titleSize"]').selectOption('compact');
   await page.locator('[data-path="hero.contactButton"]').fill('Erstgespräch anfragen');
@@ -158,8 +162,10 @@ test('rich-text controls and hero presentation remain editable', async ({ page }
   const preview = page.frameLocator('#preview-frame');
   await expect(preview.locator('.hero')).toHaveAttribute('data-image-layout','background');
   await expect(preview.locator('.hero')).toHaveAttribute('data-image-blend','natural');
+  await expect(preview.locator('.hero')).toHaveAttribute('data-mobile-image-layout','landscape');
   await expect(preview.locator('.hero')).toHaveAttribute('data-title-size','large');
   await expect(preview.locator('.hero')).toHaveCSS('--hero-image-position','right center');
+  await expect(preview.locator('.hero')).toHaveCSS('--hero-mobile-image-position','center top');
   await expect(preview.locator('#psychotherapie')).toHaveAttribute('data-title-size','compact');
   await expect(preview.getByRole('link',{ name:'Erstgespräch anfragen' })).toHaveAttribute('href','#kontakt');
   await expect(preview.locator('h1 strong')).toHaveText('Ein neuer Titel');
@@ -221,6 +227,29 @@ test('mobile and desktop previews use distinct viewports and every layout fits m
   for (const layout of registeredLayouts) {
     expect(await mobilePreview.locator(`.content-section[data-layout="${layout}"]`).count()).toBeGreaterThanOrEqual(1);
   }
+  const mobileComposition = await page.frames()[1].evaluate(() => {
+    const heroImage = document.querySelector('.hero-image') as HTMLImageElement;
+    const heroRibbon = document.querySelector('.hero-ribbon') as HTMLElement;
+    const divider = document.querySelector('.ribbons') as HTMLElement;
+    const dividerArtwork = divider.querySelector('svg:not(.ribbon-transition)') as SVGElement;
+    const imageBox = heroImage.getBoundingClientRect();
+    const heroRibbonBox = heroRibbon.getBoundingClientRect();
+    return {
+      heroImageWidth:heroImage.naturalWidth,
+      heroImagePosition:getComputedStyle(heroImage).objectPosition,
+      heroImageBottom:imageBox.bottom,
+      heroRibbonTop:heroRibbonBox.top,
+      heroRibbonHeight:heroRibbonBox.height,
+      dividerHeight:divider.getBoundingClientRect().height,
+      dividerArtworkWidth:dividerArtwork.getBoundingClientRect().width
+    };
+  });
+  expect(mobileComposition.heroImageWidth).toBeGreaterThan(0);
+  expect(mobileComposition.heroImagePosition).toBe('50% 38%');
+  expect(mobileComposition.heroImageBottom).toBeLessThanOrEqual(mobileComposition.heroRibbonTop);
+  expect(mobileComposition.heroRibbonHeight).toBeLessThanOrEqual(118);
+  expect(mobileComposition.dividerHeight).toBeLessThanOrEqual(108);
+  expect(mobileComposition.dividerArtworkWidth).toBeGreaterThan(780);
   const mobileFit = await page.frames()[1].evaluate(() => {
     const viewportWidth = document.documentElement.clientWidth;
     const sectionsFit = [...document.querySelectorAll('.dynamic-section')].every((section) => {

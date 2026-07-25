@@ -115,7 +115,7 @@
     .office-art { position:absolute; right:10%; bottom:0; left:10%; height:70%; border:14px solid rgba(255,255,255,.63); border-bottom:0; }
     .office-art::before { position:absolute; bottom:0; left:12%; width:46%; height:72%; border-radius:90px 90px 0 0; background:rgba(245,235,229,.85); box-shadow:150px 21px 0 -25px rgba(77,35,40,.67); content:""; }
     .office-art::after { position:absolute; right:-8%; bottom:30%; width:52%; height:8px; background:rgba(75,36,43,.62); box-shadow:0 72px 0 rgba(75,36,43,.62); content:""; }
-    .section-image { display:block; width:100%; min-height:430px; max-height:620px; object-fit:cover; }
+    .section-image { display:block; width:100%; min-height:430px; max-height:620px; object-fit:cover; object-position:var(--section-image-position,center center); }
     .image-caption { position:absolute; z-index:1; right:18px; bottom:15px; margin:0; color:#fff!important; font-size:.67rem; font-weight:700; letter-spacing:.1em; text-transform:uppercase; }
 
     .wide-image-copy { display:grid; grid-template-columns:.78fr 1.22fr; gap:clamp(42px,10vw,142px); align-items:end; margin-bottom:52px; }
@@ -199,16 +199,22 @@
       .nav-list { position:absolute; top:65px; right:0; left:0; display:none; flex-direction:column; align-items:stretch; gap:0; padding:10px 20px 17px; border-bottom:1px solid rgba(255,255,255,.16); background:var(--wine-950); }
       .nav-list.is-open { display:flex; }
       .nav-list a { display:block; padding:11px 0; }
-      .hero { min-height:auto; }
+      .hero { --mobile-wave-height:clamp(96px,27vw,118px); min-height:auto; }
       .hero-inner,.intro-grid,.therapy-grid,.practice-grid,.costs-grid,.contact-grid,.focus-header,.wide-image-copy,.topics-grid,.timeline-grid { grid-template-columns:1fr; }
       .intro-grid,.therapy-grid,.practice-grid,.costs-grid,.contact-grid,.wide-image-copy,.topics-grid,.timeline-grid { gap:36px; }
       .hero-inner { gap:0; padding-top:56px; }
-      .hero-copy { padding-bottom:84px; transform:none; }
-      .hero-image-wrap { min-height:430px; }
+      .hero-copy { padding-bottom:52px; transform:none; }
+      .hero[data-mobile-image-layout="portrait"] .hero-inner,.hero[data-mobile-image-layout="landscape"] .hero-inner { display:grid; grid-template-columns:1fr; }
+      .hero[data-mobile-image-layout="portrait"] .hero-copy,.hero[data-mobile-image-layout="landscape"] .hero-copy { display:block; min-height:0; }
+      .hero[data-mobile-image-layout="portrait"] .hero-image-wrap,.hero[data-mobile-image-layout="landscape"] .hero-image-wrap { position:relative; inset:auto; width:100%; min-height:0; justify-self:center; margin-bottom:calc(var(--mobile-wave-height) + 18px); }
+      .hero[data-mobile-image-layout="portrait"] .hero-image-wrap { width:min(100%,460px); aspect-ratio:4/5; }
+      .hero[data-mobile-image-layout="landscape"] .hero-image-wrap { aspect-ratio:16/10; }
+      .hero[data-mobile-image-layout="hidden"] .hero-image-wrap { display:none; }
+      .hero[data-mobile-image-layout="hidden"] .hero-copy { padding-bottom:calc(var(--mobile-wave-height) + 54px); }
+      .hero-image { object-position:var(--hero-mobile-image-position,var(--hero-image-position,center center)); }
       .hero-image-wrap::after { background:linear-gradient(0deg,var(--wine-950) 0%,transparent 28%); }
-      .hero-ribbon { right:-40vw; left:-45vw; }
-      .hero[data-image-layout="landscape"] .hero-inner { grid-template-columns:1fr; }
-      .hero[data-image-layout="background"] .hero-copy { min-height:inherit; }
+      .hero-ribbon { right:0; left:0; height:var(--mobile-wave-height); }
+      .hero[data-mobile-image-layout="hidden"] .hero-copy { min-height:inherit; }
       .focus-header { gap:18px; margin-bottom:38px; }
       .focus-grid { grid-template-columns:repeat(2,1fr); }
       .focus-card,.focus-card:nth-child(4n+1) { min-height:190px; padding-left:0; }
@@ -222,9 +228,13 @@
       .contact-details { gap:27px 20px; }
       .office-placeholder,.section-image { min-height:360px; }
       .wide-image-copy { margin-bottom:36px; }
-      .wide-image-frame { min-height:0; aspect-ratio:4/3; }
+      .wide-image-frame { min-height:0; aspect-ratio:16/10; }
       .topics-list { gap:0 24px; }
       .map { min-height:240px; }
+      .ribbons { height:clamp(88px,24vw,108px); }
+      .ribbons svg,.hero-ribbon svg { width:220%; max-width:none; }
+      .ribbon-transition { right:auto; left:-60%; width:220%; }
+      .ribbons>svg:not(.ribbon-transition),.hero-ribbon>svg:not(.ribbon-transition) { left:-60%; }
     }
 
     @media (max-width:440px) {
@@ -309,9 +319,11 @@
       const image = document.querySelector('.hero-image');
       hero.dataset.titleSize = content.hero.titleSize;
       hero.dataset.imageLayout = content.heroImage.layout;
+      hero.dataset.mobileImageLayout = content.heroImage.mobileLayout;
       hero.dataset.imageBlend = content.heroImage.blend;
       hero.dataset.imageOverlay = content.heroImage.overlay;
       hero.style.setProperty('--hero-image-position',content.heroImage.position);
+      hero.style.setProperty('--hero-mobile-image-position',content.heroImage.mobilePosition);
       image.src = content.heroImage.src;
       image.alt = content.heroImage.alt || `Porträt von ${content.practitionerName}`;
     })();
