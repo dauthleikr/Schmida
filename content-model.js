@@ -1,5 +1,9 @@
 (() => {
   const clone = (value) => JSON.parse(JSON.stringify(value));
+  const relativeAssetPath = (value) => {
+    const path = String(value || '').trim();
+    return path.startsWith('/') && !path.startsWith('//') ? path.replace(/^\/+/,'') : path;
+  };
 
   const themes = {
     wine: { label: 'Weinrot', '--wine-950': '#291117', '--wine-850': '#471a25', '--wine-750': '#6b2736', '--wine-650': '#863547', '--header-bg': '#291117', '--ribbon-hot': '#9d1c30', '--rose-300': '#dfa8ad', '--rose-100': '#f4e4e4', '--practice-bg': '#f2edeb', '--paper': '#fcfaf8', '--body-text': '#51474a', '--intro-text': '#471a25', '--line': '#dfd5d2' },
@@ -276,6 +280,8 @@
       while (items.length < (field.min || 0)) items.push(clone(template));
       content[field.key] = items.map((item) => mergeDefaults(template,item));
     });
+    if (layout === 'image') content.imageSrc = relativeAssetPath(content.imageSrc);
+    if (layout === 'wideImage') content.images.forEach((image) => { image.imageSrc = relativeAssetPath(image.imageSrc); });
     return {
       id: String(section?.id || `section-${index + 1}`),
       layout,
@@ -401,7 +407,7 @@
     const source = input && typeof input === 'object' ? clone(input) : {};
     const sections = Array.isArray(source.sections) ? source.sections : migrateLegacySections(source);
     const hero = mergeDefaults({ eyebrow: '', title: '', sentence: '', contactButton: 'Kontakt aufnehmen', titleSize: 'standard', titleWidthDesktop: 42 }, source.hero);
-    const heroImage = mergeDefaults({ src: 'therapist.png', alt: '', layout: 'portrait', blend: 'duotone', position: 'center top', mobileLayout: 'portrait', mobilePosition: 'center center', overlay: 'soft', blendWidthDesktop: 32, blendWidthMobile: 28 }, source.heroImage);
+    const heroImage = mergeDefaults({ src: 'assets/carina_close2.JPG', alt: '', layout: 'portrait', blend: 'duotone', position: 'center top', mobileLayout: 'portrait', mobilePosition: 'center center', overlay: 'soft', blendWidthDesktop: 32, blendWidthMobile: 28 }, source.heroImage);
     const sectionSpacing = mergeDefaults({ desktop: 104,mobile: 64 },source.sectionSpacing);
     if (!titleSizeOptions.some(([value]) => value === hero.titleSize)) hero.titleSize = 'standard';
     hero.titleWidthDesktop = Math.min(55,Math.max(30,Number(hero.titleWidthDesktop) || 42));
@@ -409,6 +415,7 @@
     if (!['portrait','landscape','hidden'].includes(heroImage.mobileLayout)) heroImage.mobileLayout = 'portrait';
     if (!['duotone','natural','mono','warm'].includes(heroImage.blend)) heroImage.blend = 'duotone';
     if (!['soft','strong','none'].includes(heroImage.overlay)) heroImage.overlay = 'soft';
+    heroImage.src = relativeAssetPath(heroImage.src);
     heroImage.blendWidthDesktop = Math.min(80,Math.max(5,Number(heroImage.blendWidthDesktop) || 32));
     heroImage.blendWidthMobile = Math.min(80,Math.max(5,Number(heroImage.blendWidthMobile) || 28));
     sectionSpacing.desktop = Math.min(180,Math.max(48,Number(sectionSpacing.desktop) || 104));
@@ -419,7 +426,7 @@
       customColors: source.customColors && typeof source.customColors === 'object' ? source.customColors : {},
       practiceName: String(source.practiceName || 'Praxis für Psychotherapie'),
       practitionerName: String(source.practitionerName || ''),
-      siteIcon: String(source.siteIcon || 'assets/icon4_tiny.png'),
+      siteIcon: relativeAssetPath(source.siteIcon || 'assets/icon4_tiny.png'),
       navigation: { home: String(source.navigation?.home || 'Startseite') },
       hero,
       heroImage,

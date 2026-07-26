@@ -1,8 +1,98 @@
 import { expect, test } from '@playwright/test';
-import { resolve } from 'node:path';
+import { createServer } from 'node:http';
+import { readFile } from 'node:fs/promises';
+import { extname, resolve, sep } from 'node:path';
 
 const siteUrl = `file:///${resolve('index.html').replace(/\\/g, '/')}`;
 const editorUrl = `file:///${resolve('editor.html').replace(/\\/g, '/')}`;
+
+test('all internal resources work from a nested static-server directory', async ({ page }) => {
+  const root = resolve('.');
+  const prefix = '/static/sites/schmida/';
+  const contentTypes:Record<string,string> = {
+    '.html':'text/html; charset=utf-8',
+    '.js':'text/javascript; charset=utf-8',
+    '.css':'text/css; charset=utf-8',
+    '.png':'image/png',
+    '.jpg':'image/jpeg',
+    '.jpeg':'image/jpeg'
+  };
+  const server = createServer(async (request,response) => {
+    try {
+      const pathname = decodeURIComponent(new URL(request.url || '/',`http://${request.headers.host}`).pathname);
+      if (!pathname.startsWith(prefix)) {
+        response.writeHead(404).end('Not found');
+        return;
+      }
+      const relativePath = pathname.slice(prefix.length) || 'index.html';
+      const filePath = resolve(root,relativePath);
+      if (!filePath.toLowerCase().startsWith(`${root}${sep}`.toLowerCase())) {
+        response.writeHead(403).end('Forbidden');
+        return;
+      }
+      const body = await readFile(filePath);
+      response.writeHead(200,{ 'Content-Type':contentTypes[extname(filePath).toLowerCase()] || 'application/octet-stream' });
+      response.end(body);
+    } catch {
+      response.writeHead(404).end('Not found');
+    }
+  });
+  await new Promise<void>((resolveListen,reject) => {
+    server.once('error',reject);
+    server.listen(0,'127.0.0.1',resolveListen);
+  });
+
+  try {
+    const address = server.address();
+    if (!address || typeof address === 'string') throw new Error('Static test server did not start');
+    const origin = `http://127.0.0.1:${address.port}`;
+    const baseUrl = `${origin}${prefix}`;
+    const badLocalResponses:string[] = [];
+    const loadedLocalPaths = new Set<string>();
+    page.on('response',(response) => {
+      if (!response.url().startsWith(baseUrl)) return;
+      loadedLocalPaths.add(new URL(response.url()).pathname.slice(prefix.length));
+      if (response.status() >= 400) badLocalResponses.push(`${response.status()} ${response.url()}`);
+    });
+    await page.route('https://www.google.com/maps/embed**',(route) => route.fulfill({
+      status:200,
+      contentType:'text/html',
+      body:'<!doctype html><title>Map test</title>'
+    }));
+
+    await page.goto(baseUrl);
+    await expect(page.locator('.hero-image')).toHaveJSProperty('complete',true);
+    await expect(page.locator('.brand-mark')).toHaveJSProperty('complete',true);
+    expect(await page.locator('.hero-image').evaluate((image:HTMLImageElement) => image.currentSrc)).toMatch(`${baseUrl}assets/`);
+    expect(await page.locator('.brand-mark').evaluate((image:HTMLImageElement) => image.currentSrc)).toMatch(`${baseUrl}assets/`);
+
+    await page.getByRole('link',{ name:'Praxis',exact:true }).click();
+    const carousel = page.locator('#praxis [data-carousel]');
+    const dots = carousel.locator('[data-carousel-dot]');
+    for (let index = 0; index < await dots.count(); index += 1) {
+      await dots.nth(index).click();
+      const image = carousel.locator(`[data-carousel-slide="${index}"] .section-image`);
+      await expect.poll(() => image.evaluate((element:HTMLImageElement) => element.naturalWidth)).toBeGreaterThan(0);
+      expect(await image.evaluate((element:HTMLImageElement) => element.currentSrc)).toMatch(`${baseUrl}assets/`);
+    }
+
+    await page.goto(`${baseUrl}editor.html`);
+    await page.getByRole('button',{ name:'Vorschau Desktop' }).click();
+    const preview = page.frameLocator('#preview-frame');
+    await expect(preview.locator('.hero-image')).toHaveJSProperty('complete',true);
+    await expect(preview.locator('.brand-mark')).toHaveJSProperty('complete',true);
+    const previewFrame = page.frames().find((frame) => frame !== page.mainFrame() && frame.url().startsWith(`${baseUrl}index.html?`));
+    expect(previewFrame).toBeDefined();
+    expect(await preview.locator('.hero-image').evaluate((image:HTMLImageElement) => image.currentSrc)).toMatch(`${baseUrl}assets/`);
+
+    expect(badLocalResponses).toEqual([]);
+    for (const resource of ['index.html','editor.html','content-model.js','content.js','section-layout.js','editor-enhancements.js','listing-styles.css','timeline-styles.css']) {
+      expect(loadedLocalPaths).toContain(resource);
+    }
+  } finally {
+    await new Promise<void>((resolveClose,reject) => server.close((error) => error ? reject(error) : resolveClose()));
+  }
+});
 
 test('renders the new section schema with dynamic navigation and waves', async ({ page }) => {
   await page.goto(siteUrl);
@@ -833,6 +923,19 @@ test('legacy fixed content is isolated behind the schema migration adapter', asy
     window.practiceContentModel.normalize({ hero:{ titleWidthDesktop:2 } }).hero.titleWidthDesktop
   ]);
   expect(heroWidths).toEqual([55,30]);
+
+  const relativeAssets = await page.evaluate(() => window.practiceContentModel.normalize({
+    siteIcon:'/assets/icon.png',
+    heroImage:{ src:'/assets/hero.jpg' },
+    sections:[
+      { id:'image',layout:'image',content:{ imageSrc:'/assets/side.jpg' } },
+      { id:'wide',layout:'wideImage',content:{ images:[{ imageSrc:'/assets/wide.jpg' }] } }
+    ]
+  }));
+  expect(relativeAssets.siteIcon).toBe('assets/icon.png');
+  expect(relativeAssets.heroImage.src).toBe('assets/hero.jpg');
+  expect(relativeAssets.sections[0].content.imageSrc).toBe('assets/side.jpg');
+  expect(relativeAssets.sections[1].content.images[0].imageSrc).toBe('assets/wide.jpg');
 });
 
 test('mobile and desktop previews use distinct viewports and every layout fits mobile', async ({ page }) => {

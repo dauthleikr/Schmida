@@ -35,7 +35,7 @@ The editor form, add/remove/reorder behavior, preview, export, backgrounds, navi
 
 ## Images
 
-- The hero image defaults to `therapist.png`.
+- The hero image defaults to the relative path `assets/carina_close2.JPG`, so the site can be hosted from any subdirectory.
 - Image-layout sections accept a file path. When left empty, the existing styled practice-room placeholder is shown.
 
 ## Tests
