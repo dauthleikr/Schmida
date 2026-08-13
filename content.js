@@ -114,7 +114,8 @@ window.practiceContent = {
         "headingModeDesktop": "eyebrow",
         "headingModeMobile": "eyebrow",
         "titleSize": "compact",
-        "timelineStyle": "alternating-path"
+        "timelineStyle": "alternating-path",
+        "timelineTransitionDuration": 650
       },
       "content": {
         "eyebrow": "Über mich",
@@ -241,6 +242,11 @@ window.practiceContent = {
             "title": "Adresse",
             "content": "Neubaugasse 7 / Stiege II / 2. Stock / Top 49\n1070 Wien",
             "type": "address"
+          },
+          {
+            "title": "Website",
+            "content": "https://apaedo.at/",
+            "type": "website"
           }
         ],
         "mapEmbed": "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d664.8465953807859!2d16.34879082855037!3d48.19917319210002!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x476d07f4eca9ce37%3A0xddd9c34524055e49!2sInstitut%20Ap%C3%A4do%20KG!5e0!3m2!1sen!2sat!4v1785022156931!5m2!1sen!2sat",
