@@ -56,7 +56,7 @@ window.practiceContent = {
     },
     {
       "id": "schwerpunkte",
-      "layout": "topics",
+      "layout": "titleCards",
       "internalName": "Schwerpunkte",
       "navigationLabel": "Schwerpunkte",
       "background": "rose",
@@ -65,6 +65,8 @@ window.practiceContent = {
         "headingModeDesktop": "eyebrow",
         "headingModeMobile": "eyebrow",
         "titleSize": "standard",
+        "itemTitleFont": "sans",
+        "itemTitleSize": 22,
         "listStyle": "gradient-pills",
         "gradientStart": "#d11137",
         "gradientEnd": "#6d0918"
@@ -72,28 +74,31 @@ window.practiceContent = {
       "content": {
         "eyebrow": "Schwerpunkte",
         "title": "Wobei ich Sie begleiten kann.",
-        "intro": "Psychotherapie ist so individuell wie die Menschen, die sie in Anspruch nehmen. Zu meinen Schwerpunkten zählen:",
+        "intro": "Psychotherapie ist so individuell wie die Menschen, die sie in Anspruch nehmen. Zu meinen Schwerpunkten zählen unter anderem:",
         "items": [
           {
-            "text": "Ängste, Zwänge und Panikattacken"
+            "title": "ADHS"
           },
           {
-            "text": "Depressionen"
+            "title": "Essstörungen"
           },
           {
-            "text": "Essstörungen"
+            "title": "Ängste und Panikattacken"
           },
           {
-            "text": "Trauma und Belastungsstörungen"
+            "title": "Depressionen"
           },
           {
-            "text": "Psychosomatische Beschwerden"
+            "title": "Zwänge"
           },
           {
-            "text": "ADHS"
+            "title": "Trauma und Belastungsstörungen"
           },
           {
-            "text": "Krisenhafte Lebenssituationen"
+            "title": "Psychosomatische Beschwerden"
+          },
+          {
+            "title": "Krisenhafte Lebenssituationen"
           }
         ]
       }
@@ -173,8 +178,8 @@ window.practiceContent = {
       "layout": "wideImage",
       "internalName": "Text über breitem Bild",
       "navigationLabel": "Praxis",
-      "background": "paper",
-      "customBackground": "#f7f2ef",
+      "background": "soft",
+      "customBackground": "#f2f2f2",
       "appearance": {
         "headingModeDesktop": "title",
         "headingModeMobile": "eyebrow",
@@ -218,7 +223,6 @@ window.practiceContent = {
         "title": "Erstgespräch & Kontakt.",
         "text": "Wenn Sie Fragen haben oder ein Erstgespräch vereinbaren möchten, freue ich mich über Ihre Nachricht.",
         "personalDetailsTitle": "Persönlicher Kontakt",
-        "officeDetailsTitle": "Praxisgemeinschaft",
         "personalDetails": [
           {
             "title": "Telefon",
@@ -231,6 +235,7 @@ window.practiceContent = {
             "type": "email"
           }
         ],
+        "officeDetailsTitle": "Praxisgemeinschaft",
         "officeDetails": [
           {
             "title": "Adresse",
