@@ -176,6 +176,40 @@ test('renders the new section schema with dynamic navigation and waves', async (
   expect(seamCoverage.background).not.toBe('rgba(0, 0, 0, 0)');
 });
 
+test('card grids draw complete row dividers at desktop and mobile widths', async ({ page }) => {
+  await page.goto(editorUrl);
+  await page.selectOption('#new-layout','cards');
+  await page.getByRole('button',{ name:'Bereich hinzufügen' }).click();
+
+  const editor = page.locator('.section-editor').last();
+  for (let index = 0; index < 4; index += 1) {
+    await editor.locator('[data-collection-action="add"]').click();
+  }
+  await editor.getByRole('button',{ name:/Desktopvorschau/ }).click();
+
+  const preview = page.frameLocator('#preview-frame');
+  const grid = preview.locator('.focus-grid');
+  const cards = grid.locator('.focus-card');
+  await expect(cards).toHaveCount(6);
+  await expect(grid).toHaveCSS('grid-template-columns',/\d+(?:\.\d+)?px \d+(?:\.\d+)?px \d+(?:\.\d+)?px/);
+
+  await expect(cards.nth(0)).toHaveCSS('padding-left','0px');
+  await expect(cards.nth(2)).toHaveCSS('border-right-width','0px');
+  await expect(cards.nth(3)).toHaveCSS('padding-left','0px');
+  await expect(cards.nth(3)).toHaveCSS('border-right-width','1px');
+  await expect(cards.nth(5)).toHaveCSS('border-right-width','0px');
+
+  await page.locator('#preview-frame').evaluate((frame:HTMLIFrameElement) => frame.style.width = '760px');
+  await expect(grid).toHaveCSS('grid-template-columns',/\d+(?:\.\d+)?px \d+(?:\.\d+)?px/);
+  await expect(cards.nth(2)).toHaveCSS('border-right-width','1px');
+  await expect(cards.nth(3)).toHaveCSS('border-right-width','0px');
+
+  await page.locator('#preview-frame').evaluate((frame:HTMLIFrameElement) => frame.style.width = '440px');
+  await expect(grid).toHaveCSS('grid-template-columns',/^[\d.]+px$/);
+  await expect(cards.nth(2)).toHaveCSS('border-right-width','0px');
+  await expect(cards.nth(3)).toHaveCSS('border-right-width','0px');
+});
+
 test('provides a usable compact navigation', async ({ page }) => {
   await page.setViewportSize({ width:390,height:844 });
   await page.goto(siteUrl);

@@ -119,8 +119,8 @@
     .focus-header p { align-self:end; max-width:45ch; margin:0; }
     .focus-grid { display:grid; grid-template-columns:repeat(var(--card-columns,4),1fr); border-top:1px solid var(--line); }
     .focus-card { min-height:240px; padding:27px 28px 23px; border-right:1px solid var(--line); border-bottom:1px solid var(--line); }
-    .focus-card:nth-child(4n+1) { padding-left:0; }
-    .focus-card:nth-child(4n) { border-right:0; }
+    .focus-card.is-row-start { padding-left:0; }
+    .focus-card.is-row-end { border-right:0; }
     .focus-card h3 { max-width:12ch; margin-bottom:16px; color:var(--wine-850); font-family:var(--serif); font-size:1.55rem; font-weight:400; line-height:1.04; }
     .focus-card p { margin:0; font-size:.91rem; }
 
@@ -306,7 +306,7 @@
       .hero[data-mobile-image-layout="hidden"] .hero-copy { min-height:inherit; }
       .focus-header { gap:18px; margin-bottom:38px; }
       .focus-grid { grid-template-columns:repeat(2,1fr); }
-      .focus-card,.focus-card:nth-child(4n+1) { min-height:190px; padding-left:0; }
+      .focus-card { min-height:190px; padding-left:0; }
       .focus-card:nth-child(odd) { border-right:1px solid var(--line); }
       .focus-card:nth-child(even) { padding-left:22px; border-right:0; }
       .therapy-note { padding:24px 0 0; border-top:2px solid var(--wine-650); border-left:0; }

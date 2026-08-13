@@ -76,7 +76,13 @@
     cards: (section) => {
       const body = section.content;
       const columns = body.items.length > 4 ? 3 : Math.max(1,body.items.length);
-      const cards = body.items.map((item) => `<article class="focus-card"><h3>${formatMarkup(item.title)}</h3><p>${formatMarkup(item.text)}</p></article>`).join('');
+      const cards = body.items.map((item,index) => {
+        const classes = ['focus-card',
+          index % columns === 0 ? 'is-row-start' : '',
+          index % columns === columns - 1 || index === body.items.length - 1 ? 'is-row-end' : ''
+        ].filter(Boolean).join(' ');
+        return `<article class="${classes}"><h3>${formatMarkup(item.title)}</h3><p>${formatMarkup(item.text)}</p></article>`;
+      }).join('');
       return `<section class="section dynamic-section layout-cards"><div class="page"><div class="focus-header"><div>${sectionHeading(section)}</div><p class="section-intro-text">${formatMarkup(body.intro)}</p></div><div class="focus-grid" data-count="${body.items.length}" style="--card-columns:${columns}">${cards}</div></div></section>`;
     },
     image: (section) => {
