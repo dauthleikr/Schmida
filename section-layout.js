@@ -64,7 +64,9 @@
 
   const renderCardGrid = (section,{ titleOnly = false } = {}) => {
     const body = section.content;
-    const columns = body.items.length > 4 ? 3 : Math.max(1,body.items.length);
+    const columns = titleOnly && body.items.length > 6
+      ? 4
+      : body.items.length > 4 ? 3 : Math.max(1,body.items.length);
     const cards = body.items.map((item,index) => {
       const classes = ['focus-card',
         titleOnly ? 'title-card' : '',

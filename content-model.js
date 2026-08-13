@@ -99,14 +99,14 @@
     titleCards: {
       ...titleAppearance(),
       label: 'Titelraster',
-      description: 'Einleitung mit einem kompakten Raster aus zwei bis sechs Titeln.',
+      description: 'Einleitung mit einem kompakten Raster aus zwei bis acht Titeln.',
       defaultNavigation: 'Schwerpunkte',
       defaultBackground: 'paper',
       fields: [
         { key: 'eyebrow', label: 'Bereichsbezeichnung', type: 'text' },
         { key: 'title', label: 'Titel', type: 'rich', editorRows: 3 },
         { key: 'intro', label: 'Einleitung', type: 'rich', editorRows: 4 },
-        { key: 'items', label: 'Titel', type: 'collection', min: 2, max: 6, addLabel: 'Titel hinzufügen', itemFields: [{ key: 'title', label: 'Titel', type: 'text' }] }
+        { key: 'items', label: 'Titel', type: 'collection', min: 2, max: 8, addLabel: 'Titel hinzufügen', itemFields: [{ key: 'title', label: 'Titel', type: 'text' }] }
       ],
       defaults: { eyebrow: 'Schwerpunkte', title: 'Womit Sie zu mir kommen können.', intro: 'Eine kurze Einleitung zu den folgenden Themen.', items: [{ title: 'Erstes Thema' }, { title: 'Zweites Thema' }] }
     },

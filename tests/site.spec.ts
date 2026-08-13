@@ -182,16 +182,17 @@ test('card grids draw complete row dividers at desktop and mobile widths', async
   await page.getByRole('button',{ name:'Bereich hinzufügen' }).click();
 
   const editor = page.locator('.section-editor').last();
-  for (let index = 0; index < 4; index += 1) {
+  for (let index = 0; index < 6; index += 1) {
     await editor.locator('[data-collection-action="add"]').click();
   }
+  await expect(editor.locator('[data-collection-action="add"]')).toBeDisabled();
   await editor.getByRole('button',{ name:/Desktopvorschau/ }).click();
 
   const preview = page.frameLocator('#preview-frame');
   const grid = preview.locator('.focus-grid');
   const cards = grid.locator('.focus-card');
-  await expect(cards).toHaveCount(6);
-  await expect(grid).toHaveCSS('grid-template-columns',/\d+(?:\.\d+)?px \d+(?:\.\d+)?px \d+(?:\.\d+)?px/);
+  await expect(cards).toHaveCount(8);
+  await expect(grid).toHaveCSS('grid-template-columns',/\d+(?:\.\d+)?px \d+(?:\.\d+)?px \d+(?:\.\d+)?px \d+(?:\.\d+)?px/);
 
   await expect(cards.nth(0)).toHaveCSS('padding-left','0px');
   await expect(cards.nth(2)).toHaveCSS('border-right-width','0px');
