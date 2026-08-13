@@ -101,7 +101,7 @@ window.practiceContent = {
     {
       "id": "berufserfahrung",
       "layout": "timeline",
-      "internalName": "Vertikale Zeitleiste",
+      "internalName": "Beruf und Ausbildung",
       "navigationLabel": "Über mich",
       "background": "paper",
       "customBackground": "#f7f2ef",
@@ -115,6 +115,8 @@ window.practiceContent = {
         "eyebrow": "Über mich",
         "title": "Psychosoziale Berufserfahrung.",
         "intro": "Als Psychotherapeutin in Ausbildung unter Supervision stehe ich im regelmäßigen fachlichen Austausch mit erfahrenen Psychotherapeut:innen.\n\nMeine bisherige Berufserfahrung im psychosozialen Bereich:",
+        "primaryViewLabel": "Berufserfahrung",
+        "secondaryViewLabel": "Ausbildung",
         "items": [
           {
             "period": "Seit 2024",
@@ -136,27 +138,10 @@ window.practiceContent = {
             "title": "Sozialpädagogische Kinder- und Jugend-Wohngemeinschaft",
             "detail": "Volkshilfe Wien"
           }
-        ]
-      }
-    },
-    {
-      "id": "ausbildung",
-      "layout": "timeline",
-      "internalName": "Vertikale Zeitleiste",
-      "navigationLabel": "",
-      "background": "rose",
-      "customBackground": "#f7f2ef",
-      "appearance": {
-        "headingModeDesktop": "eyebrow",
-        "headingModeMobile": "eyebrow",
-        "titleSize": "compact",
-        "timelineStyle": "classic-lines"
-      },
-      "content": {
-        "eyebrow": "Ausbildung",
-        "title": "Ausbildung",
-        "intro": "Meine psychotherapeutische und ergänzende Ausbildung:",
-        "items": [
+        ],
+        "secondaryTitle": "Ausbildung",
+        "secondaryIntro": "Meine psychotherapeutische und ergänzende Ausbildung:",
+        "secondaryItems": [
           {
             "period": "Laufend",
             "title": "Lerntherapeut*in & Kinder- und Elterncoach nach Apädo",

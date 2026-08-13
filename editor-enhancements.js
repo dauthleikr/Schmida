@@ -83,6 +83,12 @@
     ['--paper','Papier']
   ];
 
+  const fieldIsVisible = (field,section) => {
+    if (!field.visibleWhen) return true;
+    const source = field.visibleWhen.scope === 'content' ? section.content : section.appearance;
+    return field.visibleWhen.values.includes(source[field.visibleWhen.key]);
+  };
+
   function renderGeneral() {
     const panel = document.querySelector('#general');
     const theme = model.themes[data.colorTheme] || model.themes.wine;
@@ -166,11 +172,11 @@
           <div class="field"><label>Layout</label><select data-section-layout>${Object.entries(model.layouts).map(([key,item]) => `<option value="${key}" ${section.layout === key ? 'selected' : ''}>${escapeHtml(item.label)}</option>`).join('')}</select></div>
           <div class="field"><label>Navigation</label><input data-path="sections.${index}.navigationLabel" value="${escapeHtml(section.navigationLabel)}"><p class="help">Leer lassen, um den Bereich nicht im Menü zu zeigen.</p></div>
           <div class="field"><label>Hintergrund</label><select data-section-background>${colorOptions}</select>${section.background === 'custom' ? `<div class="background-custom"><input type="color" data-section-custom-color value="${escapeHtml(section.customBackground)}"><input data-section-custom-code value="${escapeHtml(section.customBackground)}" spellcheck="false"></div>` : ''}</div>
-          ${(definition.appearanceFields || []).filter((field) => !field.visibleWhen || field.visibleWhen.values.includes(section.appearance[field.visibleWhen.key])).map((field) => fieldMarkup(field,`sections.${index}.appearance.${field.key}`,section.appearance[field.key],{ compact:true })).join('')}
+          ${(definition.appearanceFields || []).filter((field) => fieldIsVisible(field,section)).map((field) => fieldMarkup(field,`sections.${index}.appearance.${field.key}`,section.appearance[field.key],{ compact:true })).join('')}
           <p class="layout-description">${escapeHtml(definition.description)}</p>
         </div>
         <div class="section-fields">
-          ${definition.fields.map((field) => field.type === 'collection' ? collectionMarkup(index,field) : fieldMarkup(field,`sections.${index}.content.${field.key}`,section.content[field.key])).join('')}
+          ${definition.fields.filter((field) => fieldIsVisible(field,section)).map((field) => field.type === 'collection' ? collectionMarkup(index,field) : fieldMarkup(field,`sections.${index}.content.${field.key}`,section.content[field.key])).join('')}
         </div>
       </div>
     </article>`;
@@ -225,7 +231,12 @@
       const output = event.target.parentElement.querySelector('output');
       if (output) output.value = `${event.target.value}${output.dataset.unit || '%'}`;
       saveDraft();
-      if (path.endsWith('.appearance.listStyle')) renderSections();
+      const appearanceChange = path.match(/^sections\.(\d+)\.appearance\.([^.]+)$/);
+      if (appearanceChange) {
+        const section = data.sections[Number(appearanceChange[1])];
+        const fields = [...(model.layouts[section.layout].appearanceFields || []),...model.layouts[section.layout].fields];
+        if (fields.some((field) => field.visibleWhen?.key === appearanceChange[2])) renderSections();
+      }
       return;
     }
     const token = event.target.dataset.globalColor || event.target.dataset.globalColorCode;

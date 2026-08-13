@@ -83,6 +83,9 @@
     return `<section class="section dynamic-section ${layoutClass}"${titleStyles}><div class="page"><div class="focus-header"><div>${sectionHeading(section)}</div><p class="section-intro-text">${formatMarkup(body.intro)}</p></div><div class="focus-grid" data-count="${body.items.length}" style="--card-columns:${columns}">${cards}</div></div></section>`;
   };
 
+  const timelineItemsMarkup = (items) => items.map((item) => `<li><span class="timeline-period">${formatMarkup(item.period)}</span><div class="timeline-entry"><h3>${formatMarkup(item.title)}</h3>${item.detail ? `<p>${formatMarkup(item.detail)}</p>` : ''}</div></li>`).join('');
+  let timelineToggleId = 0;
+
   const renderers = {
     intro: (section) => {
       const body = section.content;
@@ -132,9 +135,19 @@
     },
     timeline: (section) => {
       const body = section.content;
-      const items = body.items.map((item) => `<li><span class="timeline-period">${formatMarkup(item.period)}</span><div class="timeline-entry"><h3>${formatMarkup(item.title)}</h3>${item.detail ? `<p>${formatMarkup(item.detail)}</p>` : ''}</div></li>`).join('');
       const timelineStyle = section.appearance?.timelineStyle || 'classic-lines';
-      return `<section class="section dynamic-section layout-timeline"><div class="page timeline-grid"><div class="timeline-copy">${sectionHeading(section)}<p class="section-intro-text">${formatMarkup(body.intro)}</p></div><ol class="timeline-list" data-timeline-style="${escapeAttribute(timelineStyle)}">${items}</ol></div></section>`;
+      const secondaryItems = Array.isArray(body.secondaryItems) ? body.secondaryItems : [];
+      const hasToggle = timelineStyle === 'alternating-path' && secondaryItems.length > 0;
+      if (!hasToggle) {
+        return `<section class="section dynamic-section layout-timeline"><div class="page timeline-grid"><div class="timeline-copy">${sectionHeading(section)}<p class="section-intro-text">${formatMarkup(body.intro)}</p></div><ol class="timeline-list" data-timeline-style="${escapeAttribute(timelineStyle)}">${timelineItemsMarkup(body.items)}</ol></div></section>`;
+      }
+
+      const toggleId = `timeline-toggle-${++timelineToggleId}`;
+      const viewMarkup = (key,title,intro,items,active) => {
+        const viewSection = { ...section,content:{ ...body,title } };
+        return `<div class="timeline-view${active ? ' is-active' : ''}" data-timeline-view="${key}" id="${toggleId}-panel-${key}" role="tabpanel" aria-labelledby="${toggleId}-tab-${key}" ${active ? '' : 'hidden'}><div class="timeline-grid"><div class="timeline-copy">${sectionHeading(viewSection)}<p class="section-intro-text">${formatMarkup(intro)}</p></div><ol class="timeline-list" data-timeline-style="${escapeAttribute(timelineStyle)}">${timelineItemsMarkup(items)}</ol></div></div>`;
+      };
+      return `<section class="section dynamic-section layout-timeline layout-timeline-toggle"><div class="page"><div class="timeline-toggle-wrap"><div class="timeline-toggle" data-timeline-toggle role="tablist" aria-label="Werdegang auswählen"><button type="button" id="${toggleId}-tab-primary" role="tab" aria-selected="true" aria-controls="${toggleId}-panel-primary" data-timeline-toggle-target="primary">${formatMarkup(body.primaryViewLabel || 'Berufserfahrung')}</button><button type="button" id="${toggleId}-tab-secondary" role="tab" aria-selected="false" aria-controls="${toggleId}-panel-secondary" data-timeline-toggle-target="secondary" tabindex="-1">${formatMarkup(body.secondaryViewLabel || 'Ausbildung')}</button></div></div>${viewMarkup('primary',body.title,body.intro,body.items,true)}${viewMarkup('secondary',body.secondaryTitle,body.secondaryIntro,secondaryItems,false)}</div></section>`;
     },
     pricing: (section) => {
       const body = section.content;
@@ -218,6 +231,37 @@
   });
 
   const wrappers = [...host.querySelectorAll('.content-section')];
+  const initializeTimelineToggle = (toggle) => {
+    const tabs = [...toggle.querySelectorAll('[data-timeline-toggle-target]')];
+    const section = toggle.closest('.layout-timeline-toggle');
+    const panels = [...section.querySelectorAll('[data-timeline-view]')];
+    const activate = (key,{ focus = false } = {}) => {
+      tabs.forEach((tab) => {
+        const active = tab.dataset.timelineToggleTarget === key;
+        tab.setAttribute('aria-selected',String(active));
+        tab.tabIndex = active ? 0 : -1;
+        if (active && focus) tab.focus();
+      });
+      panels.forEach((panel) => {
+        const active = panel.dataset.timelineView === key;
+        panel.hidden = !active;
+        panel.classList.toggle('is-active',active);
+      });
+    };
+    tabs.forEach((tab,index) => {
+      tab.addEventListener('click',() => activate(tab.dataset.timelineToggleTarget));
+      tab.addEventListener('keydown',(event) => {
+        if (!['ArrowLeft','ArrowRight','Home','End'].includes(event.key)) return;
+        event.preventDefault();
+        const nextIndex = event.key === 'Home' ? 0
+          : event.key === 'End' ? tabs.length - 1
+          : (index + (event.key === 'ArrowRight' ? 1 : -1) + tabs.length) % tabs.length;
+        activate(tabs[nextIndex].dataset.timelineToggleTarget,{ focus:true });
+      });
+    });
+  };
+  wrappers.forEach((wrapper) => wrapper.querySelectorAll('[data-timeline-toggle]').forEach(initializeTimelineToggle));
+
   const initializeCarousel = (carousel) => {
     const slides = [...carousel.querySelectorAll('[data-carousel-slide]')];
     const dots = [...carousel.querySelectorAll('[data-carousel-dot]')];

@@ -810,8 +810,10 @@ test('contact layout supports a safe embedded map with an external fallback', as
 
 test('timeline layout offers interchangeable visual treatments', async ({ page }) => {
   await page.goto(editorUrl);
+  await page.selectOption('#new-layout','timeline');
+  await page.getByRole('button',{ name:'Bereich hinzufügen' }).click();
 
-  const timeline = page.locator('.section-editor:has([data-section-layout] option:checked[value="timeline"])').first();
+  const timeline = page.locator('.section-editor').last();
   const style = timeline.locator('[data-path$=".appearance.timelineStyle"]');
   await expect(style.locator('option')).toHaveText([
     'Klassische Linien',
@@ -872,6 +874,63 @@ test('timeline layout offers interchangeable visual treatments', async ({ page }
   await expect(mobileTimelineFrame.locator('.timeline-list li').first()).toHaveCSS('border-radius','18px');
   await expect(mobileTimelineFrame.locator('.timeline-entry').first()).toHaveCSS('border-top-width','0px');
   await expect(mobileTimelineFrame.locator('.timeline-entry').first()).toHaveCSS('background-color','rgba(0, 0, 0, 0)');
+});
+
+test('alternating timeline toggles between two editable views', async ({ page }) => {
+  await page.goto(editorUrl);
+  await page.selectOption('#new-layout','timeline');
+  await page.getByRole('button',{ name:'Bereich hinzufügen' }).click();
+
+  const timeline = page.locator('.section-editor').last();
+  await timeline.locator('[data-path$=".appearance.timelineStyle"]').selectOption('alternating-path');
+  const primaryLabel = timeline.locator('[data-path$=".content.primaryViewLabel"]');
+  const secondaryLabel = timeline.locator('[data-path$=".content.secondaryViewLabel"]');
+  await expect(primaryLabel).toBeVisible();
+  await expect(secondaryLabel).toBeVisible();
+  await primaryLabel.fill('Berufserfahrung');
+  await secondaryLabel.fill('Ausbildung');
+  await timeline.locator('[data-path$=".content.secondaryTitle"]').fill('Meine Ausbildung');
+  await timeline.locator('[data-path$=".content.secondaryIntro"]').fill('Ausbildungen und Abschlüsse.');
+
+  const secondaryItems = timeline.locator('.collection:has([data-collection-key="secondaryItems"])');
+  await secondaryItems.locator('[data-collection-action="add"]').click();
+  await secondaryItems.locator('[data-path$=".period"]').fill('2026');
+  await secondaryItems.locator('[data-path$=".title"]').fill('Beispielausbildung');
+  await timeline.getByRole('button',{ name:/Desktopvorschau/ }).click();
+
+  const preview = page.frameLocator('#preview-frame');
+  const toggle = preview.getByRole('tablist',{ name:'Werdegang auswählen' });
+  const careerTab = toggle.getByRole('tab',{ name:'Berufserfahrung' });
+  const educationTab = toggle.getByRole('tab',{ name:'Ausbildung' });
+  await expect(careerTab).toHaveAttribute('aria-selected','true');
+  await expect(educationTab).toHaveAttribute('aria-selected','false');
+  await expect(preview.locator('[data-timeline-view="primary"]')).toBeVisible();
+  await expect(preview.locator('[data-timeline-view="secondary"]')).toBeHidden();
+
+  await educationTab.click();
+  await expect(educationTab).toHaveAttribute('aria-selected','true');
+  await expect(preview.locator('[data-timeline-view="secondary"]')).toBeVisible();
+  await expect(preview.locator('[data-timeline-view="secondary"]')).toContainText('Beispielausbildung');
+  await educationTab.press('ArrowLeft');
+  await expect(careerTab).toBeFocused();
+  await expect(careerTab).toHaveAttribute('aria-selected','true');
+
+  await page.getByRole('button',{ name:'Vorschau schließen' }).click();
+  await timeline.getByRole('button',{ name:/Mobilvorschau/ }).click();
+  const mobilePreview = page.frameLocator('#preview-frame');
+  const mobileToggle = mobilePreview.getByRole('tablist',{ name:'Werdegang auswählen' });
+  await expect(mobileToggle).toBeVisible();
+  const mobileFit = await mobileToggle.evaluate((element) => ({
+    viewport:document.documentElement.clientWidth,
+    scrollWidth:document.documentElement.scrollWidth,
+    left:element.getBoundingClientRect().left,
+    right:element.getBoundingClientRect().right
+  }));
+  expect(mobileFit.scrollWidth).toBeLessThanOrEqual(mobileFit.viewport);
+  expect(mobileFit.left).toBeGreaterThanOrEqual(0);
+  expect(mobileFit.right).toBeLessThanOrEqual(mobileFit.viewport);
+  await mobileToggle.getByRole('tab',{ name:'Ausbildung' }).click();
+  await expect(mobilePreview.locator('[data-timeline-view="secondary"]')).toContainText('Beispielausbildung');
 });
 
 test('each section can be previewed directly on mobile and desktop', async ({ page }) => {

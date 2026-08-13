@@ -204,9 +204,14 @@
         { key: 'eyebrow', label: 'Bereichsbezeichnung', type: 'text' },
         { key: 'title', label: 'Titel', type: 'rich', editorRows: 3 },
         { key: 'intro', label: 'Einleitung', type: 'rich', editorRows: 4 },
-        { key: 'items', label: 'Stationen', type: 'collection', min: 2, max: 12, addLabel: 'Station hinzufügen', itemFields: [{ key: 'period', label: 'Zeitraum', type: 'text' }, { key: 'title', label: 'Station', type: 'text' }, { key: 'detail', label: 'Zusatz', type: 'text' }] }
+        { key: 'items', label: 'Stationen', type: 'collection', min: 2, max: 12, addLabel: 'Station hinzufügen', itemFields: [{ key: 'period', label: 'Zeitraum', type: 'text' }, { key: 'title', label: 'Station', type: 'text' }, { key: 'detail', label: 'Zusatz', type: 'text' }] },
+        { key: 'primaryViewLabel', label: 'Umschalter: erste Ansicht', type: 'text', visibleWhen: { scope: 'appearance',key: 'timelineStyle',values: ['alternating-path'] } },
+        { key: 'secondaryViewLabel', label: 'Umschalter: zweite Ansicht', type: 'text', visibleWhen: { scope: 'appearance',key: 'timelineStyle',values: ['alternating-path'] } },
+        { key: 'secondaryTitle', label: 'Titel der zweiten Ansicht', type: 'rich', editorRows: 3, visibleWhen: { scope: 'appearance',key: 'timelineStyle',values: ['alternating-path'] } },
+        { key: 'secondaryIntro', label: 'Einleitung der zweiten Ansicht', type: 'rich', editorRows: 4, visibleWhen: { scope: 'appearance',key: 'timelineStyle',values: ['alternating-path'] } },
+        { key: 'secondaryItems', label: 'Stationen der zweiten Ansicht', type: 'collection', min: 0, max: 12, addLabel: 'Station hinzufügen', visibleWhen: { scope: 'appearance',key: 'timelineStyle',values: ['alternating-path'] }, itemFields: [{ key: 'period', label: 'Zeitraum', type: 'text' }, { key: 'title', label: 'Station', type: 'text' }, { key: 'detail', label: 'Zusatz', type: 'text' }] }
       ],
-      defaults: { eyebrow: 'Über mich', title: 'Ausbildung und Erfahrung.', intro: 'Eine kurze Einleitung zum Werdegang.', items: [{ period: 'Seit 2024', title: 'Erste Station', detail: 'Ort oder Institution' }, { period: '2023', title: 'Zweite Station', detail: 'Ort oder Institution' }] }
+      defaults: { eyebrow: 'Über mich', title: 'Ausbildung und Erfahrung.', intro: 'Eine kurze Einleitung zum Werdegang.', items: [{ period: 'Seit 2024', title: 'Erste Station', detail: 'Ort oder Institution' }, { period: '2023', title: 'Zweite Station', detail: 'Ort oder Institution' }], primaryViewLabel: 'Berufserfahrung',secondaryViewLabel: 'Ausbildung',secondaryTitle: 'Ausbildung.',secondaryIntro: 'Eine kurze Einleitung zur Ausbildung.',secondaryItems: [] }
     },
     pricing: {
       ...titleAppearance(),
