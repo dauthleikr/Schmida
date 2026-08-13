@@ -97,7 +97,13 @@
       defaults: { eyebrow: 'Schwerpunkte', title: 'Womit Sie zu mir kommen können.', intro: 'Eine kurze Einleitung zu den folgenden Themen.', items: [{ title: 'Erstes Thema', text: 'Kurze Beschreibung.' }, { title: 'Zweites Thema', text: 'Kurze Beschreibung.' }] }
     },
     titleCards: {
-      ...titleAppearance(),
+      ...titleAppearance([
+        { key: 'itemTitleFont', label: 'Schriftart der Einzeltitel', type: 'select', options: [
+          ['serif','Serifenschrift (wie Überschriften)'],
+          ['sans','Sans-Serif (wie Einleitung)']
+        ] },
+        { key: 'itemTitleSize', label: 'Schriftgröße der Einzeltitel', type: 'range', min: 16, max: 36, step: 1, unit: 'px', help: 'Gilt für alle Titel in diesem Raster.' }
+      ],{ itemTitleFont: 'serif',itemTitleSize: 25 }),
       label: 'Titelraster',
       description: 'Einleitung mit einem kompakten Raster aus zwei bis acht Titeln.',
       defaultNavigation: 'Schwerpunkte',
@@ -284,6 +290,11 @@
       }
       if (field.type === 'color' && !/^#[0-9a-f]{6}$/i.test(appearance[field.key] || '')) {
         appearance[field.key] = definition.appearanceDefaults?.[field.key] || '#000000';
+      }
+      if (field.type === 'range') {
+        const fallback = Number(definition.appearanceDefaults?.[field.key]) || field.min || 0;
+        const value = Number(appearance[field.key]);
+        appearance[field.key] = Math.min(field.max,Math.max(field.min,Number.isFinite(value) ? value : fallback));
       }
     });
     definition.fields.filter((field) => field.type === 'collection').forEach((field) => {

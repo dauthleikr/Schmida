@@ -125,7 +125,7 @@
     .focus-card p { margin:0; font-size:.91rem; }
     .layout-title-cards .focus-header { margin-bottom:40px; }
     .focus-card.title-card { display:flex; min-height:104px; align-items:center; padding-top:24px; padding-bottom:24px; }
-    .focus-card.title-card h3 { max-width:18ch; margin-bottom:0; }
+    .focus-card.title-card h3 { max-width:18ch; margin-bottom:0; font-family:var(--title-card-font,var(--serif)); font-size:var(--title-card-size,1.55rem); }
 
     .practice-grid { display:grid; grid-template-columns:.82fr 1.18fr; gap:clamp(46px,10vw,135px); align-items:center; }
     .practice-copy p { max-width:38ch; font-size:1.05rem; }
@@ -145,7 +145,8 @@
     .wide-image-frame .section-image { position:relative; z-index:1; width:100%; height:auto; min-height:0; max-height:none; object-fit:contain; }
     .wide-image-frame .image-caption { z-index:2; }
     .wide-image-carousel { position:relative; }
-    .carousel-stage { position:relative; }
+    .carousel-stage { position:relative; touch-action:pan-y; user-select:none; }
+    .carousel-stage .section-image { -webkit-user-drag:none; }
     .carousel-slide { position:absolute; top:0; left:50%; opacity:0; visibility:hidden; pointer-events:none; transform:translateX(-50%); transition:opacity .55s ease,visibility 0s linear .55s; }
     .carousel-slide[data-active="true"] { position:relative; z-index:1; left:auto; opacity:1; visibility:visible; pointer-events:auto; transform:none; transition-delay:0s; }
     .carousel-controls { display:flex; min-height:44px; align-items:center; justify-content:center; gap:12px; margin-top:clamp(30px,4vw,48px); }

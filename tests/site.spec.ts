@@ -182,7 +182,7 @@ test('card grids draw complete row dividers at desktop and mobile widths', async
   await page.getByRole('button',{ name:'Bereich hinzufügen' }).click();
 
   const editor = page.locator('.section-editor').last();
-  for (let index = 0; index < 6; index += 1) {
+  for (let index = 0; index < 4; index += 1) {
     await editor.locator('[data-collection-action="add"]').click();
   }
   await expect(editor.locator('[data-collection-action="add"]')).toBeDisabled();
@@ -191,8 +191,8 @@ test('card grids draw complete row dividers at desktop and mobile widths', async
   const preview = page.frameLocator('#preview-frame');
   const grid = preview.locator('.focus-grid');
   const cards = grid.locator('.focus-card');
-  await expect(cards).toHaveCount(8);
-  await expect(grid).toHaveCSS('grid-template-columns',/\d+(?:\.\d+)?px \d+(?:\.\d+)?px \d+(?:\.\d+)?px \d+(?:\.\d+)?px/);
+  await expect(cards).toHaveCount(6);
+  await expect(grid).toHaveCSS('grid-template-columns',/\d+(?:\.\d+)?px \d+(?:\.\d+)?px \d+(?:\.\d+)?px/);
 
   await expect(cards.nth(0)).toHaveCSS('padding-left','0px');
   await expect(cards.nth(2)).toHaveCSS('border-right-width','0px');
@@ -219,18 +219,30 @@ test('title grids stay compact without per-item descriptions', async ({ page }) 
   const editor = page.locator('.section-editor').last();
   await expect(editor.locator('[data-path*=".content.items."][data-path$=".title"]')).toHaveCount(2);
   await expect(editor.locator('[data-path*=".content.items."][data-path$=".text"]')).toHaveCount(0);
-  for (let index = 0; index < 4; index += 1) {
+  const font = editor.locator('[data-path$=".appearance.itemTitleFont"]');
+  const size = editor.locator('[data-path$=".appearance.itemTitleSize"]');
+  await expect(font).toHaveValue('serif');
+  await expect(size).toHaveValue('25');
+  await font.selectOption('sans');
+  await size.evaluate((input:HTMLInputElement) => {
+    input.value = '32';
+    input.dispatchEvent(new Event('input',{ bubbles:true }));
+  });
+  for (let index = 0; index < 6; index += 1) {
     await editor.locator('[data-collection-action="add"]').click();
   }
+  await expect(editor.locator('[data-collection-action="add"]')).toBeDisabled();
   await editor.getByRole('button',{ name:/Desktopvorschau/ }).click();
 
   const preview = page.frameLocator('#preview-frame');
   const grid = preview.locator('.layout-title-cards .focus-grid');
   const cards = grid.locator('.title-card');
-  await expect(cards).toHaveCount(6);
+  await expect(cards).toHaveCount(8);
   await expect(cards.locator('p')).toHaveCount(0);
   await expect(cards.first()).toHaveCSS('min-height','104px');
-  await expect(grid).toHaveCSS('grid-template-columns',/\d+(?:\.\d+)?px \d+(?:\.\d+)?px \d+(?:\.\d+)?px/);
+  await expect(cards.first().locator('h3')).toHaveCSS('font-family',/Inter|ui-sans-serif|system-ui/);
+  await expect(cards.first().locator('h3')).toHaveCSS('font-size','32px');
+  await expect(grid).toHaveCSS('grid-template-columns',/\d+(?:\.\d+)?px \d+(?:\.\d+)?px \d+(?:\.\d+)?px \d+(?:\.\d+)?px/);
 
   await page.locator('#preview-frame').evaluate((frame:HTMLIFrameElement) => frame.style.width = '760px');
   await expect(grid).toHaveCSS('grid-template-columns',/\d+(?:\.\d+)?px \d+(?:\.\d+)?px/);
@@ -238,6 +250,7 @@ test('title grids stay compact without per-item descriptions', async ({ page }) 
 
   await page.locator('#preview-frame').evaluate((frame:HTMLIFrameElement) => frame.style.width = '440px');
   await expect(grid).toHaveCSS('grid-template-columns',/^[\d.]+px$/);
+  await expect(cards.first().locator('h3')).toHaveCSS('font-size','32px');
   const mobileFit = await grid.evaluate((element) => ({
     viewport:document.documentElement.clientWidth,
     scrollWidth:document.documentElement.scrollWidth,
@@ -716,6 +729,20 @@ test('wide image layout supports an editor-managed carousel', async ({ page }) =
 
   await carousel.locator('[data-carousel-next]').click();
   await expect(slides.nth(1)).toHaveAttribute('data-active','true');
+  await expect(carousel).toHaveAttribute('data-autoplay-stopped','true');
+
+  const stage = carousel.locator('.carousel-stage');
+  await stage.dispatchEvent('pointerdown',{ pointerId:16,pointerType:'touch',isPrimary:true,clientX:240,clientY:80 });
+  await stage.dispatchEvent('pointerup',{ pointerId:16,pointerType:'touch',isPrimary:true,clientX:230,clientY:180 });
+  await expect(slides.nth(1)).toHaveAttribute('data-active','true');
+
+  await stage.dispatchEvent('pointerdown',{ pointerId:17,pointerType:'touch',isPrimary:true,clientX:280,clientY:120 });
+  await stage.dispatchEvent('pointerup',{ pointerId:17,pointerType:'touch',isPrimary:true,clientX:160,clientY:124 });
+  await expect(slides.nth(2 % (initialImageCount + 1))).toHaveAttribute('data-active','true');
+  await expect(carousel).toHaveAttribute('data-autoplay-stopped','true');
+
+  await carousel.locator('[data-carousel-dot="0"]').click();
+  await expect(slides.nth(0)).toHaveAttribute('data-active','true');
   await expect(carousel).toHaveAttribute('data-autoplay-stopped','true');
   const activeSpacing = await carousel.evaluate((element) => {
     const active = element.querySelector('[data-carousel-slide][data-active="true"]')!.getBoundingClientRect();

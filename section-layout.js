@@ -77,7 +77,10 @@
       return `<article class="${classes}"><h3>${formatMarkup(item.title)}</h3>${description}</article>`;
     }).join('');
     const layoutClass = titleOnly ? 'layout-title-cards' : 'layout-cards';
-    return `<section class="section dynamic-section ${layoutClass}"><div class="page"><div class="focus-header"><div>${sectionHeading(section)}</div><p class="section-intro-text">${formatMarkup(body.intro)}</p></div><div class="focus-grid" data-count="${body.items.length}" style="--card-columns:${columns}">${cards}</div></div></section>`;
+    const titleFont = section.appearance?.itemTitleFont === 'sans' ? 'var(--sans)' : 'var(--serif)';
+    const titleSize = Math.min(36,Math.max(16,Number(section.appearance?.itemTitleSize) || 25));
+    const titleStyles = titleOnly ? ` style="--title-card-font:${titleFont};--title-card-size:${titleSize / 16}rem"` : '';
+    return `<section class="section dynamic-section ${layoutClass}"${titleStyles}><div class="page"><div class="focus-header"><div>${sectionHeading(section)}</div><p class="section-intro-text">${formatMarkup(body.intro)}</p></div><div class="focus-grid" data-count="${body.items.length}" style="--card-columns:${columns}">${cards}</div></div></section>`;
   };
 
   const renderers = {
@@ -254,10 +257,28 @@
       stop();
       show(next);
     };
+    const stage = carousel.querySelector('.carousel-stage');
+    let swipeStart;
+    const finishSwipe = (event) => {
+      if (!swipeStart || event.pointerId !== swipeStart.pointerId) return;
+      const horizontal = event.clientX - swipeStart.x;
+      const vertical = event.clientY - swipeStart.y;
+      swipeStart = undefined;
+      if (Math.abs(horizontal) < 48 || Math.abs(horizontal) <= Math.abs(vertical) * 1.2) return;
+      browse(current + (horizontal < 0 ? 1 : -1));
+    };
 
     carousel.querySelector('[data-carousel-previous]')?.addEventListener('click',() => browse(current - 1));
     carousel.querySelector('[data-carousel-next]')?.addEventListener('click',() => browse(current + 1));
     dots.forEach((dot,index) => dot.addEventListener('click',() => browse(index)));
+    stage?.addEventListener('pointerdown',(event) => {
+      if (event.pointerType === 'mouse' && event.button !== 0) return;
+      swipeStart = { pointerId:event.pointerId,x:event.clientX,y:event.clientY };
+      try { stage.setPointerCapture(event.pointerId); } catch {}
+    });
+    stage?.addEventListener('pointerup',finishSwipe);
+    stage?.addEventListener('pointercancel',() => { swipeStart = undefined; });
+    stage?.addEventListener('dragstart',(event) => event.preventDefault());
     carousel.addEventListener('mouseenter',() => {
       temporarilyPaused = true;
       stop();
