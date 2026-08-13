@@ -210,6 +210,42 @@ test('card grids draw complete row dividers at desktop and mobile widths', async
   await expect(cards.nth(3)).toHaveCSS('border-right-width','0px');
 });
 
+test('title grids stay compact without per-item descriptions', async ({ page }) => {
+  await page.goto(editorUrl);
+  await page.selectOption('#new-layout','titleCards');
+  await page.getByRole('button',{ name:'Bereich hinzufügen' }).click();
+
+  const editor = page.locator('.section-editor').last();
+  await expect(editor.locator('[data-path*=".content.items."][data-path$=".title"]')).toHaveCount(2);
+  await expect(editor.locator('[data-path*=".content.items."][data-path$=".text"]')).toHaveCount(0);
+  for (let index = 0; index < 4; index += 1) {
+    await editor.locator('[data-collection-action="add"]').click();
+  }
+  await editor.getByRole('button',{ name:/Desktopvorschau/ }).click();
+
+  const preview = page.frameLocator('#preview-frame');
+  const grid = preview.locator('.layout-title-cards .focus-grid');
+  const cards = grid.locator('.title-card');
+  await expect(cards).toHaveCount(6);
+  await expect(cards.locator('p')).toHaveCount(0);
+  await expect(cards.first()).toHaveCSS('min-height','104px');
+  await expect(grid).toHaveCSS('grid-template-columns',/\d+(?:\.\d+)?px \d+(?:\.\d+)?px \d+(?:\.\d+)?px/);
+
+  await page.locator('#preview-frame').evaluate((frame:HTMLIFrameElement) => frame.style.width = '760px');
+  await expect(grid).toHaveCSS('grid-template-columns',/\d+(?:\.\d+)?px \d+(?:\.\d+)?px/);
+  await expect(cards.first()).toHaveCSS('min-height','104px');
+
+  await page.locator('#preview-frame').evaluate((frame:HTMLIFrameElement) => frame.style.width = '440px');
+  await expect(grid).toHaveCSS('grid-template-columns',/^[\d.]+px$/);
+  const mobileFit = await grid.evaluate((element) => ({
+    viewport:document.documentElement.clientWidth,
+    scrollWidth:document.documentElement.scrollWidth,
+    cardHeight:element.querySelector('.title-card')!.getBoundingClientRect().height
+  }));
+  expect(mobileFit.scrollWidth).toBeLessThanOrEqual(mobileFit.viewport);
+  expect(mobileFit.cardHeight).toBeLessThan(110);
+});
+
 test('provides a usable compact navigation', async ({ page }) => {
   await page.setViewportSize({ width:390,height:844 });
   await page.goto(siteUrl);
@@ -329,6 +365,7 @@ test('editor exports normalized schema content', async ({ page }) => {
     /Zweispaltiger Text mit Liste/,
     /Zweispaltiger Text mit Hervorhebung/,
     /Kartenraster/,
+    /Titelraster/,
     /Zweispaltiger Text mit Bild/,
     /Text über breitem Bild/,
     /Auflistung/,
