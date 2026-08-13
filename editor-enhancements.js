@@ -3,7 +3,6 @@
   const editor = document.querySelector('#editor');
   const status = document.querySelector('#status');
   const draftKey = 'practice-content-draft-v3';
-  const legacyDraftKeys = ['practice-content-draft-v2','practice-content-draft-v1'];
   let connectedFile;
   let previewTimer;
   let previewSectionIndex = null;
@@ -479,7 +478,6 @@
   document.querySelector('#reset').addEventListener('click',() => {
     if (!confirm('Entwurf wirklich zurücksetzen?')) return;
     localStorage.removeItem(draftKey);
-    legacyDraftKeys.forEach((key) => localStorage.removeItem(key));
     data = model.normalize(window.practiceContent);
     renderAll();
     status.textContent = 'Entwurf zurückgesetzt';

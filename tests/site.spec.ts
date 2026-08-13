@@ -1037,20 +1037,17 @@ test('rich-text controls and hero presentation remain editable', async ({ page }
   expect(backgroundBounds.right).toBeGreaterThanOrEqual(backgroundBounds.viewportWidth);
 });
 
-test('legacy fixed content is isolated behind the schema migration adapter', async ({ page }) => {
+test('normalizes and validates the current section schema', async ({ page }) => {
   await page.goto(siteUrl);
-  const migrated = await page.evaluate(() => window.practiceContentModel.normalize({
+  const currentOnly = await page.evaluate(() => window.practiceContentModel.normalize({
     practiceName:'Legacy Praxis',
     navigation:{ home:'Start',costs:'Preise' },
     sectionLayout:{ order:['costs'],enabled:{ intro:false,therapy:false,focusAreas:false,practice:false,costs:true,contact:false } },
     costs:{ label:'Honorar',title:'Kosten',intro:'Info',entries:[['Termin','50 Minuten','100 EUR']],reimbursement:'Hinweis' }
   }));
 
-  expect(migrated.schemaVersion).toBe(3);
-  expect(migrated.sections).toHaveLength(1);
-  expect(migrated.sections[0].layout).toBe('pricing');
-  expect(migrated.sections[0].navigationLabel).toBe('Preise');
-  expect(migrated.sections[0].content.items[0]).toEqual({ name:'Termin',duration:'50 Minuten',price:'100 EUR' });
+  expect(currentOnly.schemaVersion).toBe(3);
+  expect(currentOnly.sections).toEqual([]);
 
   const ranged = await page.evaluate(() => window.practiceContentModel.normalize({
     sections:[

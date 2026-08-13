@@ -11,7 +11,7 @@ This is a static website that can be published directly with GitHub Pages or any
 5. Use **Vorschau Mobil** for a 390 px phone preview or **Vorschau Desktop** for the full-width draft.
 6. In Chrome or Edge on an HTTPS deployment, use **content.js verbinden** and **In content.js speichern** to update the selected local file. Other browsers can download the generated `content.js`.
 
-Drafts are stored locally in the browser. Existing content from the former fixed-section schema is migrated automatically when loaded.
+Drafts are stored locally in the browser. Content is normalized and validated against the current section schema when loaded.
 
 ## Included layouts
 
