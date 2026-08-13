@@ -783,29 +783,101 @@ test('wide image layout supports an editor-managed carousel', async ({ page }) =
   expect(mobileFit.right).toBeLessThanOrEqual(mobileFit.viewport);
 });
 
-test('contact layout supports a safe embedded map with an external fallback', async ({ page }) => {
-  await page.route('https://www.google.com/maps/embed**',(route) => route.fulfill({
+test('contact layout separates personal and office details with a safe map', async ({ page,context }) => {
+  await context.route('https://www.google.com/maps/embed**',(route) => route.fulfill({
     status:200,
     contentType:'text/html',
     body:'<!doctype html><title>Map test</title>'
   }));
   await page.goto(editorUrl);
+  await page.selectOption('#new-layout','contact');
+  await page.getByRole('button',{ name:'Bereich hinzufügen' }).click();
 
-  const contact = page.locator('.section-editor[data-section-id="kontakt"]');
-  const embed = contact.locator('[data-path$=".content.mapEmbed"]');
-  await expect(embed).toBeVisible();
-  await expect(contact.locator('[data-path$=".content.mapLink"]')).toBeVisible();
-  await embed.fill('https://www.google.com/maps/embed?pb=test');
-  await contact.getByRole('button',{ name:/Desktopvorschau/ }).click();
+  const contact = page.locator('.section-editor').last();
+  for (const field of ['personalDetailsTitle','officeDetailsTitle','mapEmbed','mapLink']) {
+    await expect(contact.locator(`[data-path$=".content.${field}"]`)).toBeVisible();
+  }
+  for (const collection of ['personalDetails','officeDetails']) {
+    const rows = contact.locator(`.collection:has([data-collection-key="${collection}"])`);
+    await expect(rows.locator('[data-collection-action="add"]')).toBeVisible();
+    await expect(rows.locator('[data-path$=".type"]').first().locator('option')).toHaveText(['Text','Telefon','E-Mail','Website','Adresse']);
+  }
+  const personalRows = contact.locator('.collection:has([data-collection-key="personalDetails"])');
+  const initialPersonalRows = await personalRows.locator('.collection-item').count();
+  await personalRows.locator('[data-collection-action="add"]').click();
+  await expect(personalRows.locator('.collection-item')).toHaveCount(initialPersonalRows + 1);
+  const addedPersonalRow = personalRows.locator('.collection-item').last();
+  await addedPersonalRow.locator('[data-path$=".title"]').fill('Website');
+  await addedPersonalRow.locator('[data-path$=".content"]').fill('https://personal.example.at/');
+  await addedPersonalRow.locator('[data-path$=".type"]').selectOption('website');
 
-  const preview = page.frameLocator('#preview-frame');
-  const iframe = preview.locator('.map-embed iframe');
+  const contactSection = {
+    id:'contact-layout-test',
+    layout:'contact',
+    internalName:'Kontakt-Test',
+    navigationLabel:'Kontakt',
+    background:'dark',
+    content:{
+      eyebrow:'Kontakt',
+      title:'Kontakt aufnehmen.',
+      text:'Eine gemeinsame Einleitung.',
+      personalDetailsTitle:'Persönlicher Kontakt',
+      personalDetails:[
+        { title:'Telefon',content:'+43 660 111 22 33',type:'phone' },
+        { title:'E-Mail',content:'person@example.at',type:'email' }
+      ],
+      officeDetailsTitle:'Praxisgemeinschaft',
+      officeDetails:[
+        { title:'Praxis',content:'Praxis am Beispielplatz',type:'text' },
+        { title:'Adresse',content:'Beispielplatz 1\n1010 Wien',type:'address' },
+        { title:'Telefon',content:'+43 1 234 56 78',type:'phone' },
+        { title:'Website',content:'https://praxis.example.at/',type:'website' }
+      ],
+      mapEmbed:'https://www.google.com/maps/embed?pb=test',
+      mapLink:'https://maps.example.at/',
+      mapLabel:'Karte öffnen'
+    }
+  };
+  const openFixture = async (section:typeof contactSection,viewport:'desktop'|'mobile') => {
+    const fixturePage = await context.newPage();
+    await fixturePage.setViewportSize(viewport === 'mobile' ? { width:390,height:844 } : { width:1280,height:900 });
+    await fixturePage.addInitScript((fixture) => {
+      sessionStorage.setItem('practice-preview-content',JSON.stringify({ sections:[fixture] }));
+    },section);
+    await fixturePage.goto(`${siteUrl}?preview=1&sectionPreview=1&previewViewport=${viewport}`,{ waitUntil:'domcontentloaded' });
+    return fixturePage;
+  };
+
+  await page.close();
+  const desktopPage = await openFixture(contactSection,'desktop');
+  const iframe = desktopPage.locator('.map-embed iframe');
   await expect(iframe).toHaveAttribute('src','https://www.google.com/maps/embed?pb=test');
+  const personal = desktopPage.locator('[data-contact-group="personal"]');
+  const office = desktopPage.locator('[data-contact-group="office"]');
+  await expect(personal).toContainText('Persönlicher Kontakt');
+  await expect(personal).toContainText('+43 660 111 22 33');
+  await expect(personal).toContainText('person@example.at');
+  await expect(office).toContainText('Praxisgemeinschaft');
+  await expect(office).toContainText('Praxis am Beispielplatz');
+  await expect(office.getByRole('link',{ name:'https://praxis.example.at/' })).toHaveAttribute('href','https://praxis.example.at/');
+  await expect(office.getByRole('link',{ name:/Beispielplatz 1/ })).toHaveAttribute('href','https://maps.example.at/');
+  const desktopColumns = await Promise.all([personal,office].map((group) => group.boundingBox()));
+  expect(desktopColumns[1]!.x).toBeGreaterThan(desktopColumns[0]!.x + desktopColumns[0]!.width);
+  expect(desktopColumns[1]!.y).toBeCloseTo(desktopColumns[0]!.y,0);
 
-  await page.getByRole('button',{ name:'Vorschau schließen' }).click();
-  await contact.locator('[data-path$=".content.mapEmbed"]').fill('javascript:alert(1)');
-  await contact.getByRole('button',{ name:/Desktopvorschau/ }).click();
-  await expect(preview.locator('.map-embed iframe')).toHaveCount(0);
+  await desktopPage.close();
+  const mobilePage = await openFixture({ ...contactSection,content:{ ...contactSection.content,mapEmbed:'javascript:alert(1)' } },'mobile');
+  await expect(mobilePage.locator('.map-embed iframe')).toHaveCount(0);
+  const mobileGroups = [mobilePage.locator('[data-contact-group="personal"]'),mobilePage.locator('[data-contact-group="office"]')];
+  const mobileColumns = await Promise.all(mobileGroups.map((group) => group.boundingBox()));
+  expect(mobileColumns[1]!.y).toBeGreaterThan(mobileColumns[0]!.y + mobileColumns[0]!.height);
+  const mobileFit = await mobilePage.locator('.contact-details').evaluate((element) => ({
+    viewport:document.documentElement.clientWidth,
+    scrollWidth:document.documentElement.scrollWidth,
+    right:element.getBoundingClientRect().right
+  }));
+  expect(mobileFit.scrollWidth).toBeLessThanOrEqual(mobileFit.viewport);
+  expect(mobileFit.right).toBeLessThanOrEqual(mobileFit.viewport + 1);
 });
 
 test('timeline layout offers interchangeable visual treatments', async ({ page }) => {

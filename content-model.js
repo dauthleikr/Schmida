@@ -42,6 +42,17 @@
     ['title', 'Nur Titel'],
     ['both', 'Beides']
   ];
+  const contactDetailItemFields = [
+    { key: 'title', label: 'Titel', type: 'text' },
+    { key: 'content', label: 'Inhalt', type: 'rich', editorRows: 2 },
+    { key: 'type', label: 'Typ', type: 'select', options: [
+      ['text','Text'],
+      ['phone','Telefon'],
+      ['email','E-Mail'],
+      ['website','Website'],
+      ['address','Adresse']
+    ] }
+  ];
   const titleAppearance = (extraFields = [],extraDefaults = {}) => ({
     appearanceFields: [
       { key: 'headingModeDesktop', label: 'Überschriftenaufbau Desktop', type: 'select', options: headingModeOptions },
@@ -236,16 +247,15 @@
         { key: 'eyebrow', label: 'Bereichsbezeichnung', type: 'text' },
         { key: 'title', label: 'Titel', type: 'rich', editorRows: 3 },
         { key: 'text', label: 'Einleitung', type: 'rich', editorRows: 4 },
-        { key: 'addressLine1', label: 'Straße', type: 'text' },
-        { key: 'addressLine2', label: 'Postleitzahl und Ort', type: 'text' },
-        { key: 'phoneLabel', label: 'Telefonnummer', type: 'text' },
-        { key: 'phoneHref', label: 'Telefon-Link', type: 'text' },
-        { key: 'email', label: 'E-Mail', type: 'text' },
+        { key: 'personalDetailsTitle', label: 'Spaltentitel: Persönlicher Kontakt', type: 'text' },
+        { key: 'personalDetails', label: 'Persönliche Kontaktdaten', type: 'collection', min: 0, max: 10, addLabel: 'Zeile hinzufügen', itemFields: contactDetailItemFields },
+        { key: 'officeDetailsTitle', label: 'Spaltentitel: Praxis', type: 'text' },
+        { key: 'officeDetails', label: 'Kontaktdaten der Praxis', type: 'collection', min: 0, max: 10, addLabel: 'Zeile hinzufügen', itemFields: contactDetailItemFields },
         { key: 'mapEmbed', label: 'Google-Maps-Einbettungs-URL (optional)', type: 'text' },
         { key: 'mapLink', label: 'Externer Kartenlink (optional)', type: 'text' },
         { key: 'mapLabel', label: 'Beschriftung des Kartenlinks', type: 'text' }
       ],
-      defaults: { eyebrow: 'Kontakt', title: 'Nehmen Sie Kontakt auf.', text: 'Beschreiben Sie, wie Sie erreichbar sind.', addressLine1: 'Musterstraße 12', addressLine2: '1010 Wien', phoneLabel: '+43 660 123 45 67', phoneHref: '+436601234567', email: 'praxis@beispiel.at', mapEmbed: '', mapLink: 'https://www.openstreetmap.org/', mapLabel: 'Karte in OpenStreetMap öffnen' }
+      defaults: { eyebrow: 'Kontakt', title: 'Nehmen Sie Kontakt auf.', text: 'Beschreiben Sie, wie Sie erreichbar sind.', personalDetailsTitle: 'Persönlicher Kontakt',personalDetails: [{ title: 'Telefon',content: '+43 660 123 45 67',type: 'phone' },{ title: 'E-Mail',content: 'praxis@beispiel.at',type: 'email' }],officeDetailsTitle: 'Praxis',officeDetails: [{ title: 'Adresse',content: 'Musterstraße 12\n1010 Wien',type: 'address' }],mapEmbed: '',mapLink: 'https://www.openstreetmap.org/',mapLabel: 'Karte in OpenStreetMap öffnen' }
     }
   };
 

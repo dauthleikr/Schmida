@@ -217,11 +217,27 @@ window.practiceContent = {
         "eyebrow": "Kontakt",
         "title": "Erstgespräch & Kontakt.",
         "text": "Wenn Sie Fragen haben oder ein Erstgespräch vereinbaren möchten, freue ich mich über Ihre Nachricht.",
-        "addressLine1": "Neubaugasse 7 / Stiege II / 2. Stock / Top 49 ",
-        "addressLine2": "1070 Wien",
-        "phoneLabel": "+43 670 3519322",
-        "phoneHref": "+43 670 3519322",
-        "email": "schmida.psychotherapie@gmail.com",
+        "personalDetailsTitle": "Persönlicher Kontakt",
+        "officeDetailsTitle": "Praxisgemeinschaft",
+        "personalDetails": [
+          {
+            "title": "Telefon",
+            "content": "+43 670 3519322",
+            "type": "phone"
+          },
+          {
+            "title": "E-Mail",
+            "content": "schmida.psychotherapie@gmail.com",
+            "type": "email"
+          }
+        ],
+        "officeDetails": [
+          {
+            "title": "Adresse",
+            "content": "Neubaugasse 7 / Stiege II / 2. Stock / Top 49\n1070 Wien",
+            "type": "address"
+          }
+        ],
         "mapEmbed": "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d664.8465953807859!2d16.34879082855037!3d48.19917319210002!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x476d07f4eca9ce37%3A0xddd9c34524055e49!2sInstitut%20Ap%C3%A4do%20KG!5e0!3m2!1sen!2sat!4v1785022156931!5m2!1sen!2sat",
         "mapLink": "https://maps.app.goo.gl/KBTCqJBim6ZuFhDj9",
         "mapLabel": "Google Maps"

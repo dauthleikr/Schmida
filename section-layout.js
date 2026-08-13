@@ -61,6 +61,14 @@
       return '';
     }
   };
+  const safeExternalUrl = (value) => {
+    try {
+      const url = new URL(String(value || '').trim());
+      return ['http:','https:'].includes(url.protocol) ? url.href : '';
+    } catch {
+      return '';
+    }
+  };
 
   const renderCardGrid = (section,{ titleOnly = false } = {}) => {
     const body = section.content;
@@ -153,19 +161,39 @@
     },
     contact: (section) => {
       const body = section.content;
-      const phoneHref = String(body.phoneHref || '').replace(/[^\d+]/g,'');
-      const address = [body.addressLine1,body.addressLine2].filter(Boolean);
-      const details = [
-        address.length ? `<div><div class="detail-label">Praxis</div><p class="detail-value">${address.map(formatMarkup).join('<br>')}</p></div>` : '',
-        body.phoneLabel ? `<div><div class="detail-label">Telefon</div>${phoneHref ? `<a class="detail-value" href="tel:${escapeAttribute(phoneHref)}">${formatMarkup(body.phoneLabel)}</a>` : `<span class="detail-value">${formatMarkup(body.phoneLabel)}</span>`}</div>` : '',
-        body.email ? `<div><div class="detail-label">E-Mail</div>${String(body.email).includes('@') ? `<a class="detail-value" href="mailto:${escapeAttribute(body.email)}">${formatMarkup(body.email)}</a>` : `<span class="detail-value">${formatMarkup(body.email)}</span>`}</div>` : ''
-      ].join('');
+      const mapHref = safeExternalUrl(body.mapLink);
+      const detail = (label,value) => value ? `<div class="contact-detail"><div class="detail-label">${label}</div>${value}</div>` : '';
+      const value = (text) => `<span class="detail-value">${formatMarkup(text)}</span>`;
+      const link = (href,text) => `<a class="detail-value" href="${escapeAttribute(href)}">${formatMarkup(text)}</a>`;
+      const detailMarkup = (item) => {
+        const content = String(item.content || '').trim();
+        if (!content) return '';
+        if (item.type === 'phone') {
+          const href = content.replace(/[^\d+]/g,'');
+          return detail(formatMarkup(item.title),href ? link(`tel:${href}`,content) : value(content));
+        }
+        if (item.type === 'email') {
+          return detail(formatMarkup(item.title),content.includes('@') ? link(`mailto:${content}`,content) : value(content));
+        }
+        if (item.type === 'website') {
+          const href = safeExternalUrl(content);
+          const markup = href ? `<a class="detail-value" href="${escapeAttribute(href)}" target="_blank" rel="noreferrer">${formatMarkup(content)}</a>` : value(content);
+          return detail(formatMarkup(item.title),markup);
+        }
+        if (item.type === 'address' && mapHref) {
+          return detail(formatMarkup(item.title),`<a class="detail-value detail-value-address" href="${escapeAttribute(mapHref)}" target="_blank" rel="noreferrer">${formatMarkup(content)}</a>`);
+        }
+        return detail(formatMarkup(item.title),`<p class="detail-value">${formatMarkup(content)}</p>`);
+      };
+      const personalDetails = (body.personalDetails || []).map(detailMarkup).join('');
+      const officeDetails = (body.officeDetails || []).map(detailMarkup).join('');
+      const group = (title,details,key) => `<section class="contact-group" data-contact-group="${key}"><h3>${formatMarkup(title)}</h3><div class="contact-group-items">${details}</div></section>`;
       const embedUrl = safeMapEmbedUrl(body.mapEmbed);
-      const mapLink = body.mapLink && body.mapLabel ? `<a class="map-link" href="${escapeAttribute(body.mapLink)}" target="_blank" rel="noreferrer">${formatMarkup(body.mapLabel)}</a>` : '';
+      const mapLink = mapHref && body.mapLabel ? `<a class="map-link" href="${escapeAttribute(mapHref)}" target="_blank" rel="noreferrer">${formatMarkup(body.mapLabel)}</a>` : '';
       const map = embedUrl
         ? `<div class="map map-embed">${mapLink}<iframe src="${escapeAttribute(embedUrl)}" title="Standort auf Google Maps" loading="lazy" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe></div>`
         : mapLink ? `<div class="map">${mapLink}</div>` : '';
-      return `<section class="section dynamic-section contact-section layout-contact"><div class="page contact-grid"><div class="contact-copy">${sectionHeading(section)}<p class="section-intro-text">${formatMarkup(body.text)}</p></div><div class="contact-details">${details}</div></div>${map}</section>`;
+      return `<section class="section dynamic-section contact-section layout-contact"><div class="page contact-grid"><div class="contact-copy">${sectionHeading(section)}<p class="section-intro-text">${formatMarkup(body.text)}</p></div><div class="contact-details">${group(body.personalDetailsTitle || 'Persönlicher Kontakt',personalDetails,'personal')}${group(body.officeDetailsTitle || 'Praxis',officeDetails,'office')}</div></div>${map}</section>`;
     }
   };
 

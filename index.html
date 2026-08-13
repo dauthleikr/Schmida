@@ -239,12 +239,18 @@
 
     .contact-section { overflow:hidden; padding-bottom:0; }
     .contact-section h2 { max-width:11ch; }
-    .contact-grid { display:grid; grid-template-columns:.74fr 1.26fr; gap:clamp(52px,10vw,135px); padding-bottom:clamp(70px,10vw,120px); }
-    .contact-copy { max-width:35ch; }
-    .contact-details { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:34px; padding-top:10px; }
+    .contact-grid { padding-bottom:clamp(70px,10vw,120px); }
+    .contact-copy { display:grid; grid-template-columns:.74fr 1.26fr; gap:clamp(52px,10vw,135px); align-items:start; margin-bottom:clamp(48px,7vw,80px); }
+    .contact-copy>p { max-width:43ch; margin-top:10px; }
+    .contact-details { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:clamp(42px,8vw,100px); }
+    .contact-group { padding-top:24px; border-top:1px solid var(--line); }
+    .is-dark .contact-group { border-color:rgba(255,255,255,.2); }
+    .contact-group h3 { margin:0 0 30px; color:inherit; font-family:var(--serif); font-size:clamp(1.55rem,2.4vw,2rem); font-weight:400; line-height:1.15; }
+    .contact-group-items { display:grid; gap:26px; }
     .detail-label { margin-bottom:8px; color:var(--wine-650); font-size:.66rem; font-weight:700; letter-spacing:.12em; text-transform:uppercase; }
     .is-dark .detail-label { color:var(--rose-300); }
     .detail-value { margin:0; color:inherit; font-family:var(--serif); font-size:1.23rem; line-height:1.35; text-decoration:none; }
+    .detail-value-address { display:inline-block; }
     .detail-value:hover { color:var(--wine-650); }
     .is-dark .detail-value:hover { color:var(--rose-300); }
     .map { position:relative; display:flex; min-height:280px; align-items:flex-end; overflow:hidden; background:#39161e; }
@@ -293,8 +299,8 @@
       .nav-list.is-open { display:flex; }
       .nav-list a { display:block; padding:11px 0; }
       .hero { --mobile-wave-height:clamp(96px,27vw,118px); --hero-ribbon-height:var(--mobile-wave-height); }
-      .hero-inner,.intro-grid,.therapy-grid,.practice-grid,.costs-grid,.contact-grid,.focus-header,.topics-grid,.timeline-grid { grid-template-columns:1fr; }
-      .intro-grid,.therapy-grid,.practice-grid,.costs-grid,.contact-grid,.topics-grid,.timeline-grid { gap:36px; }
+      .hero-inner,.intro-grid,.therapy-grid,.practice-grid,.costs-grid,.focus-header,.topics-grid,.timeline-grid,.contact-copy { grid-template-columns:1fr; }
+      .intro-grid,.therapy-grid,.practice-grid,.costs-grid,.topics-grid,.timeline-grid,.contact-copy { gap:36px; }
       .hero-inner { gap:0; padding:var(--hero-content-top) 0 0; }
       .hero-copy { padding:0 0 52px; transform:none; }
       h1 { width:auto; max-width:11ch; }
@@ -318,7 +324,7 @@
       .price-row { grid-template-columns:minmax(0,1fr) auto; }
       .price-name { min-width:0; }
       .price-value { max-width:18ch; text-align:right; white-space:normal; }
-      .contact-details { gap:27px 20px; }
+      .contact-details { gap:36px; }
       .office-placeholder,.section-image { min-height:360px; }
       .wide-image-copy { margin-bottom:36px; }
       .wide-image-frame { min-height:0; }
