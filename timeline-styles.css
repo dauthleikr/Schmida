@@ -42,12 +42,20 @@
   outline-offset:2px;
 }
 
-.timeline-view.is-active {
-  animation:timeline-view-enter 280ms cubic-bezier(.16,1,.3,1);
+.timeline-view.is-leaving {
+  animation:timeline-view-leave 100ms ease-in both;
+}
+
+.timeline-view.is-entering {
+  animation:timeline-view-enter 170ms cubic-bezier(.16,1,.3,1) both;
+}
+
+@keyframes timeline-view-leave {
+  to { opacity:0; transform:translateY(-3px); }
 }
 
 @keyframes timeline-view-enter {
-  from { opacity:0; transform:translateY(8px); }
+  from { opacity:0; transform:translateY(5px); }
   to { opacity:1; transform:none; }
 }
 
@@ -460,5 +468,6 @@
 }
 
 @media (prefers-reduced-motion:reduce) {
-  .timeline-view.is-active { animation:none; }
+  .timeline-view.is-entering,
+  .timeline-view.is-leaving { animation:none; }
 }

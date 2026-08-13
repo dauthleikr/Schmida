@@ -232,6 +232,34 @@
     const tabs = [...toggle.querySelectorAll('[data-timeline-toggle-target]')];
     const section = toggle.closest('.layout-timeline-toggle');
     const panels = [...section.querySelectorAll('[data-timeline-view]')];
+    const reducedMotion = matchMedia('(prefers-reduced-motion:reduce)').matches;
+    let transitionId = 0;
+    const animatePanel = async (panel,className) => {
+      panel.classList.add(className);
+      await Promise.all(panel.getAnimations().map((animation) => animation.finished.catch(() => {})));
+      panel.classList.remove(className);
+    };
+    const switchPanel = async (key) => {
+      const target = panels.find((panel) => panel.dataset.timelineView === key);
+      const current = panels.find((panel) => !panel.hidden);
+      const currentTransition = ++transitionId;
+      panels.forEach((panel) => {
+        panel.getAnimations().forEach((animation) => animation.cancel());
+        panel.classList.remove('is-entering','is-leaving','is-active');
+      });
+      if (!target || target === current) {
+        current?.classList.add('is-active');
+        return;
+      }
+
+      if (!reducedMotion) await animatePanel(current,'is-leaving');
+      if (currentTransition !== transitionId) return;
+
+      current.hidden = true;
+      target.hidden = false;
+      target.classList.add('is-active');
+      if (!reducedMotion) await animatePanel(target,'is-entering');
+    };
     const activate = (key,{ focus = false } = {}) => {
       tabs.forEach((tab) => {
         const active = tab.dataset.timelineToggleTarget === key;
@@ -239,11 +267,7 @@
         tab.tabIndex = active ? 0 : -1;
         if (active && focus) tab.focus();
       });
-      panels.forEach((panel) => {
-        const active = panel.dataset.timelineView === key;
-        panel.hidden = !active;
-        panel.classList.toggle('is-active',active);
-      });
+      void switchPanel(key);
     };
     tabs.forEach((tab,index) => {
       tab.addEventListener('click',() => activate(tab.dataset.timelineToggleTarget));

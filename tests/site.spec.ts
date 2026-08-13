@@ -912,6 +912,12 @@ test('alternating timeline toggles between two editable views', async ({ page })
   await expect(preview.locator('[data-timeline-view="secondary"]')).toBeHidden();
 
   await educationTab.click();
+  await careerTab.click();
+  await expect(careerTab).toHaveAttribute('aria-selected','true');
+  await expect(preview.locator('[data-timeline-view="primary"]')).toBeVisible();
+  await expect(preview.locator('[data-timeline-view="secondary"]')).toBeHidden();
+
+  await educationTab.click();
   await expect(educationTab).toHaveAttribute('aria-selected','true');
   await expect(timelineGrid.locator(':scope > .timeline-copy')).toContainText('Gemeinsame Einleitung zum Werdegang.');
   await expect(preview.locator('[data-timeline-view="secondary"]')).toBeVisible();
@@ -919,6 +925,8 @@ test('alternating timeline toggles between two editable views', async ({ page })
   await educationTab.press('ArrowLeft');
   await expect(careerTab).toBeFocused();
   await expect(careerTab).toHaveAttribute('aria-selected','true');
+  await expect(preview.locator('[data-timeline-view="primary"]')).toBeVisible();
+  await expect(preview.locator('[data-timeline-view="secondary"]')).toBeHidden();
 
   await page.getByRole('button',{ name:'Vorschau schließen' }).click();
   await timeline.getByRole('button',{ name:/Mobilvorschau/ }).click();
