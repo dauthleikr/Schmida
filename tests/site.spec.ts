@@ -918,6 +918,8 @@ test('alternating timeline toggles between two editable views', async ({ page })
   await expect(preview.locator('[data-timeline-view="secondary"]')).toBeHidden();
 
   await educationTab.click();
+  expect(await preview.locator('[data-timeline-view="primary"]').evaluate((panel) => panel.getAnimations().length)).toBeGreaterThan(0);
+  expect(await preview.locator('[data-timeline-view="secondary"]').evaluate((panel) => panel.getAnimations().length)).toBeGreaterThan(0);
   await expect(educationTab).toHaveAttribute('aria-selected','true');
   await expect(timelineGrid.locator(':scope > .timeline-copy')).toContainText('Gemeinsame Einleitung zum Werdegang.');
   await expect(preview.locator('[data-timeline-view="secondary"]')).toBeVisible();

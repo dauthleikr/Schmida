@@ -144,7 +144,7 @@
 
       const toggleId = `timeline-toggle-${++timelineToggleId}`;
       const viewMarkup = (key,items,active) => `<div class="timeline-view${active ? ' is-active' : ''}" data-timeline-view="${key}" id="${toggleId}-panel-${key}" role="tabpanel" aria-labelledby="${toggleId}-tab-${key}" ${active ? '' : 'hidden'}><ol class="timeline-list" data-timeline-style="${escapeAttribute(timelineStyle)}">${timelineItemsMarkup(items)}</ol></div>`;
-      return `<section class="section dynamic-section layout-timeline layout-timeline-toggle"><div class="page timeline-grid"><div class="timeline-copy">${sectionHeading(section)}<p class="section-intro-text">${formatMarkup(body.intro)}</p></div><div class="timeline-switchable"><div class="timeline-toggle-wrap"><div class="timeline-toggle" data-timeline-toggle role="tablist" aria-label="Werdegang auswählen"><button type="button" id="${toggleId}-tab-primary" role="tab" aria-selected="true" aria-controls="${toggleId}-panel-primary" data-timeline-toggle-target="primary">${formatMarkup(body.primaryViewLabel || 'Berufserfahrung')}</button><button type="button" id="${toggleId}-tab-secondary" role="tab" aria-selected="false" aria-controls="${toggleId}-panel-secondary" data-timeline-toggle-target="secondary" tabindex="-1">${formatMarkup(body.secondaryViewLabel || 'Ausbildung')}</button></div></div>${viewMarkup('primary',body.items,true)}${viewMarkup('secondary',secondaryItems,false)}</div></div></section>`;
+      return `<section class="section dynamic-section layout-timeline layout-timeline-toggle"><div class="page timeline-grid"><div class="timeline-copy">${sectionHeading(section)}<p class="section-intro-text">${formatMarkup(body.intro)}</p></div><div class="timeline-switchable"><div class="timeline-toggle-wrap"><div class="timeline-toggle" data-timeline-toggle role="tablist" aria-label="Werdegang auswählen"><button type="button" id="${toggleId}-tab-primary" role="tab" aria-selected="true" aria-controls="${toggleId}-panel-primary" data-timeline-toggle-target="primary">${formatMarkup(body.primaryViewLabel || 'Berufserfahrung')}</button><button type="button" id="${toggleId}-tab-secondary" role="tab" aria-selected="false" aria-controls="${toggleId}-panel-secondary" data-timeline-toggle-target="secondary" tabindex="-1">${formatMarkup(body.secondaryViewLabel || 'Ausbildung')}</button></div></div><div class="timeline-panels">${viewMarkup('primary',body.items,true)}${viewMarkup('secondary',secondaryItems,false)}</div></div></div></section>`;
     },
     pricing: (section) => {
       const body = section.content;
@@ -234,31 +234,34 @@
     const panels = [...section.querySelectorAll('[data-timeline-view]')];
     const reducedMotion = matchMedia('(prefers-reduced-motion:reduce)').matches;
     let transitionId = 0;
-    const animatePanel = async (panel,className) => {
-      panel.classList.add(className);
-      await Promise.all(panel.getAnimations().map((animation) => animation.finished.catch(() => {})));
-      panel.classList.remove(className);
-    };
     const switchPanel = async (key) => {
       const target = panels.find((panel) => panel.dataset.timelineView === key);
-      const current = panels.find((panel) => !panel.hidden);
+      const current = panels.find((panel) => panel.classList.contains('is-active')) || panels.find((panel) => !panel.hidden);
       const currentTransition = ++transitionId;
       panels.forEach((panel) => {
         panel.getAnimations().forEach((animation) => animation.cancel());
-        panel.classList.remove('is-entering','is-leaving','is-active');
+        panel.hidden = panel !== current;
       });
       if (!target || target === current) {
         current?.classList.add('is-active');
         return;
       }
 
-      if (!reducedMotion) await animatePanel(current,'is-leaving');
-      if (currentTransition !== transitionId) return;
+      target.hidden = false;
+      if (!reducedMotion) {
+        const timing = { duration:220,easing:'cubic-bezier(.4,0,.2,1)',fill:'both' };
+        const animations = [
+          current.animate([{ opacity:1,transform:'translateY(0)' },{ opacity:0,transform:'translateY(-4px)' }],timing),
+          target.animate([{ opacity:0,transform:'translateY(5px)' },{ opacity:1,transform:'translateY(0)' }],timing)
+        ];
+        await Promise.all(animations.map((animation) => animation.finished.catch(() => {})));
+        if (currentTransition !== transitionId) return;
+        animations.forEach((animation) => animation.cancel());
+      }
 
       current.hidden = true;
-      target.hidden = false;
+      current.classList.remove('is-active');
       target.classList.add('is-active');
-      if (!reducedMotion) await animatePanel(target,'is-entering');
     };
     const activate = (key,{ focus = false } = {}) => {
       tabs.forEach((tab) => {
