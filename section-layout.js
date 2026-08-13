@@ -275,21 +275,27 @@
         return;
       }
 
-      target.hidden = false;
-      if (!reducedMotion) {
-        const timing = { duration:220,easing:'cubic-bezier(.4,0,.2,1)',fill:'both' };
-        const animations = [
-          current.animate([{ opacity:1,transform:'translateY(0)' },{ opacity:0,transform:'translateY(-4px)' }],timing),
-          target.animate([{ opacity:0,transform:'translateY(5px)' },{ opacity:1,transform:'translateY(0)' }],timing)
-        ];
-        await Promise.all(animations.map((animation) => animation.finished.catch(() => {})));
-        if (currentTransition !== transitionId) return;
-        animations.forEach((animation) => animation.cancel());
-      }
+      const offset = reducedMotion ? '0' : '-6px';
+      const outgoing = current.animate(
+        [{ opacity:1,transform:'translateY(0)' },{ opacity:0,transform:`translateY(${offset})` }],
+        { duration:reducedMotion ? 90 : 160,easing:'ease-in',fill:'both' }
+      );
+      await outgoing.finished.catch(() => {});
+      if (currentTransition !== transitionId) return;
+      outgoing.cancel();
 
       current.hidden = true;
       current.classList.remove('is-active');
+      target.hidden = false;
       target.classList.add('is-active');
+
+      const incomingOffset = reducedMotion ? '0' : '7px';
+      const incoming = target.animate(
+        [{ opacity:0,transform:`translateY(${incomingOffset})` },{ opacity:1,transform:'translateY(0)' }],
+        { duration:reducedMotion ? 110 : 210,easing:'cubic-bezier(.16,1,.3,1)',fill:'both' }
+      );
+      await incoming.finished.catch(() => {});
+      if (currentTransition === transitionId) incoming.cancel();
     };
     const activate = (key,{ focus = false } = {}) => {
       tabs.forEach((tab) => {
