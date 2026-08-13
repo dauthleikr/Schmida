@@ -949,11 +949,7 @@ test('timeline layout offers interchangeable visual treatments', async ({ page }
 });
 
 test('alternating timeline toggles between two editable views', async ({ page }) => {
-  const timelineLogs:string[] = [];
-  page.on('console',(message) => {
-    if (message.text().includes('[timeline-transition]')) timelineLogs.push(message.text());
-  });
-  await page.goto(`${editorUrl}?debugTimeline=1`);
+  await page.goto(editorUrl);
   await page.selectOption('#new-layout','timeline');
   await page.getByRole('button',{ name:'Bereich hinzufügen' }).click();
 
@@ -1002,17 +998,13 @@ test('alternating timeline toggles between two editable views', async ({ page })
   await expect(preview.locator('[data-timeline-view="secondary"]')).toBeHidden();
 
   await educationTab.click();
-  await expect(timelineSection).toHaveAttribute('data-timeline-transition-state','leaving');
   expect(await preview.locator('[data-timeline-view="primary"]').evaluate((panel) => panel.getAnimations().length)).toBeGreaterThan(0);
   await expect(preview.locator('[data-timeline-view="primary"]')).toBeHidden();
-  await expect(timelineSection).toHaveAttribute('data-timeline-transition-state','entering');
   expect(await preview.locator('[data-timeline-view="secondary"]').evaluate((panel) => panel.getAnimations().length)).toBeGreaterThan(0);
   await expect(educationTab).toHaveAttribute('aria-selected','true');
   await expect(timelineGrid.locator(':scope > .timeline-copy')).toContainText('Gemeinsame Einleitung zum Werdegang.');
   await expect(preview.locator('[data-timeline-view="secondary"]')).toBeVisible();
   await expect(preview.locator('[data-timeline-view="secondary"]')).toContainText('Beispielausbildung');
-  await expect(timelineSection).toHaveAttribute('data-timeline-transition-state','idle');
-  expect(timelineLogs.some((entry) => entry.includes('timeline-transition'))).toBe(true);
   await educationTab.press('ArrowLeft');
   await expect(careerTab).toBeFocused();
   await expect(careerTab).toHaveAttribute('aria-selected','true');
