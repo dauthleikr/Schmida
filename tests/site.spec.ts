@@ -889,8 +889,9 @@ test('alternating timeline toggles between two editable views', async ({ page })
   await expect(secondaryLabel).toBeVisible();
   await primaryLabel.fill('Berufserfahrung');
   await secondaryLabel.fill('Ausbildung');
-  await timeline.locator('[data-path$=".content.secondaryTitle"]').fill('Meine Ausbildung');
-  await timeline.locator('[data-path$=".content.secondaryIntro"]').fill('Ausbildungen und Abschlüsse.');
+  await timeline.locator('[data-path$=".content.intro"]').fill('Gemeinsame Einleitung zum Werdegang.');
+  await expect(timeline.locator('[data-path$=".content.secondaryTitle"]')).toHaveCount(0);
+  await expect(timeline.locator('[data-path$=".content.secondaryIntro"]')).toHaveCount(0);
 
   const secondaryItems = timeline.locator('.collection:has([data-collection-key="secondaryItems"])');
   await secondaryItems.locator('[data-collection-action="add"]').click();
@@ -902,6 +903,9 @@ test('alternating timeline toggles between two editable views', async ({ page })
   const toggle = preview.getByRole('tablist',{ name:'Werdegang auswählen' });
   const careerTab = toggle.getByRole('tab',{ name:'Berufserfahrung' });
   const educationTab = toggle.getByRole('tab',{ name:'Ausbildung' });
+  const timelineGrid = preview.locator('.layout-timeline-toggle > .timeline-grid');
+  await expect(timelineGrid.locator(':scope > .timeline-copy')).toContainText('Gemeinsame Einleitung zum Werdegang.');
+  await expect(timelineGrid.locator(':scope > .timeline-switchable > .timeline-toggle-wrap')).toContainText('Berufserfahrung');
   await expect(careerTab).toHaveAttribute('aria-selected','true');
   await expect(educationTab).toHaveAttribute('aria-selected','false');
   await expect(preview.locator('[data-timeline-view="primary"]')).toBeVisible();
@@ -909,6 +913,7 @@ test('alternating timeline toggles between two editable views', async ({ page })
 
   await educationTab.click();
   await expect(educationTab).toHaveAttribute('aria-selected','true');
+  await expect(timelineGrid.locator(':scope > .timeline-copy')).toContainText('Gemeinsame Einleitung zum Werdegang.');
   await expect(preview.locator('[data-timeline-view="secondary"]')).toBeVisible();
   await expect(preview.locator('[data-timeline-view="secondary"]')).toContainText('Beispielausbildung');
   await educationTab.press('ArrowLeft');

@@ -115,8 +115,6 @@ window.practiceContent = {
         "eyebrow": "Über mich",
         "title": "Psychosoziale Berufserfahrung.",
         "intro": "Als Psychotherapeutin in Ausbildung unter Supervision stehe ich im regelmäßigen fachlichen Austausch mit erfahrenen Psychotherapeut:innen.\n\nMeine bisherige Berufserfahrung im psychosozialen Bereich:",
-        "primaryViewLabel": "Berufserfahrung",
-        "secondaryViewLabel": "Ausbildung",
         "items": [
           {
             "period": "Seit 2024",
@@ -139,8 +137,8 @@ window.practiceContent = {
             "detail": "Volkshilfe Wien"
           }
         ],
-        "secondaryTitle": "Ausbildung",
-        "secondaryIntro": "Meine psychotherapeutische und ergänzende Ausbildung:",
+        "primaryViewLabel": "Berufserfahrung",
+        "secondaryViewLabel": "Ausbildung",
         "secondaryItems": [
           {
             "period": "Laufend",

@@ -3,7 +3,7 @@
 .timeline-toggle-wrap {
   display:flex;
   justify-content:center;
-  margin-bottom:clamp(40px,6vw,72px);
+  margin-bottom:clamp(24px,3vw,36px);
 }
 
 .timeline-toggle {
@@ -70,6 +70,10 @@
   grid-template-columns:.72fr 1.28fr;
   gap:clamp(48px,10vw,148px);
   align-items:start;
+}
+
+.timeline-switchable {
+  min-width:0;
 }
 
 .timeline-copy>p {
