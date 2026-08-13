@@ -151,8 +151,9 @@
       }
 
       const toggleId = `timeline-toggle-${++timelineToggleId}`;
+      const transitionDuration = Math.min(2000,Math.max(0,Number(section.appearance?.timelineTransitionDuration) || 0));
       const viewMarkup = (key,items,active) => `<div class="timeline-view${active ? ' is-active' : ''}" data-timeline-view="${key}" id="${toggleId}-panel-${key}" role="tabpanel" aria-labelledby="${toggleId}-tab-${key}" ${active ? '' : 'hidden'}><ol class="timeline-list" data-timeline-style="${escapeAttribute(timelineStyle)}">${timelineItemsMarkup(items)}</ol></div>`;
-      return `<section class="section dynamic-section layout-timeline layout-timeline-toggle"><div class="page timeline-grid"><div class="timeline-copy">${sectionHeading(section)}<p class="section-intro-text">${formatMarkup(body.intro)}</p></div><div class="timeline-switchable"><div class="timeline-toggle-wrap"><div class="timeline-toggle" data-timeline-toggle role="tablist" aria-label="Werdegang auswählen"><button type="button" id="${toggleId}-tab-primary" role="tab" aria-selected="true" aria-controls="${toggleId}-panel-primary" data-timeline-toggle-target="primary">${formatMarkup(body.primaryViewLabel || 'Berufserfahrung')}</button><button type="button" id="${toggleId}-tab-secondary" role="tab" aria-selected="false" aria-controls="${toggleId}-panel-secondary" data-timeline-toggle-target="secondary" tabindex="-1">${formatMarkup(body.secondaryViewLabel || 'Ausbildung')}</button></div></div><div class="timeline-panels">${viewMarkup('primary',body.items,true)}${viewMarkup('secondary',secondaryItems,false)}</div></div></div></section>`;
+      return `<section class="section dynamic-section layout-timeline layout-timeline-toggle" data-timeline-transition-duration="${transitionDuration}" data-timeline-transition-state="idle"><div class="page timeline-grid"><div class="timeline-copy">${sectionHeading(section)}<p class="section-intro-text">${formatMarkup(body.intro)}</p></div><div class="timeline-switchable"><div class="timeline-toggle-wrap"><div class="timeline-toggle" data-timeline-toggle role="tablist" aria-label="Werdegang auswählen"><button type="button" id="${toggleId}-tab-primary" role="tab" aria-selected="true" aria-controls="${toggleId}-panel-primary" data-timeline-toggle-target="primary">${formatMarkup(body.primaryViewLabel || 'Berufserfahrung')}</button><button type="button" id="${toggleId}-tab-secondary" role="tab" aria-selected="false" aria-controls="${toggleId}-panel-secondary" data-timeline-toggle-target="secondary" tabindex="-1">${formatMarkup(body.secondaryViewLabel || 'Ausbildung')}</button></div></div><div class="timeline-panels">${viewMarkup('primary',body.items,true)}${viewMarkup('secondary',secondaryItems,false)}</div></div></div></section>`;
     },
     pricing: (section) => {
       const body = section.content;
@@ -261,7 +262,16 @@
     const section = toggle.closest('.layout-timeline-toggle');
     const panels = [...section.querySelectorAll('[data-timeline-view]')];
     const reducedMotion = matchMedia('(prefers-reduced-motion:reduce)').matches;
+    const transitionDuration = Math.min(2000,Math.max(0,Number(section.dataset.timelineTransitionDuration) || 0));
+    const outgoingDuration = Math.round(transitionDuration * .4);
+    const incomingDuration = transitionDuration - outgoingDuration;
+    const debug = new URLSearchParams(location.search).has('debugTimeline');
+    const report = (phase,details = {}) => {
+      section.dataset.timelineTransitionState = phase;
+      if (debug) console.debug('[timeline-transition]',{ phase,transitionDuration,reducedMotion,...details });
+    };
     let transitionId = 0;
+    report('idle');
     const switchPanel = async (key) => {
       const target = panels.find((panel) => panel.dataset.timelineView === key);
       const current = panels.find((panel) => panel.classList.contains('is-active')) || panels.find((panel) => !panel.hidden);
@@ -272,13 +282,15 @@
       });
       if (!target || target === current) {
         current?.classList.add('is-active');
+        report('idle',{ active:key });
         return;
       }
 
       const offset = reducedMotion ? '0' : '-6px';
+      report('leaving',{ from:current.dataset.timelineView,to:key,duration:outgoingDuration });
       const outgoing = current.animate(
         [{ opacity:1,transform:'translateY(0)' },{ opacity:0,transform:`translateY(${offset})` }],
-        { duration:reducedMotion ? 90 : 160,easing:'ease-in',fill:'both' }
+        { duration:outgoingDuration,easing:'ease-in',fill:'both' }
       );
       await outgoing.finished.catch(() => {});
       if (currentTransition !== transitionId) return;
@@ -290,12 +302,16 @@
       target.classList.add('is-active');
 
       const incomingOffset = reducedMotion ? '0' : '7px';
+      report('entering',{ active:key,duration:incomingDuration });
       const incoming = target.animate(
         [{ opacity:0,transform:`translateY(${incomingOffset})` },{ opacity:1,transform:'translateY(0)' }],
-        { duration:reducedMotion ? 110 : 210,easing:'cubic-bezier(.16,1,.3,1)',fill:'both' }
+        { duration:incomingDuration,easing:'cubic-bezier(.16,1,.3,1)',fill:'both' }
       );
       await incoming.finished.catch(() => {});
-      if (currentTransition === transitionId) incoming.cancel();
+      if (currentTransition === transitionId) {
+        incoming.cancel();
+        report('idle',{ active:key });
+      }
     };
     const activate = (key,{ focus = false } = {}) => {
       tabs.forEach((tab) => {

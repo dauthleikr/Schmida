@@ -205,8 +205,9 @@
           ['year-focus','Große Jahreszahlen'],
           ['alternating-path','Wechselnder Pfad'],
           ['soft-steps','Sanfte Etappen']
-        ] }
-      ],{ timelineStyle: 'classic-lines' }),
+        ] },
+        { key: 'timelineTransitionDuration', label: 'Dauer des Zeitleistenwechsels', type: 'range', min: 0, max: 2000, step: 50, unit: 'ms', help: 'Gesamtdauer des Aus- und Einblendens. 0 ms deaktiviert den Übergang.', visibleWhen: { scope: 'appearance',key: 'timelineStyle',values: ['alternating-path'] } }
+      ],{ timelineStyle: 'classic-lines',timelineTransitionDuration: 600 }),
       label: 'Zeitleiste',
       description: 'Eine flexible chronologische Liste mit verschiedenen Darstellungen für Ausbildung oder Berufserfahrung.',
       defaultNavigation: 'Über mich',
