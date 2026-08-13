@@ -864,6 +864,8 @@ test('contact layout separates personal and office details with a safe map', asy
   const desktopColumns = await Promise.all([personal,office].map((group) => group.boundingBox()));
   expect(desktopColumns[1]!.x).toBeGreaterThan(desktopColumns[0]!.x + desktopColumns[0]!.width);
   expect(desktopColumns[1]!.y).toBeCloseTo(desktopColumns[0]!.y,0);
+  const introBox = await desktopPage.locator('.contact-copy > .section-intro-text').boundingBox();
+  expect(introBox!.x).toBeCloseTo(desktopColumns[1]!.x,0);
 
   await desktopPage.close();
   const mobilePage = await openFixture({ ...contactSection,content:{ ...contactSection.content,mapEmbed:'javascript:alert(1)' } },'mobile');
