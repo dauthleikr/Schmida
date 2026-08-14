@@ -68,7 +68,10 @@
   };
   const safeExternalUrl = (value) => {
     try {
-      const url = new URL(String(value || '').trim());
+      const raw = String(value || '').trim();
+      const hasProtocol = /^[a-z][a-z\d+.-]*:/i.test(raw);
+      const looksLikeDomain = /^(?:www\.)?[a-z\d](?:[a-z\d.-]*[a-z\d])?\.[a-z]{2,}(?::\d+)?(?:[/?#].*)?$/i.test(raw);
+      const url = new URL(!hasProtocol && looksLikeDomain ? `https://${raw}` : raw);
       return ['http:','https:'].includes(url.protocol) ? url.href : '';
     } catch {
       return '';

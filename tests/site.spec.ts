@@ -890,7 +890,7 @@ test('contact layout separates personal and office details with a safe map', asy
         { title:'Praxis',content:'Praxis am Beispielplatz',type:'text' },
         { title:'Adresse',content:'Beispielplatz 1\n1010 Wien',type:'address' },
         { title:'Telefon',content:'+43 1 234 56 78',type:'phone' },
-        { title:'Website',content:'https://praxis.example.at/',type:'website' }
+        { title:'Website',content:'www.praxis.example.at',type:'website' }
       ],
       mapEmbed:'https://www.google.com/maps/embed?pb=test',
       mapLink:'https://maps.example.at/',
@@ -918,7 +918,7 @@ test('contact layout separates personal and office details with a safe map', asy
   await expect(personal).toContainText('person@example.at');
   await expect(office).toContainText('Praxisgemeinschaft');
   await expect(office).toContainText('Praxis am Beispielplatz');
-  await expect(office.getByRole('link',{ name:'https://praxis.example.at/' })).toHaveAttribute('href','https://praxis.example.at/');
+  await expect(office.getByRole('link',{ name:'www.praxis.example.at' })).toHaveAttribute('href','https://www.praxis.example.at/');
   await expect(office.getByRole('link',{ name:/Beispielplatz 1/ })).toHaveAttribute('href','https://maps.example.at/');
   const desktopColumns = await Promise.all([personal,office].map((group) => group.boundingBox()));
   expect(desktopColumns[1]!.x).toBeGreaterThan(desktopColumns[0]!.x + desktopColumns[0]!.width);
