@@ -18,17 +18,22 @@
     .replace(/_([^_]+)_/g,'<em>$1</em>')
     .replace(/\[([^\]]+)\]\((https?:\/\/[^\s)]+)\)/g,'<a href="$2" target="_blank" rel="noreferrer">$1</a>')
     .replace(/\n/g,'<br>');
-  const eyebrow = (value) => value ? `<p class="eyebrow">${formatMarkup(value)}</p>` : '';
+  const hasText = (value) => String(value ?? '').trim().length > 0;
+  const eyebrow = (value) => hasText(value) ? `<p class="eyebrow">${formatMarkup(value)}</p>` : '';
   const headingMarkup = (body,mode) => {
-    if (mode === 'both') return `${eyebrow(body.eyebrow)}<h2>${formatMarkup(body.title)}</h2>`;
+    if (mode === 'both') return `${eyebrow(body.eyebrow)}${hasText(body.title) ? `<h2>${formatMarkup(body.title)}</h2>` : ''}`;
     const value = mode === 'title' ? body.title : body.eyebrow;
-    return `<h2 class="section-heading-accent">${formatMarkup(value)}</h2>`;
+    return hasText(value) ? `<h2 class="section-heading-accent">${formatMarkup(value)}</h2>` : '';
   };
   const sectionHeading = (section) => {
     const body = section.content;
     const desktop = section.appearance?.headingModeDesktop || 'eyebrow';
     const mobile = section.appearance?.headingModeMobile || 'eyebrow';
-    return `<div class="section-heading-variant section-heading-desktop">${headingMarkup(body,desktop)}</div><div class="section-heading-variant section-heading-mobile">${headingMarkup(body,mobile)}</div>`;
+    const variant = (mode,className) => {
+      const markup = headingMarkup(body,mode);
+      return markup ? `<div class="section-heading-variant ${className}">${markup}</div>` : '';
+    };
+    return `${variant(desktop,'section-heading-desktop')}${variant(mobile,'section-heading-mobile')}`;
   };
   const imageMarkup = (body, className = 'office-placeholder', attributes = '', imageAttributes = '') => body.imageSrc
     ? `<div class="${className}" ${attributes} role="img" aria-label="${escapeAttribute(body.imageAlt)}" style="--section-image-position:${escapeAttribute(body.imagePosition || 'center center')}"><img class="section-image" src="${escapeAttribute(body.imageSrc)}" alt="${escapeAttribute(body.imageAlt)}" ${imageAttributes}>${body.caption ? `<p class="image-caption">${formatMarkup(body.caption)}</p>` : ''}</div>`

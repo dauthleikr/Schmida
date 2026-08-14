@@ -546,6 +546,13 @@ test('section heading source can be switched independently for desktop and mobil
 
   await expect(eyebrowField).toHaveValue(eyebrowText);
   await expect(titleField).toHaveValue(titleText);
+
+  await page.getByRole('button',{ name:'Vorschau schließen' }).click();
+  await eyebrowField.fill('');
+  await titleField.fill('   ');
+  await section.getByRole('button',{ name:/Desktopvorschau/ }).click();
+  await expect(preview.locator('.section-heading-variant')).toHaveCount(0);
+  await expect(preview.locator('h2')).toHaveCount(0);
 });
 
 test('intro layout supports an optional lead below its heading', async ({ page }) => {
