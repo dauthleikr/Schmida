@@ -239,18 +239,22 @@
       defaults: { eyebrow: 'Kosten', title: 'Transparent von Anfang an.', intro: 'Beschreiben Sie hier die Rahmenbedingungen.', items: [{ name: 'Einzeltherapie', duration: '50 Minuten', price: 'EUR 110' }], note: 'Ergänzender Hinweis zu Kosten oder Erstattung.' }
     },
     conditions: {
-      ...titleAppearance(),
-      label: 'Rahmenbedingungen mit Honorar',
-      description: 'Ein hervorgehobenes Honorar mit kompakten Informationen zu Dauer, Absage und Versicherung.',
+      ...titleAppearance([
+        { key: 'highlightTextSize', label: 'Schriftgröße des hervorgehobenen Texts', type: 'range', min: 30, max: 80, step: 1, unit: 'px' },
+        { key: 'highlightGradientStart', label: 'Verlaufsfarbe Start', type: 'color' },
+        { key: 'highlightGradientEnd', label: 'Verlaufsfarbe Ende', type: 'color' }
+      ],{ highlightTextSize: 50,highlightGradientStart: '#f4e4e4',highlightGradientEnd: '#fcfaf8' }),
+      label: 'Rahmenbedingungen mit Hervorhebung',
+      description: 'Ein quadratischer Hinweis mit einstellbarem Verlauf und kompakte Informationen zu Dauer, Absage und Versicherung.',
       defaultNavigation: 'Rahmenbedingungen',
       defaultBackground: 'paper',
       fields: [
         { key: 'eyebrow', label: 'Bereichsbezeichnung', type: 'text' },
         { key: 'title', label: 'Titel', type: 'rich', editorRows: 3 },
         { key: 'intro', label: 'Einleitung', type: 'rich', editorRows: 4 },
-        { key: 'feeLabel', label: 'Honorar-Bezeichnung', type: 'text' },
-        { key: 'feeAmount', label: 'Honorar', type: 'text' },
-        { key: 'feeMeta', label: 'Zusatz zum Honorar', type: 'text' },
+        { key: 'highlightLabel', label: 'Kleine Hinweiszeile', type: 'text' },
+        { key: 'highlightText', label: 'Hervorgehobener Text', type: 'rich', editorRows: 3 },
+        { key: 'highlightDetail', label: 'Detailtext', type: 'rich', editorRows: 4 },
         { key: 'items', label: 'Rahmenbedingungen', type: 'collection', min: 2, max: 6, addLabel: 'Information hinzufügen', itemFields: [{ key: 'title', label: 'Titel', type: 'text' }, { key: 'text', label: 'Beschreibung', type: 'rich', editorRows: 3 }] },
         { key: 'note', label: 'Abschließender Hinweis (optional)', type: 'rich', editorRows: 3 }
       ],
@@ -258,9 +262,9 @@
         eyebrow: 'Rahmenbedingungen',
         title: 'Klarheit von Anfang an.',
         intro: 'Damit Sie gut planen können, finden Sie hier die wichtigsten organisatorischen Informationen.',
-        feeLabel: 'Honorar pro Einheit',
-        feeAmount: '€ 90',
-        feeMeta: 'Einzelsitzung · 50 Minuten',
+        highlightLabel: 'Gut zu wissen',
+        highlightText: 'Klarheit schafft Vertrauen.',
+        highlightDetail: 'Offene Fragen und individuelle Vereinbarungen besprechen wir in Ruhe im Erstgespräch.',
         items: [
           { title: 'Absageregelung', text: 'Termine können bis 24 Stunden vorher kostenfrei abgesagt werden.' },
           { title: 'Versicherung', text: 'Bitte klären Sie eine mögliche Kostenübernahme direkt mit Ihrer Versicherung.' }
@@ -319,6 +323,11 @@
       delete sourceContent.imageAlt;
       delete sourceContent.imagePosition;
       delete sourceContent.caption;
+    }
+    if (layout === 'conditions') {
+      delete sourceContent.feeLabel;
+      delete sourceContent.feeAmount;
+      delete sourceContent.feeMeta;
     }
     const content = mergeDefaults(definition.defaults, sourceContent);
     const sourceAppearance = { ...(section?.appearance || {}) };

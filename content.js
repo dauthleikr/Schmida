@@ -210,22 +210,25 @@ window.practiceContent = {
     {
       "id": "rahmenbedingungen",
       "layout": "conditions",
-      "internalName": "Rahmenbedingungen mit Honorar",
+      "internalName": "Rahmenbedingungen mit Hervorhebung",
       "navigationLabel": "Rahmenbedingungen",
       "background": "paper",
       "customBackground": "#f7f2ef",
       "appearance": {
-        "headingModeDesktop": "both",
-        "headingModeMobile": "both",
-        "titleSize": "compact"
+        "headingModeDesktop": "eyebrow",
+        "headingModeMobile": "eyebrow",
+        "titleSize": "compact",
+        "highlightTextSize": 50,
+        "highlightGradientStart": "#f4e4e4",
+        "highlightGradientEnd": "#fcfaf8"
       },
       "content": {
         "eyebrow": "Rahmenbedingungen",
-        "title": "Klarheit von Anfang an.",
-        "intro": "Damit Sie gut planen können, finden Sie hier die wichtigsten Informationen zu Honorar, Terminablauf und Kostenerstattung.",
-        "feeLabel": "Honorar pro Einheit",
-        "feeAmount": "€ 90",
-        "feeMeta": "Einzelsitzung · 50 Minuten",
+        "title": "Rahmenbedingungen",
+        "intro": "Hier finden Sie hier die wichtigsten Informationen zu Honorar, Terminablauf und Kostenerstattung.",
+        "highlightLabel": "Gut zu wissen",
+        "highlightText": "Klarheit schafft Vertrauen.",
+        "highlightDetail": "Offene Fragen und individuelle Vereinbarungen besprechen wir in Ruhe im Erstgespräch.",
         "items": [
           {
             "title": "Sitzungsdauer",

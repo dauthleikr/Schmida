@@ -163,8 +163,13 @@
     conditions: (section) => {
       const body = section.content;
       const items = body.items.map((item) => `<article class="condition-item"><h3>${formatMarkup(item.title)}</h3><p>${formatMarkup(item.text)}</p></article>`).join('');
-      const fee = `<div class="conditions-fee"><p class="conditions-fee-label">${formatMarkup(body.feeLabel)}</p><p class="conditions-fee-amount">${formatMarkup(body.feeAmount)}</p><p class="conditions-fee-meta">${formatMarkup(body.feeMeta)}</p></div>`;
-      return `<section class="section dynamic-section layout-conditions"><div class="page conditions-grid"><div class="conditions-copy">${sectionHeading(section)}<p class="section-intro-text">${formatMarkup(body.intro)}</p>${fee}</div><div class="conditions-details"><div class="conditions-list">${items}</div>${body.note ? `<p class="conditions-note">${formatMarkup(body.note)}</p>` : ''}</div></div></section>`;
+      const textSize = Math.min(80,Math.max(30,Number(section.appearance?.highlightTextSize) || 50));
+      const gradientStart = section.appearance?.highlightGradientStart || '#f4e4e4';
+      const gradientEnd = section.appearance?.highlightGradientEnd || '#fcfaf8';
+      const highlightInk = readableInk(interpolateColor(gradientStart,gradientEnd,.5));
+      const highlightStyle = `--conditions-highlight-size:${textSize / 16}rem;--conditions-highlight-start:${gradientStart};--conditions-highlight-end:${gradientEnd};--conditions-highlight-ink:${highlightInk}`;
+      const highlight = `<div class="conditions-highlight" style="${escapeAttribute(highlightStyle)}"><p class="conditions-highlight-label">${formatMarkup(body.highlightLabel)}</p><div><p class="conditions-highlight-text">${formatMarkup(body.highlightText)}</p><p class="conditions-highlight-detail">${formatMarkup(body.highlightDetail)}</p></div></div>`;
+      return `<section class="section dynamic-section layout-conditions"><div class="page conditions-grid"><div class="conditions-copy">${sectionHeading(section)}<p class="section-intro-text">${formatMarkup(body.intro)}</p>${highlight}</div><div class="conditions-details"><div class="conditions-list">${items}</div>${body.note ? `<p class="conditions-note">${formatMarkup(body.note)}</p>` : ''}</div></div></section>`;
     },
     contact: (section) => {
       const body = section.content;

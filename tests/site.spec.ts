@@ -186,16 +186,25 @@ test('places editable Rahmenbedingungen directly after Praxis', async ({ page })
 
   const conditions = page.locator('#rahmenbedingungen');
   await expect(conditions.locator('.section-heading-desktop h2')).toBeVisible();
-  await expect(conditions.locator('.conditions-fee-amount')).toHaveText('€ 90');
-  await expect(conditions.locator('.conditions-fee-meta')).toContainText('50 Minuten');
+  await expect(conditions.locator('.conditions-highlight-text')).toHaveText('Klarheit schafft Vertrauen.');
+  await expect(conditions.locator('.conditions-highlight')).not.toContainText('€ 90');
+  await expect(conditions.locator('.conditions-highlight-text')).toHaveCSS('font-size','50px');
   await expect(conditions.locator('.condition-item')).toHaveCount(4);
   await expect(conditions).toContainText('24 Stunden');
   await expect(conditions).toContainText('keine Bezuschussung durch die gesetzliche Krankenversicherung');
   const desktopBalance = await Promise.all([
-    conditions.locator('.conditions-fee').boundingBox(),
+    conditions.locator('.conditions-highlight').boundingBox(),
     conditions.locator('.conditions-details').boundingBox()
   ]);
   expect(desktopBalance[0]!.x + desktopBalance[0]!.width).toBeLessThan(desktopBalance[1]!.x);
+  expect(desktopBalance[0]!.width).toBeCloseTo(desktopBalance[0]!.height,0);
+  const firstConditionLayout = await conditions.locator('.condition-item').first().evaluate((item) => {
+    const title = item.querySelector('h3')!.getBoundingClientRect();
+    const detail = item.querySelector('p')!.getBoundingClientRect();
+    return { itemWidth:item.getBoundingClientRect().width,titleBottom:title.bottom,detailTop:detail.top,detailWidth:detail.width };
+  });
+  expect(firstConditionLayout.detailTop).toBeGreaterThanOrEqual(firstConditionLayout.titleBottom);
+  expect(firstConditionLayout.detailWidth).toBeCloseTo(firstConditionLayout.itemWidth,0);
 
   const navigationItems = await page.locator('.nav-list a').allTextContents();
   expect(navigationItems.indexOf('Rahmenbedingungen')).toBe(navigationItems.indexOf('Praxis') + 1);
@@ -203,7 +212,9 @@ test('places editable Rahmenbedingungen directly after Praxis', async ({ page })
   await page.goto(editorUrl);
   const editor = page.locator('.section-editor[data-section-id="rahmenbedingungen"]');
   await expect(editor.locator('[data-section-layout]')).toHaveValue('conditions');
-  await expect(editor.locator('[data-path$=".content.feeAmount"]')).toHaveValue('€ 90');
+  await expect(editor.locator('[data-path$=".appearance.highlightTextSize"]')).toHaveValue('50');
+  await expect(editor.locator('[data-path$=".appearance.highlightGradientStart"]')).toHaveValue('#f4e4e4');
+  await expect(editor.locator('[data-path$=".content.highlightText"]')).toHaveValue('Klarheit schafft Vertrauen.');
   await expect(editor.locator('.collection-item')).toHaveCount(4);
 });
 
@@ -416,7 +427,7 @@ test('editor exports normalized schema content', async ({ page }) => {
     /Auflistung/,
     /Zeitleiste/,
     /Zweispaltige Preisliste/,
-    /Rahmenbedingungen mit Honorar/,
+    /Rahmenbedingungen mit Hervorhebung/,
     /Kontaktblock mit Karte/
   ]);
   await page.locator('[data-path="practiceName"]').fill('Praxis Sonnenweg');
