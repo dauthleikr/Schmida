@@ -396,6 +396,7 @@
       practiceName: String(source.practiceName || 'Praxis für Psychotherapie'),
       practitionerName: String(source.practitionerName || ''),
       siteIcon: relativeAssetPath(source.siteIcon || 'assets/icon4_tiny.png'),
+      showHeaderIcon: source.showHeaderIcon !== false,
       navigation: { home: String(source.navigation?.home || 'Startseite') },
       hero,
       heroImage,

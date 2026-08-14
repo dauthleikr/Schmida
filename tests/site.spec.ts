@@ -441,10 +441,15 @@ test('editor exports normalized schema content', async ({ page }) => {
   ]);
   await page.locator('[data-path="practiceName"]').fill('Praxis Sonnenweg');
   await expect(page.locator('[data-path="siteIcon"]')).toHaveValue('assets/icon4_tiny.png');
+  const showHeaderIcon = page.locator('[data-path="showHeaderIcon"]');
+  await expect(showHeaderIcon).toBeChecked();
   await page.locator('[data-path="siteIcon"]').fill('assets/wave-mark-128.png');
+  await showHeaderIcon.uncheck();
   await page.getByRole('button',{ name:'Vorschau Desktop' }).click();
   const preview = page.frameLocator('#preview-frame');
   await expect(preview.locator('.brand-mark')).toHaveAttribute('src','assets/wave-mark-128.png');
+  await expect(preview.locator('.brand-mark')).toBeHidden();
+  await expect(preview.locator('[data-practice-name]')).toBeVisible();
   await expect(preview.locator('link[rel="icon"]')).toHaveAttribute('href','assets/wave-mark-128.png');
   await page.getByRole('button',{ name:'Vorschau schließen' }).click();
   await page.getByRole('radio',{ name:'Scharlachrot' }).check();
@@ -463,6 +468,7 @@ test('editor exports normalized schema content', async ({ page }) => {
   expect(output).toContain('"schemaVersion": 3');
   expect(output).toContain('"internalName": "Hauptbereich Psychotherapie"');
   expect(output).toContain('"siteIcon": "assets/wave-mark-128.png"');
+  expect(output).toContain('"showHeaderIcon": false');
   expect(output).toContain('"sections": [');
   expect(output).toContain('"colorTheme": "scarlet"');
   expect(output).not.toContain('"sectionLayout"');
@@ -553,6 +559,30 @@ test('section heading source can be switched independently for desktop and mobil
   await section.getByRole('button',{ name:/Desktopvorschau/ }).click();
   await expect(preview.locator('.section-heading-variant')).toHaveCount(0);
   await expect(preview.locator('h2')).toHaveCount(0);
+});
+
+test('editor navigation links to individual collapsible sections', async ({ page }) => {
+  await page.goto(editorUrl);
+
+  const sections = page.locator('.section-editor');
+  const sectionCount = await sections.count();
+  const sectionLinks = page.locator('[data-editor-section-nav] a');
+  await expect(sectionLinks).toHaveCount(sectionCount);
+  await expect(sectionLinks.first()).toHaveAttribute('href','#editor-section-0');
+
+  const firstSection = sections.first();
+  const collapse = firstSection.getByRole('button',{ name:'Bereich einklappen' });
+  await expect(collapse).toHaveAttribute('aria-expanded','true');
+  await collapse.click();
+  await expect(firstSection).toHaveClass(/is-collapsed/);
+  await expect(firstSection.locator('.section-editor-body')).toBeHidden();
+  await expect(firstSection.getByRole('button',{ name:'Bereich ausklappen' })).toHaveAttribute('aria-expanded','false');
+
+  await firstSection.getByRole('button',{ name:'Bereich ausklappen' }).click();
+  await expect(firstSection.locator('.section-editor-body')).toBeVisible();
+  const internalName = firstSection.locator('[data-path$=".internalName"]');
+  await internalName.fill('Direkt verlinkter Bereich');
+  await expect(sectionLinks.first()).toHaveText('Direkt verlinkter Bereich');
 });
 
 test('intro layout supports an optional lead below its heading', async ({ page }) => {
@@ -1248,6 +1278,11 @@ test('normalizes and validates the current section schema', async ({ page }) => 
   expect(relativeAssets.heroImage.src).toBe('assets/hero.jpg');
   expect(relativeAssets.sections[0].content.imageSrc).toBe('assets/side.jpg');
   expect(relativeAssets.sections[1].content.images[0].imageSrc).toBe('assets/wide.jpg');
+  const headerIconVisibility = await page.evaluate(() => [
+    window.practiceContentModel.normalize({}).showHeaderIcon,
+    window.practiceContentModel.normalize({ showHeaderIcon:false }).showHeaderIcon
+  ]);
+  expect(headerIconVisibility).toEqual([true,false]);
 });
 
 test('mobile and desktop previews use distinct viewports and every layout fits mobile', async ({ page }) => {
