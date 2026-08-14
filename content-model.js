@@ -243,7 +243,7 @@
         { key: 'highlightTextSize', label: 'Schriftgröße des hervorgehobenen Texts', type: 'range', min: 30, max: 80, step: 1, unit: 'px' },
         { key: 'highlightGradientStart', label: 'Verlaufsfarbe Start', type: 'color' },
         { key: 'highlightGradientEnd', label: 'Verlaufsfarbe Ende', type: 'color' }
-      ],{ highlightTextSize: 50,highlightGradientStart: '#f4e4e4',highlightGradientEnd: '#fcfaf8' }),
+      ],{ highlightTextSize: 50,highlightGradientStart: '#863547',highlightGradientEnd: '#471a25' }),
       label: 'Rahmenbedingungen mit Hervorhebung',
       description: 'Ein quadratischer Hinweis mit einstellbarem Verlauf und kompakte Informationen zu Dauer, Absage und Versicherung.',
       defaultNavigation: 'Rahmenbedingungen',
