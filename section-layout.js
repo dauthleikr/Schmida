@@ -163,7 +163,8 @@
     conditions: (section) => {
       const body = section.content;
       const items = body.items.map((item) => `<article class="condition-item"><h3>${formatMarkup(item.title)}</h3><p>${formatMarkup(item.text)}</p></article>`).join('');
-      return `<section class="section dynamic-section layout-conditions"><div class="page conditions-grid"><div class="conditions-copy">${sectionHeading(section)}<p class="section-intro-text">${formatMarkup(body.intro)}</p></div><div class="conditions-details"><div class="conditions-fee"><div><p class="conditions-fee-label">${formatMarkup(body.feeLabel)}</p><p class="conditions-fee-meta">${formatMarkup(body.feeMeta)}</p></div><p class="conditions-fee-amount">${formatMarkup(body.feeAmount)}</p></div><div class="conditions-list">${items}</div>${body.note ? `<p class="conditions-note">${formatMarkup(body.note)}</p>` : ''}</div></div></section>`;
+      const fee = `<div class="conditions-fee"><p class="conditions-fee-label">${formatMarkup(body.feeLabel)}</p><p class="conditions-fee-amount">${formatMarkup(body.feeAmount)}</p><p class="conditions-fee-meta">${formatMarkup(body.feeMeta)}</p></div>`;
+      return `<section class="section dynamic-section layout-conditions"><div class="page conditions-grid"><div class="conditions-copy">${sectionHeading(section)}<p class="section-intro-text">${formatMarkup(body.intro)}</p>${fee}</div><div class="conditions-details"><div class="conditions-list">${items}</div>${body.note ? `<p class="conditions-note">${formatMarkup(body.note)}</p>` : ''}</div></div></section>`;
     },
     contact: (section) => {
       const body = section.content;

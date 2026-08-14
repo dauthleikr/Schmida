@@ -185,12 +185,17 @@ test('places editable Rahmenbedingungen directly after Praxis', async ({ page })
   expect(sectionIds[practiceIndex + 1]).toBe('rahmenbedingungen');
 
   const conditions = page.locator('#rahmenbedingungen');
-  await expect(conditions.getByRole('heading',{ name:'Klarheit von Anfang an.' })).toBeVisible();
+  await expect(conditions.locator('.section-heading-desktop h2')).toBeVisible();
   await expect(conditions.locator('.conditions-fee-amount')).toHaveText('€ 90');
   await expect(conditions.locator('.conditions-fee-meta')).toContainText('50 Minuten');
   await expect(conditions.locator('.condition-item')).toHaveCount(4);
   await expect(conditions).toContainText('24 Stunden');
   await expect(conditions).toContainText('keine Bezuschussung durch die gesetzliche Krankenversicherung');
+  const desktopBalance = await Promise.all([
+    conditions.locator('.conditions-fee').boundingBox(),
+    conditions.locator('.conditions-details').boundingBox()
+  ]);
+  expect(desktopBalance[0]!.x + desktopBalance[0]!.width).toBeLessThan(desktopBalance[1]!.x);
 
   const navigationItems = await page.locator('.nav-list a').allTextContents();
   expect(navigationItems.indexOf('Rahmenbedingungen')).toBe(navigationItems.indexOf('Praxis') + 1);

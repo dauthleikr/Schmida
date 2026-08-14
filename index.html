@@ -237,21 +237,22 @@
     .price-value { align-self:center; font-size:.86rem; font-weight:700; white-space:nowrap; }
     .reimbursement { max-width:53ch; margin:25px 0 0; font-size:.89rem; }
 
-    .conditions-grid { display:grid; grid-template-columns:.7fr 1.3fr; gap:clamp(48px,10vw,148px); align-items:start; }
+    .conditions-grid { display:grid; grid-template-columns:minmax(0,.92fr) minmax(0,1.08fr); gap:clamp(52px,9vw,128px); align-items:start; }
+    .conditions-copy,.conditions-details { min-width:0; }
     .conditions-copy>p { max-width:38ch; }
     .conditions-details { border-top:1px solid var(--line); }
-    .conditions-fee { display:grid; grid-template-columns:minmax(0,1fr) auto; gap:28px; align-items:end; padding:28px 0 32px; border-bottom:1px solid var(--line); }
-    .conditions-fee-label { margin:0 0 8px; color:var(--wine-650); font-size:.68rem; font-weight:750; letter-spacing:.12em; text-transform:uppercase; }
-    .conditions-fee-meta { margin:0; color:var(--muted); font-size:.9rem; }
-    .conditions-fee-amount { margin:0; color:var(--wine-850); font-family:var(--serif); font-size:clamp(2.5rem,5vw,4.3rem); line-height:.9; white-space:nowrap; }
-    .conditions-list { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); }
-    .condition-item { min-width:0; padding:26px 0 28px; border-bottom:1px solid var(--line); }
-    .condition-item:nth-child(odd) { padding-right:28px; border-right:1px solid var(--line); }
-    .condition-item:nth-child(even) { padding-left:28px; }
-    .condition-item h3 { margin:0 0 9px; color:var(--wine-850); font-family:var(--serif); font-size:1.2rem; font-weight:400; line-height:1.25; }
+    .conditions-fee { position:relative; display:grid; margin-top:clamp(36px,5vw,58px); padding:28px 30px 30px; overflow:hidden; border:1px solid var(--line); background:linear-gradient(135deg,var(--rose-100),var(--paper)); }
+    .conditions-fee::after { position:absolute; right:-38px; bottom:-64px; width:150px; height:150px; border:1px solid color-mix(in srgb,var(--wine-650) 18%,transparent); border-radius:50%; content:""; }
+    .conditions-fee-label { position:relative; z-index:1; margin:0 0 24px; color:var(--wine-650); font-size:.68rem; font-weight:750; letter-spacing:.12em; text-transform:uppercase; }
+    .conditions-fee-meta { position:relative; z-index:1; margin:13px 0 0; color:var(--muted); font-size:.9rem; }
+    .conditions-fee-amount { position:relative; z-index:1; margin:0; color:var(--wine-850); font-family:var(--serif); font-size:clamp(3.3rem,6vw,5.1rem); line-height:.82; white-space:nowrap; }
+    .conditions-list { display:grid; }
+    .condition-item { display:grid; grid-template-columns:minmax(125px,.72fr) minmax(0,1.28fr); gap:clamp(20px,3vw,38px); min-width:0; padding:25px 0 27px; border-bottom:1px solid var(--line); }
+    .condition-item h3 { margin:0; color:var(--wine-850); font-family:var(--serif); font-size:1.16rem; font-weight:400; line-height:1.28; }
     .condition-item p { margin:0; font-size:.9rem; line-height:1.7; }
-    .conditions-note { max-width:58ch; margin:24px 0 0; font-size:.86rem; }
+    .conditions-note { max-width:58ch; margin:24px 0 0; padding-left:35%; font-size:.86rem; }
     .layout-conditions.is-dark .conditions-details,.layout-conditions.is-dark .conditions-fee,.layout-conditions.is-dark .condition-item { border-color:rgba(255,255,255,.22); }
+    .layout-conditions.is-dark .conditions-fee { background:rgba(255,255,255,.07); }
     .layout-conditions.is-dark .conditions-fee-label { color:var(--rose-300); }
     .layout-conditions.is-dark .conditions-fee-meta { color:rgba(255,255,255,.68); }
     .layout-conditions.is-dark .conditions-fee-amount,.layout-conditions.is-dark .condition-item h3 { color:#fff; }
@@ -318,12 +319,12 @@
       .nav-list.is-open { display:flex; }
       .nav-list a { display:block; padding:11px 0; }
       .hero { --mobile-wave-height:clamp(96px,27vw,118px); --hero-ribbon-height:var(--mobile-wave-height); }
-      .hero-inner,.intro-grid,.therapy-grid,.practice-grid,.costs-grid,.conditions-grid,.focus-header,.topics-grid,.timeline-grid,.contact-copy { grid-template-columns:1fr; }
+      .hero-inner,.intro-grid,.therapy-grid,.practice-grid,.costs-grid,.conditions-grid,.focus-header,.topics-grid,.timeline-grid,.contact-copy { grid-template-columns:minmax(0,1fr); }
       .intro-grid,.therapy-grid,.practice-grid,.costs-grid,.conditions-grid,.topics-grid,.timeline-grid,.contact-copy { gap:36px; }
       .hero-inner { gap:0; padding:var(--hero-content-top) 0 0; }
       .hero-copy { padding:0 0 52px; transform:none; }
       h1 { width:auto; max-width:11ch; }
-      .hero[data-mobile-image-layout="portrait"] .hero-inner,.hero[data-mobile-image-layout="landscape"] .hero-inner { display:grid; grid-template-columns:1fr; }
+      .hero[data-mobile-image-layout="portrait"] .hero-inner,.hero[data-mobile-image-layout="landscape"] .hero-inner { display:grid; grid-template-columns:minmax(0,1fr); }
       .hero[data-mobile-image-layout="portrait"] .hero-copy,.hero[data-mobile-image-layout="landscape"] .hero-copy { display:block; min-height:0; }
       .hero[data-mobile-image-layout="portrait"] .hero-image-wrap,.hero[data-mobile-image-layout="landscape"] .hero-image-wrap { position:relative; inset:auto; left:-20px; width:100vw; min-height:0; justify-self:start; margin:0; transform:none; }
       .hero[data-mobile-image-layout="hidden"] .hero-image-wrap { display:none; }
@@ -343,7 +344,7 @@
       .price-row { grid-template-columns:minmax(0,1fr) auto; }
       .price-name { min-width:0; }
       .price-value { max-width:18ch; text-align:right; white-space:normal; }
-      .conditions-fee-amount { font-size:clamp(2.6rem,11vw,4rem); }
+      .conditions-fee-amount { font-size:clamp(3.2rem,11vw,4.8rem); }
       .contact-details { gap:36px; }
       .office-placeholder,.section-image { min-height:360px; }
       .wide-image-copy { margin-bottom:36px; }
@@ -406,9 +407,10 @@
       .focus-card,.focus-card:nth-child(even),.focus-card:nth-child(odd) { min-height:auto; padding:25px 0; border-right:0; }
       .price-row { grid-template-columns:1fr; gap:6px; }
       .price-value { max-width:none; text-align:left; }
-      .conditions-fee { grid-template-columns:1fr; gap:20px; align-items:start; }
-      .conditions-list { grid-template-columns:1fr; }
-      .condition-item:nth-child(odd),.condition-item:nth-child(even) { padding-right:0; padding-left:0; border-right:0; }
+      .conditions-fee { margin-top:32px; padding:25px 24px 27px; }
+      .dynamic-section.layout-conditions { --section-title-size:clamp(1.9rem,9.3vw,2.45rem); }
+      .condition-item { grid-template-columns:1fr; gap:8px; }
+      .conditions-note { padding-left:0; }
       .contact-details { grid-template-columns:1fr; }
       .topics-list { grid-template-columns:1fr; }
       .map-link { margin-right:24px; }
