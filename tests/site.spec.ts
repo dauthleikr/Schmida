@@ -189,6 +189,7 @@ test('places editable Rahmenbedingungen directly after Praxis', async ({ page })
   await expect(conditions.locator('.conditions-highlight-text')).toHaveText('Klarheit schafft Vertrauen.');
   await expect(conditions.locator('.conditions-highlight')).not.toContainText('€ 90');
   await expect(conditions.locator('.conditions-highlight-text')).toHaveCSS('font-size','50px');
+  await expect(conditions.locator('.conditions-highlight-text')).toHaveCSS('color','rgb(134, 53, 71)');
   await expect(conditions.locator('.conditions-highlight')).toHaveCSS('border-top-width','1px');
   const highlightSpacing = await conditions.locator('.conditions-highlight').evaluate((highlight) => {
     const label = highlight.querySelector('.conditions-highlight-label')!.getBoundingClientRect();
@@ -220,8 +221,8 @@ test('places editable Rahmenbedingungen directly after Praxis', async ({ page })
   const editor = page.locator('.section-editor[data-section-id="rahmenbedingungen"]');
   await expect(editor.locator('[data-section-layout]')).toHaveValue('conditions');
   await expect(editor.locator('[data-path$=".appearance.highlightTextSize"]')).toHaveValue('50');
-  await expect(editor.locator('[data-path$=".appearance.highlightGradientStart"]')).toHaveValue('#863547');
-  await expect(editor.locator('[data-path$=".appearance.highlightGradientEnd"]')).toHaveValue('#471a25');
+  await expect(editor.locator('[data-path$=".appearance.highlightGradientStart"]')).toHaveValue('#f4e4e4');
+  await expect(editor.locator('[data-path$=".appearance.highlightGradientEnd"]')).toHaveValue('#fcfaf8');
   await expect(editor.locator('[data-path$=".content.highlightText"]')).toHaveValue('Klarheit schafft Vertrauen.');
   await expect(editor.locator('.collection-item')).toHaveCount(4);
 });

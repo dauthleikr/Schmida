@@ -219,8 +219,8 @@ window.practiceContent = {
         "headingModeMobile": "eyebrow",
         "titleSize": "compact",
         "highlightTextSize": 50,
-        "highlightGradientStart": "#863547",
-        "highlightGradientEnd": "#471a25"
+        "highlightGradientStart": "#f4e4e4",
+        "highlightGradientEnd": "#fcfaf8"
       },
       "content": {
         "eyebrow": "Rahmenbedingungen",
