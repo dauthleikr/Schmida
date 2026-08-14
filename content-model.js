@@ -238,6 +238,36 @@
       ],
       defaults: { eyebrow: 'Kosten', title: 'Transparent von Anfang an.', intro: 'Beschreiben Sie hier die Rahmenbedingungen.', items: [{ name: 'Einzeltherapie', duration: '50 Minuten', price: 'EUR 110' }], note: 'Ergänzender Hinweis zu Kosten oder Erstattung.' }
     },
+    conditions: {
+      ...titleAppearance(),
+      label: 'Rahmenbedingungen mit Honorar',
+      description: 'Ein hervorgehobenes Honorar mit kompakten Informationen zu Dauer, Absage und Versicherung.',
+      defaultNavigation: 'Rahmenbedingungen',
+      defaultBackground: 'paper',
+      fields: [
+        { key: 'eyebrow', label: 'Bereichsbezeichnung', type: 'text' },
+        { key: 'title', label: 'Titel', type: 'rich', editorRows: 3 },
+        { key: 'intro', label: 'Einleitung', type: 'rich', editorRows: 4 },
+        { key: 'feeLabel', label: 'Honorar-Bezeichnung', type: 'text' },
+        { key: 'feeAmount', label: 'Honorar', type: 'text' },
+        { key: 'feeMeta', label: 'Zusatz zum Honorar', type: 'text' },
+        { key: 'items', label: 'Rahmenbedingungen', type: 'collection', min: 2, max: 6, addLabel: 'Information hinzufügen', itemFields: [{ key: 'title', label: 'Titel', type: 'text' }, { key: 'text', label: 'Beschreibung', type: 'rich', editorRows: 3 }] },
+        { key: 'note', label: 'Abschließender Hinweis (optional)', type: 'rich', editorRows: 3 }
+      ],
+      defaults: {
+        eyebrow: 'Rahmenbedingungen',
+        title: 'Klarheit von Anfang an.',
+        intro: 'Damit Sie gut planen können, finden Sie hier die wichtigsten organisatorischen Informationen.',
+        feeLabel: 'Honorar pro Einheit',
+        feeAmount: '€ 90',
+        feeMeta: 'Einzelsitzung · 50 Minuten',
+        items: [
+          { title: 'Absageregelung', text: 'Termine können bis 24 Stunden vorher kostenfrei abgesagt werden.' },
+          { title: 'Versicherung', text: 'Bitte klären Sie eine mögliche Kostenübernahme direkt mit Ihrer Versicherung.' }
+        ],
+        note: ''
+      }
+    },
     contact: {
       ...titleAppearance(),
       label: 'Kontaktblock mit Karte',

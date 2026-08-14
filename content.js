@@ -208,6 +208,46 @@ window.practiceContent = {
       }
     },
     {
+      "id": "rahmenbedingungen",
+      "layout": "conditions",
+      "internalName": "Rahmenbedingungen mit Honorar",
+      "navigationLabel": "Rahmenbedingungen",
+      "background": "paper",
+      "customBackground": "#f7f2ef",
+      "appearance": {
+        "headingModeDesktop": "both",
+        "headingModeMobile": "both",
+        "titleSize": "compact"
+      },
+      "content": {
+        "eyebrow": "Rahmenbedingungen",
+        "title": "Klarheit von Anfang an.",
+        "intro": "Damit Sie gut planen können, finden Sie hier die wichtigsten Informationen zu Honorar, Terminablauf und Kostenerstattung.",
+        "feeLabel": "Honorar pro Einheit",
+        "feeAmount": "€ 90",
+        "feeMeta": "Einzelsitzung · 50 Minuten",
+        "items": [
+          {
+            "title": "Sitzungsdauer",
+            "text": "Eine Einheit dauert 50 Minuten. Im Erstgespräch klären wir Ihr Anliegen und ob eine Zusammenarbeit für Sie stimmig ist."
+          },
+          {
+            "title": "Absageregelung",
+            "text": "Vereinbarte Termine können bis 24 Stunden vorher kostenfrei abgesagt werden. Bei kurzfristigeren Absagen wird das Honorar in Rechnung gestellt."
+          },
+          {
+            "title": "Gesetzliche Krankenversicherung",
+            "text": "Da ich als Psychotherapeutin in Ausbildung unter Supervision tätig bin, ist derzeit keine Bezuschussung durch die gesetzliche Krankenversicherung möglich."
+          },
+          {
+            "title": "Private Zusatzversicherung",
+            "text": "Je nach Vertrag kann eine Kostenübernahme möglich sein. Bitte klären Sie dies direkt mit Ihrem Versicherungsanbieter."
+          }
+        ],
+        "note": "Offene Fragen zu den Rahmenbedingungen können wir gerne im Erstgespräch besprechen."
+      }
+    },
+    {
       "id": "kontakt",
       "layout": "contact",
       "internalName": "Kontaktblock mit Karte",

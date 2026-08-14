@@ -20,6 +20,7 @@ Drafts are stored locally in the browser. Content is normalized and validated ag
 - Card grid
 - Text with image
 - Price list
+- Conditions with highlighted fee and policy details
 - Contact details and map
 
 Repeatable content such as bullets, cards, and prices uses per-layout minimum and maximum ranges. These ranges protect the visual layout without prescribing an exact item count.

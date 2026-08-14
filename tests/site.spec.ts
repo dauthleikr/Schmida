@@ -176,6 +176,32 @@ test('renders the new section schema with dynamic navigation and waves', async (
   expect(seamCoverage.background).not.toBe('rgba(0, 0, 0, 0)');
 });
 
+test('places editable Rahmenbedingungen directly after Praxis', async ({ page }) => {
+  await page.goto(siteUrl);
+
+  const sectionIds = await page.locator('.content-section').evaluateAll((sections) => sections.map((section) => section.getAttribute('data-section-id')));
+  const practiceIndex = sectionIds.indexOf('praxis');
+  expect(practiceIndex).toBeGreaterThanOrEqual(0);
+  expect(sectionIds[practiceIndex + 1]).toBe('rahmenbedingungen');
+
+  const conditions = page.locator('#rahmenbedingungen');
+  await expect(conditions.getByRole('heading',{ name:'Klarheit von Anfang an.' })).toBeVisible();
+  await expect(conditions.locator('.conditions-fee-amount')).toHaveText('€ 90');
+  await expect(conditions.locator('.conditions-fee-meta')).toContainText('50 Minuten');
+  await expect(conditions.locator('.condition-item')).toHaveCount(4);
+  await expect(conditions).toContainText('24 Stunden');
+  await expect(conditions).toContainText('keine Bezuschussung durch die gesetzliche Krankenversicherung');
+
+  const navigationItems = await page.locator('.nav-list a').allTextContents();
+  expect(navigationItems.indexOf('Rahmenbedingungen')).toBe(navigationItems.indexOf('Praxis') + 1);
+
+  await page.goto(editorUrl);
+  const editor = page.locator('.section-editor[data-section-id="rahmenbedingungen"]');
+  await expect(editor.locator('[data-section-layout]')).toHaveValue('conditions');
+  await expect(editor.locator('[data-path$=".content.feeAmount"]')).toHaveValue('€ 90');
+  await expect(editor.locator('.collection-item')).toHaveCount(4);
+});
+
 test('card grids draw complete row dividers at desktop and mobile widths', async ({ page }) => {
   await page.goto(editorUrl);
   await page.selectOption('#new-layout','cards');
@@ -385,6 +411,7 @@ test('editor exports normalized schema content', async ({ page }) => {
     /Auflistung/,
     /Zeitleiste/,
     /Zweispaltige Preisliste/,
+    /Rahmenbedingungen mit Honorar/,
     /Kontaktblock mit Karte/
   ]);
   await page.locator('[data-path="practiceName"]').fill('Praxis Sonnenweg');
