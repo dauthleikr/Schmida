@@ -6,6 +6,7 @@ window.practiceContent = {
   "practiceName": "Carina Schmida, BA.pth.",
   "practitionerName": "Carina Schmida",
   "siteIcon": "assets/icon4_tiny.png",
+  "showHeaderIcon": false,
   "navigation": {
     "home": "Startseite"
   },
@@ -226,9 +227,9 @@ window.practiceContent = {
         "eyebrow": "Rahmenbedingungen",
         "title": "Rahmenbedingungen",
         "intro": "Hier finden Sie hier die wichtigsten Informationen zu Honorar, Terminablauf und Kostenerstattung.",
-        "highlightLabel": "Gut zu wissen",
-        "highlightText": "Klarheit schafft Vertrauen.",
-        "highlightDetail": "Offene Fragen und individuelle Vereinbarungen besprechen wir in Ruhe im Erstgespräch.",
+        "highlightLabel": "Irgendein text",
+        "highlightText": "Blablubb blubb blubb",
+        "highlightDetail": "Das Zebra furzt leise.",
         "items": [
           {
             "title": "Sitzungsdauer",
@@ -277,18 +278,28 @@ window.practiceContent = {
             "title": "E-Mail",
             "content": "schmida.psychotherapie@gmail.com",
             "type": "email"
-          }
-        ],
-        "officeDetailsTitle": "Praxisgemeinschaft",
-        "officeDetails": [
+          },
           {
             "title": "Adresse",
             "content": "Neubaugasse 7 / Stiege II / 2. Stock / Top 49\n1070 Wien",
             "type": "address"
+          }
+        ],
+        "officeDetailsTitle": "Praxisgemeinschaft Apädo",
+        "officeDetails": [
+          {
+            "title": "Telefon",
+            "content": "+43 1 524 62 93",
+            "type": "phone"
+          },
+          {
+            "title": "E-Mail",
+            "content": "apaedo@inode.at",
+            "type": "email"
           },
           {
             "title": "Website",
-            "content": "https://apaedo.at/",
+            "content": "www.apaedo.at",
             "type": "website"
           }
         ],
