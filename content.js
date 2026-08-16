@@ -12,10 +12,10 @@ window.practiceContent = {
   },
   "hero": {
     "eyebrow": "Psychotherapeutin in Ausbildung unter Supervision",
-    "title": "Jeder Mensch verdient es, gehört zu werden.",
-    "sentence": "Ich begleite Sie einfühlsam und kompetent auf Ihrem Weg zu mehr Klarheit, Stabilität und Wohlbefinden.",
-    "contactButton": "Erstgespräch anfragen",
-    "titleSize": "small",
+    "title": "Gefühle annehmen.\nGedanken ordnen.\nLeben gestalten.",
+    "sentence": "",
+    "contactButton": "Erstgespräch vereinbaren",
+    "titleSize": "tiny",
     "titleWidthDesktop": 42
   },
   "heroImage": {
@@ -50,7 +50,7 @@ window.practiceContent = {
       "content": {
         "eyebrow": "Psychotherapie",
         "title": "",
-        "intro": "Manchmal hilft es, nicht allein weitergehen zu müssen.",
+        "intro": "**Manchmal hilft es, nicht allein weitergehen zu müssen.**",
         "text": "Ob bei Ängsten, Depressionen oder anderen psychischen Krisen – als Verhaltenstherapeutin unterstütze ich Sie dabei, belastende Gefühle, Gedanken und Verhaltensweisen zu erkennen und schrittweise zu verändern.\n\nRespekt, Wertschätzung und Empathie bilden die Basis unserer Zusammenarbeit. In einem sicheren, geschützten Rahmen können Sie sich öffnen, vorhandene Stärken und Ressourcen wiederentdecken, hilfreiche Strategien erlernen und neue Wege erkunden.\n\nMein Ziel ist, dass Sie mehr Klarheit und Selbstwirksamkeit gewinnen – und damit mehr Lebensfreude und Wohlbefinden in Ihr Leben einziehen können.\n\nIch würde mich freuen, Sie kennenlernen und ein Stück auf Ihrem Weg in eine möglichst unbeschwerte Zukunft begleiten zu dürfen.",
         "items": []
       }
@@ -121,22 +121,22 @@ window.practiceContent = {
       "content": {
         "eyebrow": "Über mich",
         "title": "Psychosoziale Berufserfahrung.",
-        "intro": "Als Psychotherapeutin in Ausbildung unter Supervision stehe ich im regelmäßigen fachlichen Austausch mit erfahrenen Psychotherapeut:innen.\n\nMeine bisherige Berufserfahrung im psychosozialen Bereich:",
+        "intro": "Hier sehen Sie einen Überblick über meine bisherige Berufserfahrung im psychosozialen Bereich sowie meine psychotherapeutische Ausbildung.",
         "items": [
           {
-            "period": "Seit 2024",
-            "title": "SFU-Ambulanz für Erwachsene",
-            "detail": ""
+            "period": "Seit 2023",
+            "title": "Praxisgemeinschaft Apädo",
+            "detail": "Wien"
           },
           {
-            "period": "Seit 2023",
-            "title": "Institut Apädo",
-            "detail": ""
+            "period": "2024/25 ",
+            "title": "SFU-Ambulanz für Erwachsene",
+            "detail": "Wien"
           },
           {
             "period": "2022",
-            "title": "Gerontopsychiatrische Station",
-            "detail": "Klinik Donaustadt Wien"
+            "title": "Klinik Donaustadt Wien",
+            "detail": "Gerontopsychiatrische Station"
           },
           {
             "period": "2021",
@@ -149,11 +149,6 @@ window.practiceContent = {
         "secondaryItems": [
           {
             "period": "Laufend",
-            "title": "Lerntherapeut*in & Kinder- und Elterncoach nach Apädo",
-            "detail": ""
-          },
-          {
-            "period": "Laufend",
             "title": "Magisterstudium der Psychotherapiewissenschaft",
             "detail": "Sigmund Freud Privatuniversität Wien"
           },
@@ -161,6 +156,11 @@ window.practiceContent = {
             "period": "Laufend",
             "title": "Fachspezifikum Verhaltenstherapie",
             "detail": "Sigmund Freud Privatuniversität Wien"
+          },
+          {
+            "period": "2026",
+            "title": "Lerntherapeutin und Kinder- & Elterncoach",
+            "detail": "nach Apädo"
           },
           {
             "period": "2023",
@@ -191,7 +191,7 @@ window.practiceContent = {
       "content": {
         "eyebrow": "Praxis",
         "title": "Praxis",
-        "text": "Die helle, ruhige Praxis bietet einen geschützten Raum für Gespräche, neue Perspektiven und persönliche Entwicklung.",
+        "text": "Der Praxisraum bietet einen geschützten Ort für Gespräche, neue Perspektiven und persönliche Entwicklung.",
         "images": [
           {
             "imageSrc": "assets/office_horizontal.JPG",
@@ -219,25 +219,25 @@ window.practiceContent = {
         "headingModeDesktop": "eyebrow",
         "headingModeMobile": "eyebrow",
         "titleSize": "compact",
-        "highlightTextSize": 50,
+        "highlightTextSize": 30,
         "highlightGradientStart": "#f4e4e4",
         "highlightGradientEnd": "#fcfaf8"
       },
       "content": {
         "eyebrow": "Rahmenbedingungen",
         "title": "Rahmenbedingungen",
-        "intro": "Hier finden Sie hier die wichtigsten Informationen zu Honorar, Terminablauf und Kostenerstattung.",
-        "highlightLabel": "Irgendein text",
-        "highlightText": "Blablubb blubb blubb",
-        "highlightDetail": "Das Zebra furzt leise.",
+        "intro": "",
+        "highlightLabel": "",
+        "highlightText": "Psychotherapeutin in Ausbildung unter Supervision",
+        "highlightDetail": "Als Psychotherapeutin in Ausbildung unter Supervision stehe ich im regelmäßigen fachlichen Austausch mit erfahrenen Psychotherapeut:innen. So kann ich die Qualität der Behandlung sicherstellen und mich gleichzeitig kontinuierlich weiterentwickeln.",
         "items": [
           {
-            "title": "Sitzungsdauer",
-            "text": "Eine Einheit dauert 50 Minuten. Im Erstgespräch klären wir Ihr Anliegen und ob eine Zusammenarbeit für Sie stimmig ist."
+            "title": "Zielgruppe",
+            "text": "derzeit vor allem Erwachsene,\naber auch Kinder und Jugendliche"
           },
           {
-            "title": "Absageregelung",
-            "text": "Vereinbarte Termine können bis 24 Stunden vorher kostenfrei abgesagt werden. Bei kurzfristigeren Absagen wird das Honorar in Rechnung gestellt."
+            "title": "Setting",
+            "text": ""
           },
           {
             "title": "Gesetzliche Krankenversicherung",
@@ -246,6 +246,10 @@ window.practiceContent = {
           {
             "title": "Private Zusatzversicherung",
             "text": "Je nach Vertrag kann eine Kostenübernahme möglich sein. Bitte klären Sie dies direkt mit Ihrem Versicherungsanbieter."
+          },
+          {
+            "title": "Absageregelung",
+            "text": "Termine können bis 24 Stunden vorher kostenfrei abgesagt werden."
           }
         ],
         "note": "Offene Fragen zu den Rahmenbedingungen können wir gerne im Erstgespräch besprechen."
