@@ -126,7 +126,8 @@
         ${fieldMarkup({ label:'Titel',type:'rich',editorRows:3 },'hero.title',data.hero.title)}
         ${fieldMarkup({ label:'Abstand Überzeile–Titel Desktop',type:'range',min:0,max:80,step:1,unit:'px',help:'Vertikaler Abstand zwischen Überzeile und Titel auf großen Bildschirmen.' },'hero.eyebrowTitleSpacingDesktop',data.hero.eyebrowTitleSpacingDesktop)}
         ${fieldMarkup({ label:'Abstand Überzeile–Titel Mobil',type:'range',min:0,max:80,step:1,unit:'px',help:'Vertikaler Abstand zwischen Überzeile und Titel auf schmalen Bildschirmen.' },'hero.eyebrowTitleSpacingMobile',data.hero.eyebrowTitleSpacingMobile)}
-        ${fieldMarkup({ label:'Titelgröße',type:'select',options:model.titleSizeOptions },'hero.titleSize',data.hero.titleSize)}
+        ${fieldMarkup({ label:'Titelgröße',type:'range',min:40,max:120,step:1,unit:'px',help:'Feste Desktop-Größe des großen Startseitentitels.' },'hero.titleSize',data.hero.titleSize)}
+        ${fieldMarkup({ label:'Abstand zwischen manuellen Titelzeilen',type:'range',min:0,max:40,step:1,unit:'px',help:'Gilt nur zwischen Zeilen, die im Titeltext mit Enter getrennt wurden. Automatische Umbrüche bleiben kompakt.' },'hero.titleLineGap',data.hero.titleLineGap)}
         ${fieldMarkup({ label:'Titelbreite Desktop',type:'range',min:30,max:55,step:1,unit:'%',help:'Breite der Textspalte bei seitlichen Desktop-Bildern. Der übrige Platz bleibt vollständig dem Bild vorbehalten.' },'hero.titleWidthDesktop',data.hero.titleWidthDesktop)}
         ${fieldMarkup({ label:'Einleitung',type:'rich',editorRows:4 },'hero.sentence',data.hero.sentence)}
         ${fieldMarkup({ label:'Kontakt-Button',type:'text' },'hero.contactButton',data.hero.contactButton)}

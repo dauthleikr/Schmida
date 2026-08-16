@@ -105,7 +105,7 @@ test('renders the new section schema with dynamic navigation and waves', async (
   expect(await page.locator('.brand-mark').evaluate((image:HTMLImageElement) => image.naturalWidth)).toBe(180);
   await expect(page.locator('.header-inner')).toHaveCSS('min-height','74px');
   const savedHeroTitleSize = await page.evaluate(() => window.currentPracticeContent.hero.titleSize);
-  await expect(page.locator('.hero')).toHaveAttribute('data-title-size',savedHeroTitleSize);
+  await expect(page.locator('.hero')).toHaveAttribute('data-title-size',String(savedHeroTitleSize));
   const heroColumns = await page.locator('.hero').evaluate((element) => {
     const title = element.querySelector('[data-hero-field="title"]')!.getBoundingClientRect();
     const image = element.querySelector('.hero-image-wrap')!.getBoundingClientRect();
@@ -210,7 +210,18 @@ test('places editable Rahmenbedingungen directly after Praxis', async ({ page })
     conditions.locator('.conditions-details').boundingBox()
   ]);
   expect(desktopBalance[0]!.x + desktopBalance[0]!.width).toBeLessThan(desktopBalance[1]!.x);
-  expect(desktopBalance[0]!.width).toBeCloseTo(desktopBalance[0]!.height,0);
+  const highlightSizing = await conditions.locator('.conditions-highlight').evaluate((box) => {
+    const style = getComputedStyle(box);
+    const childrenHeight = [...box.children].reduce((height,child) => {
+      const childStyle = getComputedStyle(child);
+      return height + child.getBoundingClientRect().height + parseFloat(childStyle.marginTop) + parseFloat(childStyle.marginBottom);
+    },0);
+    return {
+      height: box.getBoundingClientRect().height,
+      expectedHeight: parseFloat(style.paddingTop) + childrenHeight + parseFloat(style.paddingBottom) + parseFloat(style.borderTopWidth) + parseFloat(style.borderBottomWidth)
+    };
+  });
+  expect(highlightSizing.height).toBeCloseTo(highlightSizing.expectedHeight,0);
   const firstConditionLayout = await conditions.locator('.condition-item').first().evaluate((item) => {
     const title = item.querySelector('h3')!.getBoundingClientRect();
     const detail = item.querySelector('p')!.getBoundingClientRect();
@@ -227,18 +238,40 @@ test('places editable Rahmenbedingungen directly after Praxis', async ({ page })
   await expect(editor.locator('[data-section-layout]')).toHaveValue('conditions');
   await expect(editor.locator('[data-path$=".appearance.highlightTextSize"]')).toHaveValue('50');
   await expect(editor.locator('[data-path$=".appearance.highlightTextSize"]')).toHaveAttribute('min','22');
+  await expect(editor.locator('[data-path$=".appearance.highlightPaddingTop"]')).toHaveValue('32');
+  await expect(editor.locator('[data-path$=".appearance.highlightPaddingBottom"]')).toHaveValue('32');
+  const centerContent = editor.locator('[data-path$=".appearance.highlightCenterContent"]');
+  await expect(centerContent).not.toBeChecked();
   await expect(editor.locator('[data-path$=".appearance.highlightGradientStart"]')).toHaveValue('#f4e4e4');
   await expect(editor.locator('[data-path$=".appearance.highlightGradientEnd"]')).toHaveValue('#fcfaf8');
   await expect(editor.locator('[data-path$=".content.highlightText"]')).toHaveValue('Klarheit schafft Vertrauen.');
   await expect(editor.locator('.collection-item')).toHaveCount(4);
 
   await editor.locator('[data-path$=".content.highlightLabel"]').fill('');
+  await centerContent.check();
   await page.getByRole('button',{ name:'Vorschau Desktop' }).click();
-  const preview = page.frameLocator('#preview-frame');
-  const highlight = preview.locator('#rahmenbedingungen .conditions-highlight');
-  await expect(highlight).toHaveClass(/conditions-highlight-without-label/);
-  await expect(highlight).toHaveCSS('padding-top','32px');
-  const highlightBounds = await Promise.all([highlight.boundingBox(),preview.locator('#rahmenbedingungen .conditions-highlight-text').boundingBox()]);
+  const centeredPreview = page.frameLocator('#preview-frame');
+  const centeredHighlight = centeredPreview.locator('#rahmenbedingungen .conditions-highlight');
+  await expect(centeredHighlight).toHaveClass(/conditions-highlight-without-label/);
+  await expect(centeredHighlight).toHaveClass(/conditions-highlight-centered/);
+  await expect(centeredHighlight).toHaveCSS('text-align','center');
+  await expect(centeredHighlight).toHaveCSS('justify-content','center');
+  await expect(centeredHighlight).toHaveCSS('padding-top','32px');
+  const centeredTextEdges = await Promise.all([
+    centeredPreview.locator('#rahmenbedingungen .conditions-highlight-text').boundingBox(),
+    centeredPreview.locator('#rahmenbedingungen .conditions-highlight-detail').boundingBox()
+  ]);
+  expect(centeredTextEdges[1]!.x + centeredTextEdges[1]!.width).toBeCloseTo(centeredTextEdges[0]!.x + centeredTextEdges[0]!.width,0);
+  await page.getByRole('button',{ name:'Vorschau schließen' }).click();
+  await centerContent.uncheck();
+  await page.getByRole('button',{ name:'Vorschau Desktop' }).click();
+  const leftAlignedPreview = page.frameLocator('#preview-frame');
+  const leftAlignedHighlight = leftAlignedPreview.locator('#rahmenbedingungen .conditions-highlight');
+  await expect(leftAlignedHighlight).not.toHaveClass(/conditions-highlight-centered/);
+  await expect(leftAlignedHighlight).toHaveCSS('text-align','left');
+  await expect(leftAlignedHighlight).toHaveCSS('justify-content','center');
+  await expect(leftAlignedHighlight).toHaveCSS('padding-top','32px');
+  const highlightBounds = await Promise.all([leftAlignedHighlight.boundingBox(),leftAlignedPreview.locator('#rahmenbedingungen .conditions-highlight-text').boundingBox()]);
   expect(highlightBounds[1]!.y - highlightBounds[0]!.y).toBeLessThanOrEqual(34);
 });
 
@@ -285,13 +318,23 @@ test('title grids stay compact without per-item descriptions', async ({ page }) 
   const editor = page.locator('.section-editor').last();
   await expect(editor.locator('[data-path*=".content.items."][data-path$=".title"]')).toHaveCount(2);
   await expect(editor.locator('[data-path*=".content.items."][data-path$=".text"]')).toHaveCount(0);
+  const footer = editor.locator('[data-path$=".content.footer"]');
+  await expect(footer).toHaveCount(1);
+  await footer.fill('Ein abschließender Hinweis zu diesen Schwerpunkten.');
+  await editor.locator('[data-path*=".content.items."][data-path$=".title"]').first().fill('Erster Satz\nZweiter Satz');
   const font = editor.locator('[data-path$=".appearance.itemTitleFont"]');
   const size = editor.locator('[data-path$=".appearance.itemTitleSize"]');
+  const lineGap = editor.locator('[data-path$=".appearance.itemTitleLineGap"]');
   await expect(font).toHaveValue('serif');
   await expect(size).toHaveValue('25');
+  await expect(lineGap).toHaveValue('0');
   await font.selectOption('sans');
   await size.evaluate((input:HTMLInputElement) => {
     input.value = '32';
+    input.dispatchEvent(new Event('input',{ bubbles:true }));
+  });
+  await lineGap.evaluate((input:HTMLInputElement) => {
+    input.value = '8';
     input.dispatchEvent(new Event('input',{ bubbles:true }));
   });
   for (let index = 0; index < 6; index += 1) {
@@ -308,7 +351,17 @@ test('title grids stay compact without per-item descriptions', async ({ page }) 
   await expect(cards.first()).toHaveCSS('min-height','104px');
   await expect(cards.first().locator('h3')).toHaveCSS('font-family',/Inter|ui-sans-serif|system-ui/);
   await expect(cards.first().locator('h3')).toHaveCSS('font-size','32px');
+  const titleLineHeight = await cards.first().locator('h3').evaluate((element) => parseFloat(getComputedStyle(element).lineHeight));
+  expect(titleLineHeight).toBeCloseTo(33.28,1);
+  await expect(cards.first().locator('.title-card-line')).toHaveCount(2);
+  await expect(cards.first().locator('h3')).toHaveCSS('row-gap','8px');
   await expect(grid).toHaveCSS('grid-template-columns',/\d+(?:\.\d+)?px \d+(?:\.\d+)?px \d+(?:\.\d+)?px \d+(?:\.\d+)?px/);
+  await expect(preview.locator('.layout-title-cards .title-cards-footer')).toHaveText('Ein abschließender Hinweis zu diesen Schwerpunkten.');
+  const footerTypography = await preview.locator('.layout-title-cards').evaluate((section) => ({
+    intro: getComputedStyle(section.querySelector('.focus-header .section-intro-text')!).fontSize,
+    footer: getComputedStyle(section.querySelector('.title-cards-footer')!).fontSize
+  }));
+  expect(footerTypography.footer).toBe(footerTypography.intro);
 
   await page.locator('#preview-frame').evaluate((frame:HTMLIFrameElement) => frame.style.width = '760px');
   await expect(grid).toHaveCSS('grid-template-columns',/\d+(?:\.\d+)?px \d+(?:\.\d+)?px/);
@@ -317,13 +370,15 @@ test('title grids stay compact without per-item descriptions', async ({ page }) 
   await page.locator('#preview-frame').evaluate((frame:HTMLIFrameElement) => frame.style.width = '440px');
   await expect(grid).toHaveCSS('grid-template-columns',/^[\d.]+px$/);
   await expect(cards.first().locator('h3')).toHaveCSS('font-size','32px');
+  const narrowTitleLineHeight = await cards.first().locator('h3').evaluate((element) => parseFloat(getComputedStyle(element).lineHeight));
+  expect(narrowTitleLineHeight).toBeCloseTo(33.28,1);
   const mobileFit = await grid.evaluate((element) => ({
     viewport:document.documentElement.clientWidth,
     scrollWidth:document.documentElement.scrollWidth,
     cardHeight:element.querySelector('.title-card')!.getBoundingClientRect().height
   }));
   expect(mobileFit.scrollWidth).toBeLessThanOrEqual(mobileFit.viewport);
-  expect(mobileFit.cardHeight).toBeLessThan(110);
+  expect(mobileFit.cardHeight).toBeLessThan(140);
 });
 
 test('provides a usable compact navigation', async ({ page }) => {
@@ -332,8 +387,16 @@ test('provides a usable compact navigation', async ({ page }) => {
   await expect(page.locator('.header-inner')).toHaveCSS('min-height','65px');
 
   const menu = page.getByRole('button',{ name:'Menü' });
+  await expect(menu).toBeVisible();
+  const headerBounds = await page.locator('.header-inner').boundingBox();
+  const menuBounds = await menu.boundingBox();
+  expect(menuBounds!.x + menuBounds!.width).toBeCloseTo(headerBounds!.x + headerBounds!.width,0);
+  const closedBackground = await menu.evaluate((element) => getComputedStyle(element).backgroundColor);
   await menu.click();
   await expect(menu).toHaveAttribute('aria-expanded','true');
+  await page.waitForTimeout(220);
+  const openBackground = await menu.evaluate((element) => getComputedStyle(element).backgroundColor);
+  expect(openBackground).not.toBe(closedBackground);
   await expect(page.getByRole('link',{ name:'Kontakt',exact:true })).toBeVisible();
   await page.getByRole('link',{ name:'Kontakt',exact:true }).click();
   await expect(page.locator('#kontakt')).toBeInViewport();
@@ -345,12 +408,14 @@ test('hero image stays uncropped and all content remains above the ribbon', asyn
     { width:720,height:900 },
     { width:900,height:650 },
     { width:901,height:650 },
+    { width:1024,height:700 },
     { width:1280,height:720 },
     { width:1920,height:900 },
     { width:2400,height:1200 }
   ]) {
     await page.setViewportSize(viewport);
     await page.goto(siteUrl);
+    await expect(page.locator('.hero')).toHaveAttribute('data-responsive-layout',/^(mobile|side-by-side|stacked)$/);
 
     const layout = await page.evaluate(() => {
       const hero = document.querySelector('.hero')!.getBoundingClientRect();
@@ -359,12 +424,16 @@ test('hero image stays uncropped and all content remains above the ribbon', asyn
       const imageBox = image.getBoundingClientRect();
       const ribbon = document.querySelector('.hero-ribbon')!.getBoundingClientRect();
       const copy = document.querySelector('.hero-copy')!.getBoundingClientRect();
+      const heroInner = document.querySelector('.hero-inner')!.getBoundingClientRect();
+      const title = document.querySelector('.hero h1')!.getBoundingClientRect();
       const firstText = document.querySelector('.hero .eyebrow')!.getBoundingClientRect();
       const contact = document.querySelector('.hero-contact')!.getBoundingClientRect();
       return {
+        responsiveLayout:document.querySelector('.hero')!.getAttribute('data-responsive-layout'),
         heroTop:hero.top,
         heroBottom:hero.bottom,
         imageTop:imageBox.top,
+        imageLeft:imageBox.left,
         imageRight:imageBox.right,
         imageBottom:imageBox.bottom,
         imageWidth:imageBox.width,
@@ -374,7 +443,14 @@ test('hero image stays uncropped and all content remains above the ribbon', asyn
         ribbonTop:ribbon.top,
         ribbonBottom:ribbon.bottom,
         contentTop:firstText.top,
+        titleLeft:title.left,
+        titleRight:title.right,
+        titleWidth:title.width,
+        heroInnerLeft:heroInner.left,
+        heroInnerRight:heroInner.right,
         copyBottom:copy.bottom,
+        copyRight:copy.right,
+        columnGap:parseFloat(getComputedStyle(document.querySelector('.hero-inner')!).columnGap) || 0,
         contactBottom:contact.bottom,
         viewportWidth:document.documentElement.clientWidth
       };
@@ -389,12 +465,26 @@ test('hero image stays uncropped and all content remains above the ribbon', asyn
     expect(layout.contentTop - layout.heroTop).toBeCloseTo(expectedTopSpacing,0);
 
     if (viewport.width <= 900) {
+      expect(layout.responsiveLayout).toBe('mobile');
+      expect(layout.titleLeft).toBeCloseTo(layout.heroInnerLeft,0);
+      expect(layout.titleRight).toBeCloseTo(layout.heroInnerRight,0);
+      expect(layout.titleWidth).toBeCloseTo(layout.heroInnerRight - layout.heroInnerLeft,0);
+      expect(layout.imageRight).toBeGreaterThanOrEqual(layout.viewportWidth - 1);
+      expect(layout.imageBottom).toBeCloseTo(layout.ribbonBottom,0);
+      expect(layout.imageBottom).toBeCloseTo(layout.heroBottom,0);
+    } else if (layout.responsiveLayout === 'side-by-side') {
+      expect(layout.imageTop).toBeCloseTo(layout.heroTop,0);
+      expect(layout.imageWidth).toBeGreaterThanOrEqual(layout.viewportWidth - layout.copyRight - layout.columnGap - 1);
+      expect(layout.imageLeft).toBeGreaterThanOrEqual(layout.copyRight + 23);
       expect(layout.imageRight).toBeGreaterThanOrEqual(layout.viewportWidth - 1);
       expect(layout.imageBottom).toBeCloseTo(layout.ribbonBottom,0);
       expect(layout.imageBottom).toBeCloseTo(layout.heroBottom,0);
     } else {
+      expect(layout.responsiveLayout).toBe('stacked');
+      expect(layout.titleLeft).toBeCloseTo(layout.heroInnerLeft,0);
+      expect(layout.titleRight).toBeCloseTo(layout.heroInnerRight,0);
+      expect(layout.imageTop).toBeGreaterThanOrEqual(layout.copyBottom - 1);
       expect(layout.imageRight).toBeGreaterThanOrEqual(layout.viewportWidth - 1);
-      expect(layout.imageBottom).toBeCloseTo(layout.ribbonBottom,0);
       expect(layout.imageBottom).toBeCloseTo(layout.heroBottom,0);
     }
   }
@@ -405,6 +495,7 @@ test('hero image stays uncropped and all content remains above the ribbon', asyn
     image.src = 'assets/office_horizontal.JPG';
   });
   await page.locator('.hero-image').evaluate((image:HTMLImageElement) => image.decode());
+  await expect(page.locator('.hero')).toHaveAttribute('data-responsive-layout','stacked');
   await page.locator('[data-hero-field="title"]').evaluate((title) => {
     title.innerHTML = Array(8).fill('Eine zusätzliche Textzeile.').join('<br>');
   });
@@ -901,6 +992,9 @@ test('contact layout separates personal and office details with a safe map', asy
   for (const field of ['personalDetailsTitle','officeDetailsTitle','mapEmbed','mapLink']) {
     await expect(contact.locator(`[data-path$=".content.${field}"]`)).toBeVisible();
   }
+  const textBelowTitle = contact.locator('[data-path$=".appearance.contactTextBelowTitleDesktop"]');
+  await expect(textBelowTitle).toBeVisible();
+  await expect(textBelowTitle).not.toBeChecked();
   for (const collection of ['personalDetails','officeDetails']) {
     const rows = contact.locator(`.collection:has([data-collection-key="${collection}"])`);
     await expect(rows.locator('[data-collection-action="add"]')).toBeVisible();
@@ -921,6 +1015,7 @@ test('contact layout separates personal and office details with a safe map', asy
     internalName:'Kontakt-Test',
     navigationLabel:'Kontakt',
     background:'dark',
+    appearance:{ contactTextBelowTitleDesktop:true },
     content:{
       eyebrow:'Kontakt',
       title:'Kontakt aufnehmen.',
@@ -963,13 +1058,16 @@ test('contact layout separates personal and office details with a safe map', asy
   await expect(personal).toContainText('person@example.at');
   await expect(office).toContainText('Praxisgemeinschaft');
   await expect(office).toContainText('Praxis am Beispielplatz');
+  await expect(office.locator('.contact-detail').first().locator('.detail-value')).toHaveCSS('color','rgb(255, 255, 255)');
   await expect(office.getByRole('link',{ name:'www.praxis.example.at' })).toHaveAttribute('href','https://www.praxis.example.at/');
   await expect(office.getByRole('link',{ name:/Beispielplatz 1/ })).toHaveAttribute('href','https://maps.example.at/');
   const desktopColumns = await Promise.all([personal,office].map((group) => group.boundingBox()));
   expect(desktopColumns[1]!.x).toBeGreaterThan(desktopColumns[0]!.x + desktopColumns[0]!.width);
   expect(desktopColumns[1]!.y).toBeCloseTo(desktopColumns[0]!.y,0);
   const introBox = await desktopPage.locator('.contact-copy > .section-intro-text').boundingBox();
-  expect(introBox!.x).toBeCloseTo(desktopColumns[1]!.x,0);
+  const desktopPageBox = await desktopPage.locator('.contact-grid').boundingBox();
+  expect(introBox!.x).toBeCloseTo(desktopPageBox!.x,0);
+  expect(introBox!.width).toBeCloseTo(desktopPageBox!.width,0);
 
   await desktopPage.close();
   const mobilePage = await openFixture({ ...contactSection,content:{ ...contactSection.content,mapEmbed:'javascript:alert(1)' } },'mobile');
@@ -977,6 +1075,11 @@ test('contact layout separates personal and office details with a safe map', asy
   const mobileGroups = [mobilePage.locator('[data-contact-group="personal"]'),mobilePage.locator('[data-contact-group="office"]')];
   const mobileColumns = await Promise.all(mobileGroups.map((group) => group.boundingBox()));
   expect(mobileColumns[1]!.y).toBeGreaterThan(mobileColumns[0]!.y + mobileColumns[0]!.height);
+  const mobileHeading = mobilePage.locator('.contact-copy .section-heading-mobile h2');
+  const mobileIntro = mobilePage.locator('.contact-copy > .section-intro-text');
+  const mobileHeadingBox = await mobileHeading.boundingBox();
+  const mobileIntroBox = await mobileIntro.boundingBox();
+  expect(mobileIntroBox!.y - (mobileHeadingBox!.y + mobileHeadingBox!.height)).toBeCloseTo(18,0);
   const mobileFit = await mobilePage.locator('.contact-details').evaluate((element) => ({
     viewport:document.documentElement.clientWidth,
     scrollWidth:document.documentElement.scrollWidth,
@@ -1208,8 +1311,20 @@ test('rich-text controls and hero presentation remain editable', async ({ page }
   });
   await expect(page.locator('output[for="heroImage.blendWidthDesktop"]')).toHaveText('55%');
   await expect(page.locator('output[for="heroImage.blendWidthMobile"]')).toHaveText('45%');
-  await expect(page.locator('[data-path="hero.titleSize"] option')).toHaveCount(5);
-  await page.selectOption('[data-path="hero.titleSize"]','tiny');
+  const heroTitleSize = page.locator('[data-path="hero.titleSize"]');
+  await expect(heroTitleSize).toHaveAttribute('type','range');
+  await heroTitleSize.evaluate((input:HTMLInputElement) => {
+    input.value = '64';
+    input.dispatchEvent(new Event('input',{ bubbles:true }));
+  });
+  await expect(page.locator('output[for="hero.titleSize"]')).toHaveText('64px');
+  const heroTitleLineGap = page.locator('[data-path="hero.titleLineGap"]');
+  await expect(heroTitleLineGap).toHaveAttribute('type','range');
+  await heroTitleLineGap.evaluate((input:HTMLInputElement) => {
+    input.value = '12';
+    input.dispatchEvent(new Event('input',{ bubbles:true }));
+  });
+  await expect(page.locator('output[for="hero.titleLineGap"]')).toHaveText('12px');
   await page.locator('[data-path="hero.eyebrowTitleSpacingDesktop"]').evaluate((input:HTMLInputElement) => {
     input.value = '32';
     input.dispatchEvent(new Event('input',{ bubbles:true }));
@@ -1224,6 +1339,7 @@ test('rich-text controls and hero presentation remain editable', async ({ page }
     input.value = '46';
     input.dispatchEvent(new Event('input',{ bubbles:true }));
   });
+  await title.fill('**Ein neuer Titel**\nZweite Titelzeile');
   await expect(page.locator('output[for="hero.titleWidthDesktop"]')).toHaveText('46%');
   await page.locator('.section-editor[data-section-id="psychotherapie"] [data-path$=".appearance.titleSize"]').selectOption('small');
   await page.locator('[data-path="hero.contactButton"]').fill('Erstgespräch anfragen');
@@ -1233,7 +1349,11 @@ test('rich-text controls and hero presentation remain editable', async ({ page }
   await expect(preview.locator('.hero')).toHaveAttribute('data-image-layout','background');
   await expect(preview.locator('.hero')).toHaveAttribute('data-image-blend','natural');
   await expect(preview.locator('.hero')).toHaveAttribute('data-mobile-image-layout','portrait');
-  await expect(preview.locator('.hero')).toHaveAttribute('data-title-size','tiny');
+  await expect(preview.locator('.hero')).toHaveAttribute('data-title-size','64');
+  await expect(preview.locator('.hero')).toHaveCSS('--hero-title-size-desktop','64px');
+  await expect(preview.locator('.hero h1')).toHaveCSS('font-size','64px');
+  await expect(preview.locator('.hero h1')).toHaveCSS('row-gap','12px');
+  await expect(preview.locator('.hero h1 .hero-title-line')).toHaveCount(2);
   await expect(preview.locator('.hero')).toHaveCSS('--hero-eyebrow-title-spacing-desktop','32px');
   await expect(preview.locator('.hero .eyebrow')).toHaveCSS('margin-bottom','32px');
   await expect(preview.locator('.hero')).toHaveCSS('--hero-title-width-desktop','46%');
@@ -1303,11 +1423,35 @@ test('normalizes and validates the current section schema', async ({ page }) => 
     window.practiceContentModel.normalize({ hero:{ eyebrowTitleSpacingDesktop:7,eyebrowTitleSpacing:24 } }).hero.eyebrowTitleSpacingDesktop
   ]);
   expect(heroSpacing).toEqual([15,15,80,0,24,24,7]);
+  const heroTitleSettings = await page.evaluate(() => [
+    window.practiceContentModel.normalize({}).hero.titleSize,
+    window.practiceContentModel.normalize({ hero:{ titleSize:'tiny' } }).hero.titleSize,
+    window.practiceContentModel.normalize({ hero:{ titleSize:999,titleLineGap:999 } }).hero.titleSize,
+    window.practiceContentModel.normalize({ hero:{ titleSize:999,titleLineGap:999 } }).hero.titleLineGap,
+    window.practiceContentModel.normalize({ hero:{ titleSize:1,titleLineGap:-4 } }).hero.titleSize,
+    window.practiceContentModel.normalize({ hero:{ titleSize:1,titleLineGap:-4 } }).hero.titleLineGap
+  ]);
+  expect(heroTitleSettings).toEqual([90,56,120,40,40,0]);
   const highlightTextSizes = await page.evaluate(() => [
     window.practiceContentModel.normalize({ sections:[{ layout:'conditions',appearance:{ highlightTextSize:2 } }] }).sections[0].appearance.highlightTextSize,
     window.practiceContentModel.normalize({ sections:[{ layout:'conditions',appearance:{ highlightTextSize:999 } }] }).sections[0].appearance.highlightTextSize
   ]);
   expect(highlightTextSizes).toEqual([22,80]);
+  const highlightPadding = await page.evaluate(() => {
+    const section = window.practiceContentModel.normalize({ sections:[{ layout:'conditions',appearance:{ highlightPaddingTop:-4,highlightPaddingBottom:999 } }] }).sections[0];
+    return [section.appearance.highlightPaddingTop,section.appearance.highlightPaddingBottom];
+  });
+  expect(highlightPadding).toEqual([0,80]);
+  const highlightCentering = await page.evaluate(() => [
+    window.practiceContentModel.normalize({ sections:[{ layout:'conditions' }] }).sections[0].appearance.highlightCenterContent,
+    window.practiceContentModel.normalize({ sections:[{ layout:'conditions',appearance:{ highlightCenterContent:true } }] }).sections[0].appearance.highlightCenterContent
+  ]);
+  expect(highlightCentering).toEqual([false,true]);
+  const titleCardAppearance = await page.evaluate(() => {
+    const appearance = window.practiceContentModel.normalize({ sections:[{ layout:'titleCards',appearance:{ itemTitleSize:999,itemTitleLineGap:999 } }] }).sections[0].appearance;
+    return [appearance.itemTitleSize,appearance.itemTitleLineGap];
+  });
+  expect(titleCardAppearance).toEqual([36,24]);
   const heroWidths = await page.evaluate(() => [
     window.practiceContentModel.normalize({ hero:{ titleWidthDesktop:99 } }).hero.titleWidthDesktop,
     window.practiceContentModel.normalize({ hero:{ titleWidthDesktop:2 } }).hero.titleWidthDesktop

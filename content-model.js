@@ -29,6 +29,7 @@
     ['standard', 'Standard'],
     ['large', 'Groß']
   ];
+  const heroTitleSizeLegacyValues = { tiny: 56, small: 68, compact: 80, standard: 90, large: 108 };
   const imagePositionOptions = [
     ['center top', 'Mitte oben'],
     ['center 30%', 'Oberes Drittel'],
@@ -113,8 +114,9 @@
           ['serif','Serifenschrift (wie Überschriften)'],
           ['sans','Sans-Serif (wie Einleitung)']
         ] },
-        { key: 'itemTitleSize', label: 'Schriftgröße der Einzeltitel', type: 'range', min: 16, max: 36, step: 1, unit: 'px', help: 'Gilt für alle Titel in diesem Raster.' }
-      ],{ itemTitleFont: 'serif',itemTitleSize: 25 }),
+        { key: 'itemTitleSize', label: 'Schriftgröße der Einzeltitel', type: 'range', min: 16, max: 36, step: 1, unit: 'px', help: 'Gilt für alle Titel in diesem Raster.' },
+        { key: 'itemTitleLineGap', label: 'Abstand zwischen Titelzeilen', type: 'range', min: 0, max: 24, step: 1, unit: 'px', help: 'Gilt für manuelle Zeilenumbrüche. Automatische Umbrüche bleiben kompakt.' }
+      ],{ itemTitleFont: 'serif',itemTitleSize: 25,itemTitleLineGap: 0 }),
       label: 'Titelraster',
       description: 'Einleitung mit einem kompakten Raster aus zwei bis acht Titeln.',
       defaultNavigation: 'Schwerpunkte',
@@ -123,9 +125,10 @@
         { key: 'eyebrow', label: 'Bereichsbezeichnung', type: 'text' },
         { key: 'title', label: 'Titel', type: 'rich', editorRows: 3 },
         { key: 'intro', label: 'Einleitung', type: 'rich', editorRows: 4 },
-        { key: 'items', label: 'Titel', type: 'collection', min: 2, max: 8, addLabel: 'Titel hinzufügen', itemFields: [{ key: 'title', label: 'Titel', type: 'text' }] }
+        { key: 'items', label: 'Titel', type: 'collection', min: 2, max: 8, addLabel: 'Titel hinzufügen', itemFields: [{ key: 'title', label: 'Titel', type: 'rich', editorRows: 3 }] },
+        { key: 'footer', label: 'Text unter den Titeln', type: 'rich', editorRows: 3 }
       ],
-      defaults: { eyebrow: 'Schwerpunkte', title: 'Womit Sie zu mir kommen können.', intro: 'Eine kurze Einleitung zu den folgenden Themen.', items: [{ title: 'Erstes Thema' }, { title: 'Zweites Thema' }] }
+      defaults: { eyebrow: 'Schwerpunkte', title: 'Womit Sie zu mir kommen können.', intro: 'Eine kurze Einleitung zu den folgenden Themen.', items: [{ title: 'Erstes Thema' }, { title: 'Zweites Thema' }], footer: '' }
     },
     image: {
       ...titleAppearance(),
@@ -241,9 +244,12 @@
     conditions: {
       ...titleAppearance([
         { key: 'highlightTextSize', label: 'Schriftgröße des hervorgehobenen Texts', type: 'range', min: 22, max: 80, step: 1, unit: 'px' },
+        { key: 'highlightPaddingTop', label: 'Abstand oben in der Hervorhebungsbox', type: 'range', min: 0, max: 80, step: 1, unit: 'px' },
+        { key: 'highlightPaddingBottom', label: 'Abstand unten in der Hervorhebungsbox', type: 'range', min: 0, max: 80, step: 1, unit: 'px' },
+        { key: 'highlightCenterContent', label: 'Inhalt horizontal zentrieren', type: 'checkbox', help: 'Zentriert Hinweiszeile, hervorgehobenen Text und Detailtext gemeinsam.' },
         { key: 'highlightGradientStart', label: 'Verlaufsfarbe Start', type: 'color' },
         { key: 'highlightGradientEnd', label: 'Verlaufsfarbe Ende', type: 'color' }
-      ],{ highlightTextSize: 50,highlightGradientStart: '#f4e4e4',highlightGradientEnd: '#fcfaf8' }),
+      ],{ highlightTextSize: 50,highlightPaddingTop: 32,highlightPaddingBottom: 32,highlightCenterContent: false,highlightGradientStart: '#f4e4e4',highlightGradientEnd: '#fcfaf8' }),
       label: 'Rahmenbedingungen mit Hervorhebung',
       description: 'Ein quadratischer Hinweis mit einstellbarem Verlauf und kompakte Informationen zu Dauer, Absage und Versicherung.',
       defaultNavigation: 'Rahmenbedingungen',
@@ -273,7 +279,9 @@
       }
     },
     contact: {
-      ...titleAppearance(),
+      ...titleAppearance([
+        { key: 'contactTextBelowTitleDesktop', label: 'Einleitung unter dem Titel (Desktop)', type: 'checkbox', help: 'Setzt den Kontakttext auf Desktop unter den Titel und über die volle Breite.' }
+      ],{ contactTextBelowTitleDesktop: false }),
       label: 'Kontaktblock mit Karte',
       description: 'Kontakttext, Adresse, Telefon, E-Mail und eine Kartenfläche.',
       defaultNavigation: 'Kontakt',
@@ -344,6 +352,7 @@
       if (field.type === 'color' && !/^#[0-9a-f]{6}$/i.test(appearance[field.key] || '')) {
         appearance[field.key] = definition.appearanceDefaults?.[field.key] || '#000000';
       }
+      if (field.type === 'checkbox') appearance[field.key] = appearance[field.key] === true;
       if (field.type === 'range') {
         const fallback = Number(definition.appearanceDefaults?.[field.key]) || field.min || 0;
         const value = Number(appearance[field.key]);
@@ -376,10 +385,14 @@
     const source = input && typeof input === 'object' ? clone(input) : {};
     const sections = Array.isArray(source.sections) ? source.sections : [];
     const heroSource = source.hero && typeof source.hero === 'object' ? source.hero : {};
-    const hero = mergeDefaults({ eyebrow: '', title: '', sentence: '', contactButton: 'Kontakt aufnehmen', titleSize: 'standard', titleWidthDesktop: 42, eyebrowTitleSpacingDesktop: 15, eyebrowTitleSpacingMobile: 15 }, heroSource);
+    const hero = mergeDefaults({ eyebrow: '', title: '', sentence: '', contactButton: 'Kontakt aufnehmen', titleSize: 90, titleLineGap: 0, titleWidthDesktop: 42, eyebrowTitleSpacingDesktop: 15, eyebrowTitleSpacingMobile: 15 }, heroSource);
     const heroImage = mergeDefaults({ src: 'assets/carina_close2.JPG', alt: '', layout: 'portrait', blend: 'duotone', position: 'center top', mobileLayout: 'portrait', mobilePosition: 'center center', overlay: 'soft', blendWidthDesktop: 32, blendWidthMobile: 28 }, source.heroImage);
     const sectionSpacing = mergeDefaults({ desktop: 104,mobile: 64 },source.sectionSpacing);
-    if (!titleSizeOptions.some(([value]) => value === hero.titleSize)) hero.titleSize = 'standard';
+    const legacyHeroTitleSize = heroTitleSizeLegacyValues[hero.titleSize];
+    const numericHeroTitleSize = Number(hero.titleSize);
+    hero.titleSize = Math.min(120,Math.max(40,Number.isFinite(numericHeroTitleSize) ? numericHeroTitleSize : legacyHeroTitleSize || heroTitleSizeLegacyValues.standard));
+    const numericHeroTitleLineGap = Number(hero.titleLineGap);
+    hero.titleLineGap = Math.min(40,Math.max(0,Number.isFinite(numericHeroTitleLineGap) ? numericHeroTitleLineGap : 0));
     hero.titleWidthDesktop = Math.min(55,Math.max(30,Number(hero.titleWidthDesktop) || 42));
     const legacyEyebrowTitleSpacing = Number(heroSource.eyebrowTitleSpacing);
     if (Number.isFinite(legacyEyebrowTitleSpacing)) {
