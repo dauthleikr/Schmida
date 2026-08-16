@@ -357,6 +357,7 @@ test('title grids stay compact without per-item descriptions', async ({ page }) 
   await expect(cards.first().locator('h3')).toHaveCSS('row-gap','8px');
   await expect(grid).toHaveCSS('grid-template-columns',/\d+(?:\.\d+)?px \d+(?:\.\d+)?px \d+(?:\.\d+)?px \d+(?:\.\d+)?px/);
   await expect(preview.locator('.layout-title-cards .title-cards-footer')).toHaveText('Ein abschließender Hinweis zu diesen Schwerpunkten.');
+  await expect(preview.locator('.layout-title-cards .title-cards-footer')).toHaveCSS('max-width','none');
   const footerTypography = await preview.locator('.layout-title-cards').evaluate((section) => ({
     intro: getComputedStyle(section.querySelector('.focus-header .section-intro-text')!).fontSize,
     footer: getComputedStyle(section.querySelector('.title-cards-footer')!).fontSize
@@ -832,6 +833,8 @@ test('wide image layout stacks its copy and offers designed image treatments', a
   const text = copy.locator(':scope > p');
 
   await expect(section).toHaveAttribute('data-image-style','offset-shadow');
+  await expect(copy).toHaveCSS('max-width','none');
+  await expect(text).toHaveCSS('max-width','none');
   const stackedCopy = await Promise.all([heading.boundingBox(),text.boundingBox()]);
   expect(stackedCopy[0]).not.toBeNull();
   expect(stackedCopy[1]).not.toBeNull();

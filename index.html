@@ -127,10 +127,10 @@
     .focus-card.title-card { display:flex; min-height:104px; align-items:center; padding-top:24px; padding-bottom:24px; }
     .focus-card.title-card h3 { display:flex; max-width:18ch; margin-bottom:0; flex-direction:column; gap:var(--title-card-line-gap,0px); font-family:var(--title-card-font,var(--serif)); font-size:var(--title-card-size,25px); line-height:1.04; }
     .title-card-line { display:block; }
-    .title-cards-footer { max-width:45ch; margin:32px 0 0; }
+    .title-cards-footer { width:100%; max-width:none; margin:32px 0 0; }
 
     .practice-grid { display:grid; grid-template-columns:.82fr 1.18fr; gap:clamp(46px,10vw,135px); align-items:center; }
-    .practice-copy p { max-width:38ch; font-size:1.05rem; }
+    .practice-copy p { width:100%; max-width:none; font-size:1.05rem; }
     .office-placeholder { position:relative; min-height:430px; overflow:hidden; background:#d7cbc7; }
     .office-placeholder::before { position:absolute; inset:0; background:linear-gradient(125deg,rgba(93,48,47,.88),rgba(93,48,47,.06) 55%),linear-gradient(0deg,rgba(255,255,255,.17),transparent); content:""; }
     .office-art { position:absolute; right:10%; bottom:0; left:10%; height:70%; border:14px solid rgba(255,255,255,.63); border-bottom:0; }
@@ -139,9 +139,9 @@
     .section-image { display:block; width:100%; min-height:430px; max-height:620px; object-fit:cover; object-position:var(--section-image-position,center center); }
     .image-caption { position:absolute; z-index:1; right:18px; bottom:15px; margin:0; color:#fff!important; font-size:.67rem; font-weight:700; letter-spacing:.1em; text-transform:uppercase; }
 
-    .wide-image-copy { max-width:760px; margin-bottom:clamp(36px,4.5vw,54px); }
+    .wide-image-copy { width:100%; max-width:none; margin-bottom:clamp(36px,4.5vw,54px); }
     .wide-image-copy h2 { margin-bottom:22px; }
-    .wide-image-copy>p { max-width:56ch; margin:0; }
+    .wide-image-copy>p { width:100%; max-width:none; margin:0; }
     .wide-image-frame { position:relative; isolation:isolate; width:100%; min-height:0; overflow:hidden; background:#d7cbc7; }
     .wide-image-frame::before { content:none; }
     .wide-image-frame .section-image { position:relative; z-index:1; width:100%; height:auto; min-height:0; max-height:none; object-fit:contain; }
