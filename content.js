@@ -178,7 +178,7 @@ window.practiceContent = {
     {
       "id": "praxis",
       "layout": "wideImage",
-      "internalName": "Text über breitem Bild",
+      "internalName": "Praxis",
       "navigationLabel": "Praxis",
       "background": "soft",
       "customBackground": "#f2f2f2",
@@ -211,7 +211,7 @@ window.practiceContent = {
     {
       "id": "rahmenbedingungen",
       "layout": "conditions",
-      "internalName": "Rahmenbedingungen mit Hervorhebung",
+      "internalName": "Rahmenbedingungen",
       "navigationLabel": "Rahmenbedingungen",
       "background": "paper",
       "customBackground": "#f7f2ef",
