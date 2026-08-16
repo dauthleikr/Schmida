@@ -197,6 +197,11 @@ test('places editable Rahmenbedingungen directly after Praxis', async ({ page })
     return text.top - label.bottom;
   });
   expect(highlightSpacing).toBeLessThanOrEqual(40);
+  const highlightTextRightEdges = await Promise.all([
+    conditions.locator('.conditions-highlight-text').boundingBox(),
+    conditions.locator('.conditions-highlight-detail').boundingBox()
+  ]);
+  expect(highlightTextRightEdges[1]!.x + highlightTextRightEdges[1]!.width).toBeCloseTo(highlightTextRightEdges[0]!.x + highlightTextRightEdges[0]!.width,0);
   await expect(conditions.locator('.condition-item')).toHaveCount(4);
   await expect(conditions).toContainText('24 Stunden');
   await expect(conditions).toContainText('keine Bezuschussung durch die gesetzliche Krankenversicherung');
@@ -221,10 +226,20 @@ test('places editable Rahmenbedingungen directly after Praxis', async ({ page })
   const editor = page.locator('.section-editor[data-section-id="rahmenbedingungen"]');
   await expect(editor.locator('[data-section-layout]')).toHaveValue('conditions');
   await expect(editor.locator('[data-path$=".appearance.highlightTextSize"]')).toHaveValue('50');
+  await expect(editor.locator('[data-path$=".appearance.highlightTextSize"]')).toHaveAttribute('min','22');
   await expect(editor.locator('[data-path$=".appearance.highlightGradientStart"]')).toHaveValue('#f4e4e4');
   await expect(editor.locator('[data-path$=".appearance.highlightGradientEnd"]')).toHaveValue('#fcfaf8');
   await expect(editor.locator('[data-path$=".content.highlightText"]')).toHaveValue('Klarheit schafft Vertrauen.');
   await expect(editor.locator('.collection-item')).toHaveCount(4);
+
+  await editor.locator('[data-path$=".content.highlightLabel"]').fill('');
+  await page.getByRole('button',{ name:'Vorschau Desktop' }).click();
+  const preview = page.frameLocator('#preview-frame');
+  const highlight = preview.locator('#rahmenbedingungen .conditions-highlight');
+  await expect(highlight).toHaveClass(/conditions-highlight-without-label/);
+  await expect(highlight).toHaveCSS('padding-top','32px');
+  const highlightBounds = await Promise.all([highlight.boundingBox(),preview.locator('#rahmenbedingungen .conditions-highlight-text').boundingBox()]);
+  expect(highlightBounds[1]!.y - highlightBounds[0]!.y).toBeLessThanOrEqual(34);
 });
 
 test('card grids draw complete row dividers at desktop and mobile widths', async ({ page }) => {
@@ -1288,6 +1303,11 @@ test('normalizes and validates the current section schema', async ({ page }) => 
     window.practiceContentModel.normalize({ hero:{ eyebrowTitleSpacingDesktop:7,eyebrowTitleSpacing:24 } }).hero.eyebrowTitleSpacingDesktop
   ]);
   expect(heroSpacing).toEqual([15,15,80,0,24,24,7]);
+  const highlightTextSizes = await page.evaluate(() => [
+    window.practiceContentModel.normalize({ sections:[{ layout:'conditions',appearance:{ highlightTextSize:2 } }] }).sections[0].appearance.highlightTextSize,
+    window.practiceContentModel.normalize({ sections:[{ layout:'conditions',appearance:{ highlightTextSize:999 } }] }).sections[0].appearance.highlightTextSize
+  ]);
+  expect(highlightTextSizes).toEqual([22,80]);
   const heroWidths = await page.evaluate(() => [
     window.practiceContentModel.normalize({ hero:{ titleWidthDesktop:99 } }).hero.titleWidthDesktop,
     window.practiceContentModel.normalize({ hero:{ titleWidthDesktop:2 } }).hero.titleWidthDesktop

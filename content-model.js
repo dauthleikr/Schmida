@@ -240,7 +240,7 @@
     },
     conditions: {
       ...titleAppearance([
-        { key: 'highlightTextSize', label: 'Schriftgröße des hervorgehobenen Texts', type: 'range', min: 30, max: 80, step: 1, unit: 'px' },
+        { key: 'highlightTextSize', label: 'Schriftgröße des hervorgehobenen Texts', type: 'range', min: 22, max: 80, step: 1, unit: 'px' },
         { key: 'highlightGradientStart', label: 'Verlaufsfarbe Start', type: 'color' },
         { key: 'highlightGradientEnd', label: 'Verlaufsfarbe Ende', type: 'color' }
       ],{ highlightTextSize: 50,highlightGradientStart: '#f4e4e4',highlightGradientEnd: '#fcfaf8' }),
