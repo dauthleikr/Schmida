@@ -29,6 +29,7 @@
     ['standard', 'Standard'],
     ['large', 'Groß']
   ];
+  const heroTitleSizeLegacyValues = { tiny: 56, small: 68, compact: 80, standard: 90, large: 108 };
   const imagePositionOptions = [
     ['center top', 'Mitte oben'],
     ['center 30%', 'Oberes Drittel'],
@@ -384,10 +385,14 @@
     const source = input && typeof input === 'object' ? clone(input) : {};
     const sections = Array.isArray(source.sections) ? source.sections : [];
     const heroSource = source.hero && typeof source.hero === 'object' ? source.hero : {};
-    const hero = mergeDefaults({ eyebrow: '', title: '', sentence: '', contactButton: 'Kontakt aufnehmen', titleSize: 'standard', titleWidthDesktop: 42, eyebrowTitleSpacingDesktop: 15, eyebrowTitleSpacingMobile: 15 }, heroSource);
+    const hero = mergeDefaults({ eyebrow: '', title: '', sentence: '', contactButton: 'Kontakt aufnehmen', titleSize: 90, titleLineGap: 0, titleWidthDesktop: 42, eyebrowTitleSpacingDesktop: 15, eyebrowTitleSpacingMobile: 15 }, heroSource);
     const heroImage = mergeDefaults({ src: 'assets/carina_close2.JPG', alt: '', layout: 'portrait', blend: 'duotone', position: 'center top', mobileLayout: 'portrait', mobilePosition: 'center center', overlay: 'soft', blendWidthDesktop: 32, blendWidthMobile: 28 }, source.heroImage);
     const sectionSpacing = mergeDefaults({ desktop: 104,mobile: 64 },source.sectionSpacing);
-    if (!titleSizeOptions.some(([value]) => value === hero.titleSize)) hero.titleSize = 'standard';
+    const legacyHeroTitleSize = heroTitleSizeLegacyValues[hero.titleSize];
+    const numericHeroTitleSize = Number(hero.titleSize);
+    hero.titleSize = Math.min(120,Math.max(40,Number.isFinite(numericHeroTitleSize) ? numericHeroTitleSize : legacyHeroTitleSize || heroTitleSizeLegacyValues.standard));
+    const numericHeroTitleLineGap = Number(hero.titleLineGap);
+    hero.titleLineGap = Math.min(40,Math.max(0,Number.isFinite(numericHeroTitleLineGap) ? numericHeroTitleLineGap : 0));
     hero.titleWidthDesktop = Math.min(55,Math.max(30,Number(hero.titleWidthDesktop) || 42));
     const legacyEyebrowTitleSpacing = Number(heroSource.eyebrowTitleSpacing);
     if (Number.isFinite(legacyEyebrowTitleSpacing)) {

@@ -105,7 +105,7 @@ test('renders the new section schema with dynamic navigation and waves', async (
   expect(await page.locator('.brand-mark').evaluate((image:HTMLImageElement) => image.naturalWidth)).toBe(180);
   await expect(page.locator('.header-inner')).toHaveCSS('min-height','74px');
   const savedHeroTitleSize = await page.evaluate(() => window.currentPracticeContent.hero.titleSize);
-  await expect(page.locator('.hero')).toHaveAttribute('data-title-size',savedHeroTitleSize);
+  await expect(page.locator('.hero')).toHaveAttribute('data-title-size',String(savedHeroTitleSize));
   const heroColumns = await page.locator('.hero').evaluate((element) => {
     const title = element.querySelector('[data-hero-field="title"]')!.getBoundingClientRect();
     const image = element.querySelector('.hero-image-wrap')!.getBoundingClientRect();
@@ -1283,8 +1283,20 @@ test('rich-text controls and hero presentation remain editable', async ({ page }
   });
   await expect(page.locator('output[for="heroImage.blendWidthDesktop"]')).toHaveText('55%');
   await expect(page.locator('output[for="heroImage.blendWidthMobile"]')).toHaveText('45%');
-  await expect(page.locator('[data-path="hero.titleSize"] option')).toHaveCount(5);
-  await page.selectOption('[data-path="hero.titleSize"]','tiny');
+  const heroTitleSize = page.locator('[data-path="hero.titleSize"]');
+  await expect(heroTitleSize).toHaveAttribute('type','range');
+  await heroTitleSize.evaluate((input:HTMLInputElement) => {
+    input.value = '64';
+    input.dispatchEvent(new Event('input',{ bubbles:true }));
+  });
+  await expect(page.locator('output[for="hero.titleSize"]')).toHaveText('64px');
+  const heroTitleLineGap = page.locator('[data-path="hero.titleLineGap"]');
+  await expect(heroTitleLineGap).toHaveValue('0');
+  await heroTitleLineGap.evaluate((input:HTMLInputElement) => {
+    input.value = '12';
+    input.dispatchEvent(new Event('input',{ bubbles:true }));
+  });
+  await expect(page.locator('output[for="hero.titleLineGap"]')).toHaveText('12px');
   await page.locator('[data-path="hero.eyebrowTitleSpacingDesktop"]').evaluate((input:HTMLInputElement) => {
     input.value = '32';
     input.dispatchEvent(new Event('input',{ bubbles:true }));
@@ -1299,6 +1311,7 @@ test('rich-text controls and hero presentation remain editable', async ({ page }
     input.value = '46';
     input.dispatchEvent(new Event('input',{ bubbles:true }));
   });
+  await title.fill('**Ein neuer Titel**\nZweite Titelzeile');
   await expect(page.locator('output[for="hero.titleWidthDesktop"]')).toHaveText('46%');
   await page.locator('.section-editor[data-section-id="psychotherapie"] [data-path$=".appearance.titleSize"]').selectOption('small');
   await page.locator('[data-path="hero.contactButton"]').fill('Erstgespräch anfragen');
@@ -1308,7 +1321,11 @@ test('rich-text controls and hero presentation remain editable', async ({ page }
   await expect(preview.locator('.hero')).toHaveAttribute('data-image-layout','background');
   await expect(preview.locator('.hero')).toHaveAttribute('data-image-blend','natural');
   await expect(preview.locator('.hero')).toHaveAttribute('data-mobile-image-layout','portrait');
-  await expect(preview.locator('.hero')).toHaveAttribute('data-title-size','tiny');
+  await expect(preview.locator('.hero')).toHaveAttribute('data-title-size','64');
+  await expect(preview.locator('.hero')).toHaveCSS('--hero-title-size-desktop','64px');
+  await expect(preview.locator('.hero h1')).toHaveCSS('font-size','64px');
+  await expect(preview.locator('.hero h1')).toHaveCSS('row-gap','12px');
+  await expect(preview.locator('.hero h1 .hero-title-line')).toHaveCount(2);
   await expect(preview.locator('.hero')).toHaveCSS('--hero-eyebrow-title-spacing-desktop','32px');
   await expect(preview.locator('.hero .eyebrow')).toHaveCSS('margin-bottom','32px');
   await expect(preview.locator('.hero')).toHaveCSS('--hero-title-width-desktop','46%');
@@ -1378,6 +1395,15 @@ test('normalizes and validates the current section schema', async ({ page }) => 
     window.practiceContentModel.normalize({ hero:{ eyebrowTitleSpacingDesktop:7,eyebrowTitleSpacing:24 } }).hero.eyebrowTitleSpacingDesktop
   ]);
   expect(heroSpacing).toEqual([15,15,80,0,24,24,7]);
+  const heroTitleSettings = await page.evaluate(() => [
+    window.practiceContentModel.normalize({}).hero.titleSize,
+    window.practiceContentModel.normalize({ hero:{ titleSize:'tiny' } }).hero.titleSize,
+    window.practiceContentModel.normalize({ hero:{ titleSize:999,titleLineGap:999 } }).hero.titleSize,
+    window.practiceContentModel.normalize({ hero:{ titleSize:999,titleLineGap:999 } }).hero.titleLineGap,
+    window.practiceContentModel.normalize({ hero:{ titleSize:1,titleLineGap:-4 } }).hero.titleSize,
+    window.practiceContentModel.normalize({ hero:{ titleSize:1,titleLineGap:-4 } }).hero.titleLineGap
+  ]);
+  expect(heroTitleSettings).toEqual([90,56,120,40,40,0]);
   const highlightTextSizes = await page.evaluate(() => [
     window.practiceContentModel.normalize({ sections:[{ layout:'conditions',appearance:{ highlightTextSize:2 } }] }).sections[0].appearance.highlightTextSize,
     window.practiceContentModel.normalize({ sections:[{ layout:'conditions',appearance:{ highlightTextSize:999 } }] }).sections[0].appearance.highlightTextSize
