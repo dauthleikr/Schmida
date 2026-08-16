@@ -227,18 +227,40 @@ test('places editable Rahmenbedingungen directly after Praxis', async ({ page })
   await expect(editor.locator('[data-section-layout]')).toHaveValue('conditions');
   await expect(editor.locator('[data-path$=".appearance.highlightTextSize"]')).toHaveValue('50');
   await expect(editor.locator('[data-path$=".appearance.highlightTextSize"]')).toHaveAttribute('min','22');
+  await expect(editor.locator('[data-path$=".appearance.highlightPaddingTop"]')).toHaveValue('32');
+  await expect(editor.locator('[data-path$=".appearance.highlightPaddingBottom"]')).toHaveValue('32');
+  const centerContent = editor.locator('[data-path$=".appearance.highlightCenterContent"]');
+  await expect(centerContent).not.toBeChecked();
   await expect(editor.locator('[data-path$=".appearance.highlightGradientStart"]')).toHaveValue('#f4e4e4');
   await expect(editor.locator('[data-path$=".appearance.highlightGradientEnd"]')).toHaveValue('#fcfaf8');
   await expect(editor.locator('[data-path$=".content.highlightText"]')).toHaveValue('Klarheit schafft Vertrauen.');
   await expect(editor.locator('.collection-item')).toHaveCount(4);
 
   await editor.locator('[data-path$=".content.highlightLabel"]').fill('');
+  await centerContent.check();
   await page.getByRole('button',{ name:'Vorschau Desktop' }).click();
-  const preview = page.frameLocator('#preview-frame');
-  const highlight = preview.locator('#rahmenbedingungen .conditions-highlight');
-  await expect(highlight).toHaveClass(/conditions-highlight-without-label/);
-  await expect(highlight).toHaveCSS('padding-top','32px');
-  const highlightBounds = await Promise.all([highlight.boundingBox(),preview.locator('#rahmenbedingungen .conditions-highlight-text').boundingBox()]);
+  const centeredPreview = page.frameLocator('#preview-frame');
+  const centeredHighlight = centeredPreview.locator('#rahmenbedingungen .conditions-highlight');
+  await expect(centeredHighlight).toHaveClass(/conditions-highlight-without-label/);
+  await expect(centeredHighlight).toHaveClass(/conditions-highlight-centered/);
+  await expect(centeredHighlight).toHaveCSS('text-align','center');
+  await expect(centeredHighlight).toHaveCSS('justify-content','center');
+  await expect(centeredHighlight).toHaveCSS('padding-top','32px');
+  const centeredTextEdges = await Promise.all([
+    centeredPreview.locator('#rahmenbedingungen .conditions-highlight-text').boundingBox(),
+    centeredPreview.locator('#rahmenbedingungen .conditions-highlight-detail').boundingBox()
+  ]);
+  expect(centeredTextEdges[1]!.x + centeredTextEdges[1]!.width).toBeCloseTo(centeredTextEdges[0]!.x + centeredTextEdges[0]!.width,0);
+  await page.getByRole('button',{ name:'Vorschau schließen' }).click();
+  await centerContent.uncheck();
+  await page.getByRole('button',{ name:'Vorschau Desktop' }).click();
+  const leftAlignedPreview = page.frameLocator('#preview-frame');
+  const leftAlignedHighlight = leftAlignedPreview.locator('#rahmenbedingungen .conditions-highlight');
+  await expect(leftAlignedHighlight).not.toHaveClass(/conditions-highlight-centered/);
+  await expect(leftAlignedHighlight).toHaveCSS('text-align','left');
+  await expect(leftAlignedHighlight).toHaveCSS('justify-content','center');
+  await expect(leftAlignedHighlight).toHaveCSS('padding-top','32px');
+  const highlightBounds = await Promise.all([leftAlignedHighlight.boundingBox(),leftAlignedPreview.locator('#rahmenbedingungen .conditions-highlight-text').boundingBox()]);
   expect(highlightBounds[1]!.y - highlightBounds[0]!.y).toBeLessThanOrEqual(34);
 });
 
@@ -1308,6 +1330,16 @@ test('normalizes and validates the current section schema', async ({ page }) => 
     window.practiceContentModel.normalize({ sections:[{ layout:'conditions',appearance:{ highlightTextSize:999 } }] }).sections[0].appearance.highlightTextSize
   ]);
   expect(highlightTextSizes).toEqual([22,80]);
+  const highlightPadding = await page.evaluate(() => {
+    const section = window.practiceContentModel.normalize({ sections:[{ layout:'conditions',appearance:{ highlightPaddingTop:-4,highlightPaddingBottom:999 } }] }).sections[0];
+    return [section.appearance.highlightPaddingTop,section.appearance.highlightPaddingBottom];
+  });
+  expect(highlightPadding).toEqual([0,80]);
+  const highlightCentering = await page.evaluate(() => [
+    window.practiceContentModel.normalize({ sections:[{ layout:'conditions' }] }).sections[0].appearance.highlightCenterContent,
+    window.practiceContentModel.normalize({ sections:[{ layout:'conditions',appearance:{ highlightCenterContent:true } }] }).sections[0].appearance.highlightCenterContent
+  ]);
+  expect(highlightCentering).toEqual([false,true]);
   const heroWidths = await page.evaluate(() => [
     window.practiceContentModel.normalize({ hero:{ titleWidthDesktop:99 } }).hero.titleWidthDesktop,
     window.practiceContentModel.normalize({ hero:{ titleWidthDesktop:2 } }).hero.titleWidthDesktop

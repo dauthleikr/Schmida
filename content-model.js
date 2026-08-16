@@ -241,9 +241,12 @@
     conditions: {
       ...titleAppearance([
         { key: 'highlightTextSize', label: 'Schriftgröße des hervorgehobenen Texts', type: 'range', min: 22, max: 80, step: 1, unit: 'px' },
+        { key: 'highlightPaddingTop', label: 'Abstand oben in der Hervorhebungsbox', type: 'range', min: 0, max: 80, step: 1, unit: 'px' },
+        { key: 'highlightPaddingBottom', label: 'Abstand unten in der Hervorhebungsbox', type: 'range', min: 0, max: 80, step: 1, unit: 'px' },
+        { key: 'highlightCenterContent', label: 'Inhalt horizontal zentrieren', type: 'checkbox', help: 'Zentriert Hinweiszeile, hervorgehobenen Text und Detailtext gemeinsam.' },
         { key: 'highlightGradientStart', label: 'Verlaufsfarbe Start', type: 'color' },
         { key: 'highlightGradientEnd', label: 'Verlaufsfarbe Ende', type: 'color' }
-      ],{ highlightTextSize: 50,highlightGradientStart: '#f4e4e4',highlightGradientEnd: '#fcfaf8' }),
+      ],{ highlightTextSize: 50,highlightPaddingTop: 32,highlightPaddingBottom: 32,highlightCenterContent: false,highlightGradientStart: '#f4e4e4',highlightGradientEnd: '#fcfaf8' }),
       label: 'Rahmenbedingungen mit Hervorhebung',
       description: 'Ein quadratischer Hinweis mit einstellbarem Verlauf und kompakte Informationen zu Dauer, Absage und Versicherung.',
       defaultNavigation: 'Rahmenbedingungen',
@@ -344,6 +347,7 @@
       if (field.type === 'color' && !/^#[0-9a-f]{6}$/i.test(appearance[field.key] || '')) {
         appearance[field.key] = definition.appearanceDefaults?.[field.key] || '#000000';
       }
+      if (field.type === 'checkbox') appearance[field.key] = appearance[field.key] === true;
       if (field.type === 'range') {
         const fallback = Number(definition.appearanceDefaults?.[field.key]) || field.min || 0;
         const value = Number(appearance[field.key]);

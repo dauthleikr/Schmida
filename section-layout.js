@@ -176,9 +176,15 @@
       const gradientEnd = section.appearance?.highlightGradientEnd || '#fcfaf8';
       const highlightInk = readableInk(interpolateColor(gradientStart,gradientEnd,.5));
       const highlightBorder = highlightInk === '#ffffff' ? 'rgba(255,255,255,.36)' : 'rgba(41,17,23,.22)';
-      const highlightStyle = `--conditions-highlight-size:${textSize / 16}rem;--conditions-highlight-start:${gradientStart};--conditions-highlight-end:${gradientEnd};--conditions-highlight-ink:${highlightInk};--conditions-highlight-border:${highlightBorder}`;
+      const normalizePadding = (value) => {
+        const numeric = Number(value);
+        return Math.min(80,Math.max(0,Number.isFinite(numeric) ? numeric : 32));
+      };
+      const paddingTop = normalizePadding(section.appearance?.highlightPaddingTop);
+      const paddingBottom = normalizePadding(section.appearance?.highlightPaddingBottom);
+      const highlightStyle = `--conditions-highlight-size:${textSize / 16}rem;--conditions-highlight-padding-top:${paddingTop}px;--conditions-highlight-padding-bottom:${paddingBottom}px;--conditions-highlight-start:${gradientStart};--conditions-highlight-end:${gradientEnd};--conditions-highlight-ink:${highlightInk};--conditions-highlight-border:${highlightBorder}`;
       const hasHighlightLabel = hasText(body.highlightLabel);
-      const highlightClass = hasHighlightLabel ? 'conditions-highlight' : 'conditions-highlight conditions-highlight-without-label';
+      const highlightClass = ['conditions-highlight',hasHighlightLabel ? '' : 'conditions-highlight-without-label',section.appearance?.highlightCenterContent === true ? 'conditions-highlight-centered' : ''].filter(Boolean).join(' ');
       const highlightLabel = hasHighlightLabel ? `<p class="conditions-highlight-label">${formatMarkup(body.highlightLabel)}</p>` : '';
       const highlight = `<div class="${highlightClass}" style="${escapeAttribute(highlightStyle)}">${highlightLabel}<div><p class="conditions-highlight-text">${formatMarkup(body.highlightText)}</p><p class="conditions-highlight-detail">${formatMarkup(body.highlightDetail)}</p></div></div>`;
       return `<section class="section dynamic-section layout-conditions"><div class="page conditions-grid"><div class="conditions-copy">${sectionHeading(section)}<p class="section-intro-text">${formatMarkup(body.intro)}</p>${highlight}</div><div class="conditions-details"><div class="conditions-list">${items}</div>${body.note ? `<p class="conditions-note">${formatMarkup(body.note)}</p>` : ''}</div></div></section>`;
