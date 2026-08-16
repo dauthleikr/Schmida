@@ -147,7 +147,7 @@
     .wide-image-frame .section-image { position:relative; z-index:1; width:100%; height:auto; min-height:0; max-height:none; object-fit:contain; }
     .wide-image-frame .image-caption { z-index:2; }
     .wide-image-carousel { position:relative; }
-    .carousel-stage { position:relative; touch-action:pan-y; user-select:none; }
+    .carousel-stage { position:relative; min-height:var(--carousel-reserved-height,0px); touch-action:pan-y; user-select:none; }
     .carousel-stage .section-image { -webkit-user-drag:none; }
     .carousel-slide { position:absolute; top:0; left:50%; opacity:0; visibility:hidden; pointer-events:none; transform:translateX(-50%); transition:opacity .55s ease,visibility 0s linear .55s; }
     .carousel-slide[data-active="true"] { position:relative; z-index:1; left:auto; opacity:1; visibility:visible; pointer-events:auto; transform:none; transition-delay:0s; }

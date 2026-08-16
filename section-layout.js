@@ -401,6 +401,23 @@
       show(next);
     };
     const stage = carousel.querySelector('.carousel-stage');
+    const reserveStageHeight = () => {
+      if (!stage) return;
+      const stageWidth = stage.getBoundingClientRect().width;
+      if (!stageWidth) return;
+      const heights = slides.map((slide) => {
+        const image = slide.querySelector('.section-image');
+        if (!image) return 0;
+        const naturalWidth = Number(image.naturalWidth);
+        const naturalHeight = Number(image.naturalHeight);
+        return naturalWidth && naturalHeight ? stageWidth * naturalHeight / naturalWidth : image.getBoundingClientRect().height;
+      });
+      const reservedHeight = Math.max(...heights,0);
+      if (reservedHeight) stage.style.setProperty('--carousel-reserved-height',`${reservedHeight}px`);
+    };
+    slides.forEach((slide) => slide.querySelector('.section-image')?.addEventListener('load',reserveStageHeight));
+    window.addEventListener('resize',reserveStageHeight,{ passive:true });
+    reserveStageHeight();
     let swipeStart;
     const finishSwipe = (event) => {
       if (!swipeStart || event.pointerId !== swipeStart.pointerId) return;

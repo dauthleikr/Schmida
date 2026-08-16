@@ -925,11 +925,19 @@ test('wide image layout supports an editor-managed carousel', async ({ page }) =
   await expect(carousel.locator('[data-carousel-next]')).toBeVisible();
   await expect(carousel.locator('[data-carousel-toggle]')).toHaveCount(0);
 
+  const stage = carousel.locator('.carousel-stage');
+  await expect.poll(async () => slides.locator('.section-image').evaluateAll((images:HTMLImageElement[]) => images.every((image) => image.naturalWidth > 0))).toBe(true);
+  const reservedStageHeight = await stage.evaluate((element) => ({
+    height:element.getBoundingClientRect().height,
+    expected:Math.max(...[...element.querySelectorAll('.section-image')].map((image:HTMLImageElement) => element.getBoundingClientRect().width * image.naturalHeight / image.naturalWidth))
+  }));
+  expect(reservedStageHeight.height).toBeGreaterThanOrEqual(reservedStageHeight.expected - 1);
+  const initialStageHeight = reservedStageHeight.height;
   await carousel.locator('[data-carousel-next]').click();
   await expect(slides.nth(1)).toHaveAttribute('data-active','true');
   await expect(carousel).toHaveAttribute('data-autoplay-stopped','true');
+  expect(await stage.evaluate((element) => element.getBoundingClientRect().height)).toBeGreaterThanOrEqual(initialStageHeight - 1);
 
-  const stage = carousel.locator('.carousel-stage');
   await stage.dispatchEvent('pointerdown',{ pointerId:16,pointerType:'touch',isPrimary:true,clientX:240,clientY:80 });
   await stage.dispatchEvent('pointerup',{ pointerId:16,pointerType:'touch',isPrimary:true,clientX:230,clientY:180 });
   await expect(slides.nth(1)).toHaveAttribute('data-active','true');
@@ -943,9 +951,9 @@ test('wide image layout supports an editor-managed carousel', async ({ page }) =
   await expect(slides.nth(0)).toHaveAttribute('data-active','true');
   await expect(carousel).toHaveAttribute('data-autoplay-stopped','true');
   const activeSpacing = await carousel.evaluate((element) => {
-    const active = element.querySelector('[data-carousel-slide][data-active="true"]')!.getBoundingClientRect();
+    const stage = element.querySelector('.carousel-stage')!.getBoundingClientRect();
     const controls = element.querySelector('.carousel-controls')!.getBoundingClientRect();
-    return controls.top - active.bottom;
+    return controls.top - stage.bottom;
   });
   expect(activeSpacing).toBeLessThanOrEqual(50);
 
