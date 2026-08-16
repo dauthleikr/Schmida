@@ -16,7 +16,9 @@ window.practiceContent = {
     "sentence": "",
     "contactButton": "Erstgespräch vereinbaren",
     "titleSize": "tiny",
-    "titleWidthDesktop": 42
+    "titleWidthDesktop": 42,
+    "eyebrowTitleSpacingDesktop": 80,
+    "eyebrowTitleSpacingMobile": 15
   },
   "heroImage": {
     "src": "assets/carina_close2.JPG",
@@ -229,7 +231,7 @@ window.practiceContent = {
         "intro": "",
         "highlightLabel": "",
         "highlightText": "Psychotherapeutin in Ausbildung unter Supervision",
-        "highlightDetail": "Als Psychotherapeutin in Ausbildung unter Supervision stehe ich im regelmäßigen fachlichen Austausch mit erfahrenen Psychotherapeut:innen. So kann ich die Qualität der Behandlung sicherstellen und mich gleichzeitig kontinuierlich weiterentwickeln.",
+        "highlightDetail": "Als Psychotherapeutin in Ausbildung unter Supervision stehe ich im regelmäßigen fachlichen Austausch mit erfahrenen Psychotherapeut:innen. Im Sinne der Qualitätssicherung bekomme ich zusätzlichen Input, um Ihre Therapie bestmöglich gestalten zu können.",
         "items": [
           {
             "title": "Zielgruppe",
@@ -237,22 +239,22 @@ window.practiceContent = {
           },
           {
             "title": "Setting",
-            "text": ""
+            "text": "Einzelsetting,\nauf Anfrage auch Paar- und Familiensetting möglich"
           },
           {
-            "title": "Gesetzliche Krankenversicherung",
-            "text": "Da ich als Psychotherapeutin in Ausbildung unter Supervision tätig bin, ist derzeit keine Bezuschussung durch die gesetzliche Krankenversicherung möglich."
-          },
-          {
-            "title": "Private Zusatzversicherung",
-            "text": "Je nach Vertrag kann eine Kostenübernahme möglich sein. Bitte klären Sie dies direkt mit Ihrem Versicherungsanbieter."
+            "title": "Kosten",
+            "text": "ab 80 € für eine Einzelstunde (50 Minuten)\nBitte beachten Sie, dass derzeit keine Verrechnung mit der Krankenkasse möglich ist."
           },
           {
             "title": "Absageregelung",
-            "text": "Termine können bis 24 Stunden vorher kostenfrei abgesagt werden."
+            "text": "Psychotherapiestunden, die gar nicht oder weniger als 24 Stunden vor dem vereinbarten Termin abgesagt werden, werden in voller Höhe in Rechnung gestellt."
+          },
+          {
+            "title": "Verschwiegenheit",
+            "text": "Gemäß §44 des Psychotherapiegesetzes (BGBl. I Nr. 49/2024) bin ich zur Verschwiegenheit über alle Therapieinhalte gegenüber Dritten verpflichtet."
           }
         ],
-        "note": "Offene Fragen zu den Rahmenbedingungen können wir gerne im Erstgespräch besprechen."
+        "note": ""
       }
     },
     {
@@ -270,7 +272,7 @@ window.practiceContent = {
       "content": {
         "eyebrow": "Kontakt",
         "title": "Erstgespräch & Kontakt.",
-        "text": "Wenn Sie Fragen haben oder ein Erstgespräch vereinbaren möchten, freue ich mich über Ihre Nachricht.",
+        "text": "Ich gehöre seit 2023 zum Team der Praxisgemeinschaft Apädo (Leitung: Mag. Doris Pühringer). Entsprechend finden Sie hier sowohl meine persönlichen Kontaktdaten, als auch die der Praxisgemeinschaft.\n\nWenn Sie Fragen haben oder ein Erstgespräch vereinbaren möchten, freue ich mich über Ihre Nachricht.",
         "personalDetailsTitle": "Persönlicher Kontakt",
         "personalDetails": [
           {
@@ -287,6 +289,11 @@ window.practiceContent = {
             "title": "Adresse",
             "content": "Neubaugasse 7 / Stiege II / 2. Stock / Top 49\n1070 Wien",
             "type": "address"
+          },
+          {
+            "title": "Öffentliche Erreichbarkeit",
+            "content": "U3, 13A, 14A",
+            "type": "text"
           }
         ],
         "officeDetailsTitle": "Praxisgemeinschaft Apädo",
