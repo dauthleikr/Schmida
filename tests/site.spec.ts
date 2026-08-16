@@ -197,6 +197,11 @@ test('places editable Rahmenbedingungen directly after Praxis', async ({ page })
     return text.top - label.bottom;
   });
   expect(highlightSpacing).toBeLessThanOrEqual(40);
+  const highlightTextRightEdges = await Promise.all([
+    conditions.locator('.conditions-highlight-text').boundingBox(),
+    conditions.locator('.conditions-highlight-detail').boundingBox()
+  ]);
+  expect(highlightTextRightEdges[1]!.x + highlightTextRightEdges[1]!.width).toBeCloseTo(highlightTextRightEdges[0]!.x + highlightTextRightEdges[0]!.width,0);
   await expect(conditions.locator('.condition-item')).toHaveCount(4);
   await expect(conditions).toContainText('24 Stunden');
   await expect(conditions).toContainText('keine Bezuschussung durch die gesetzliche Krankenversicherung');
@@ -221,10 +226,20 @@ test('places editable Rahmenbedingungen directly after Praxis', async ({ page })
   const editor = page.locator('.section-editor[data-section-id="rahmenbedingungen"]');
   await expect(editor.locator('[data-section-layout]')).toHaveValue('conditions');
   await expect(editor.locator('[data-path$=".appearance.highlightTextSize"]')).toHaveValue('50');
+  await expect(editor.locator('[data-path$=".appearance.highlightTextSize"]')).toHaveAttribute('min','22');
   await expect(editor.locator('[data-path$=".appearance.highlightGradientStart"]')).toHaveValue('#f4e4e4');
   await expect(editor.locator('[data-path$=".appearance.highlightGradientEnd"]')).toHaveValue('#fcfaf8');
   await expect(editor.locator('[data-path$=".content.highlightText"]')).toHaveValue('Klarheit schafft Vertrauen.');
   await expect(editor.locator('.collection-item')).toHaveCount(4);
+
+  await editor.locator('[data-path$=".content.highlightLabel"]').fill('');
+  await page.getByRole('button',{ name:'Vorschau Desktop' }).click();
+  const preview = page.frameLocator('#preview-frame');
+  const highlight = preview.locator('#rahmenbedingungen .conditions-highlight');
+  await expect(highlight).toHaveClass(/conditions-highlight-without-label/);
+  await expect(highlight).toHaveCSS('padding-top','32px');
+  const highlightBounds = await Promise.all([highlight.boundingBox(),preview.locator('#rahmenbedingungen .conditions-highlight-text').boundingBox()]);
+  expect(highlightBounds[1]!.y - highlightBounds[0]!.y).toBeLessThanOrEqual(34);
 });
 
 test('card grids draw complete row dividers at desktop and mobile widths', async ({ page }) => {
@@ -1195,6 +1210,16 @@ test('rich-text controls and hero presentation remain editable', async ({ page }
   await expect(page.locator('output[for="heroImage.blendWidthMobile"]')).toHaveText('45%');
   await expect(page.locator('[data-path="hero.titleSize"] option')).toHaveCount(5);
   await page.selectOption('[data-path="hero.titleSize"]','tiny');
+  await page.locator('[data-path="hero.eyebrowTitleSpacingDesktop"]').evaluate((input:HTMLInputElement) => {
+    input.value = '32';
+    input.dispatchEvent(new Event('input',{ bubbles:true }));
+  });
+  await page.locator('[data-path="hero.eyebrowTitleSpacingMobile"]').evaluate((input:HTMLInputElement) => {
+    input.value = '18';
+    input.dispatchEvent(new Event('input',{ bubbles:true }));
+  });
+  await expect(page.locator('output[for="hero.eyebrowTitleSpacingDesktop"]')).toHaveText('32px');
+  await expect(page.locator('output[for="hero.eyebrowTitleSpacingMobile"]')).toHaveText('18px');
   await page.locator('[data-path="hero.titleWidthDesktop"]').evaluate((input:HTMLInputElement) => {
     input.value = '46';
     input.dispatchEvent(new Event('input',{ bubbles:true }));
@@ -1209,6 +1234,8 @@ test('rich-text controls and hero presentation remain editable', async ({ page }
   await expect(preview.locator('.hero')).toHaveAttribute('data-image-blend','natural');
   await expect(preview.locator('.hero')).toHaveAttribute('data-mobile-image-layout','portrait');
   await expect(preview.locator('.hero')).toHaveAttribute('data-title-size','tiny');
+  await expect(preview.locator('.hero')).toHaveCSS('--hero-eyebrow-title-spacing-desktop','32px');
+  await expect(preview.locator('.hero .eyebrow')).toHaveCSS('margin-bottom','32px');
   await expect(preview.locator('.hero')).toHaveCSS('--hero-title-width-desktop','46%');
   await expect(preview.locator('.hero')).toHaveCSS('--hero-blend-desktop','55%');
   await expect(preview.locator('.hero')).toHaveCSS('--hero-blend-mobile','45%');
@@ -1222,6 +1249,12 @@ test('rich-text controls and hero presentation remain editable', async ({ page }
   });
   expect(backgroundBounds.left).toBeLessThanOrEqual(0);
   expect(backgroundBounds.right).toBeGreaterThanOrEqual(backgroundBounds.viewportWidth);
+
+  await page.getByRole('button',{ name:'Vorschau schließen' }).click();
+  await page.getByRole('button',{ name:'Vorschau Mobil' }).click();
+  const mobilePreview = page.frameLocator('#preview-frame');
+  await expect(mobilePreview.locator('.hero')).toHaveCSS('--hero-eyebrow-title-spacing-mobile','18px');
+  await expect(mobilePreview.locator('.hero .eyebrow')).toHaveCSS('margin-bottom','18px');
 });
 
 test('normalizes and validates the current section schema', async ({ page }) => {
@@ -1260,6 +1293,21 @@ test('normalizes and validates the current section schema', async ({ page }) => 
 
   const spacing = await page.evaluate(() => window.practiceContentModel.normalize({ sectionSpacing:{ desktop:999,mobile:2 } }).sectionSpacing);
   expect(spacing).toEqual({ desktop:180,mobile:36 });
+  const heroSpacing = await page.evaluate(() => [
+    window.practiceContentModel.normalize({}).hero.eyebrowTitleSpacingDesktop,
+    window.practiceContentModel.normalize({}).hero.eyebrowTitleSpacingMobile,
+    window.practiceContentModel.normalize({ hero:{ eyebrowTitleSpacingDesktop:999,eyebrowTitleSpacingMobile:-4 } }).hero.eyebrowTitleSpacingDesktop,
+    window.practiceContentModel.normalize({ hero:{ eyebrowTitleSpacingDesktop:999,eyebrowTitleSpacingMobile:-4 } }).hero.eyebrowTitleSpacingMobile,
+    window.practiceContentModel.normalize({ hero:{ eyebrowTitleSpacing:24 } }).hero.eyebrowTitleSpacingDesktop,
+    window.practiceContentModel.normalize({ hero:{ eyebrowTitleSpacing:24 } }).hero.eyebrowTitleSpacingMobile,
+    window.practiceContentModel.normalize({ hero:{ eyebrowTitleSpacingDesktop:7,eyebrowTitleSpacing:24 } }).hero.eyebrowTitleSpacingDesktop
+  ]);
+  expect(heroSpacing).toEqual([15,15,80,0,24,24,7]);
+  const highlightTextSizes = await page.evaluate(() => [
+    window.practiceContentModel.normalize({ sections:[{ layout:'conditions',appearance:{ highlightTextSize:2 } }] }).sections[0].appearance.highlightTextSize,
+    window.practiceContentModel.normalize({ sections:[{ layout:'conditions',appearance:{ highlightTextSize:999 } }] }).sections[0].appearance.highlightTextSize
+  ]);
+  expect(highlightTextSizes).toEqual([22,80]);
   const heroWidths = await page.evaluate(() => [
     window.practiceContentModel.normalize({ hero:{ titleWidthDesktop:99 } }).hero.titleWidthDesktop,
     window.practiceContentModel.normalize({ hero:{ titleWidthDesktop:2 } }).hero.titleWidthDesktop

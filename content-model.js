@@ -240,7 +240,7 @@
     },
     conditions: {
       ...titleAppearance([
-        { key: 'highlightTextSize', label: 'Schriftgröße des hervorgehobenen Texts', type: 'range', min: 30, max: 80, step: 1, unit: 'px' },
+        { key: 'highlightTextSize', label: 'Schriftgröße des hervorgehobenen Texts', type: 'range', min: 22, max: 80, step: 1, unit: 'px' },
         { key: 'highlightGradientStart', label: 'Verlaufsfarbe Start', type: 'color' },
         { key: 'highlightGradientEnd', label: 'Verlaufsfarbe Ende', type: 'color' }
       ],{ highlightTextSize: 50,highlightGradientStart: '#f4e4e4',highlightGradientEnd: '#fcfaf8' }),
@@ -375,11 +375,24 @@
   const normalize = (input) => {
     const source = input && typeof input === 'object' ? clone(input) : {};
     const sections = Array.isArray(source.sections) ? source.sections : [];
-    const hero = mergeDefaults({ eyebrow: '', title: '', sentence: '', contactButton: 'Kontakt aufnehmen', titleSize: 'standard', titleWidthDesktop: 42 }, source.hero);
+    const heroSource = source.hero && typeof source.hero === 'object' ? source.hero : {};
+    const hero = mergeDefaults({ eyebrow: '', title: '', sentence: '', contactButton: 'Kontakt aufnehmen', titleSize: 'standard', titleWidthDesktop: 42, eyebrowTitleSpacingDesktop: 15, eyebrowTitleSpacingMobile: 15 }, heroSource);
     const heroImage = mergeDefaults({ src: 'assets/carina_close2.JPG', alt: '', layout: 'portrait', blend: 'duotone', position: 'center top', mobileLayout: 'portrait', mobilePosition: 'center center', overlay: 'soft', blendWidthDesktop: 32, blendWidthMobile: 28 }, source.heroImage);
     const sectionSpacing = mergeDefaults({ desktop: 104,mobile: 64 },source.sectionSpacing);
     if (!titleSizeOptions.some(([value]) => value === hero.titleSize)) hero.titleSize = 'standard';
     hero.titleWidthDesktop = Math.min(55,Math.max(30,Number(hero.titleWidthDesktop) || 42));
+    const legacyEyebrowTitleSpacing = Number(heroSource.eyebrowTitleSpacing);
+    if (Number.isFinite(legacyEyebrowTitleSpacing)) {
+      if (!Object.prototype.hasOwnProperty.call(heroSource,'eyebrowTitleSpacingDesktop')) hero.eyebrowTitleSpacingDesktop = legacyEyebrowTitleSpacing;
+      if (!Object.prototype.hasOwnProperty.call(heroSource,'eyebrowTitleSpacingMobile')) hero.eyebrowTitleSpacingMobile = legacyEyebrowTitleSpacing;
+    }
+    const normalizeHeroSpacing = (value) => {
+      const numeric = Number(value);
+      return Math.min(80,Math.max(0,Number.isFinite(numeric) ? numeric : 15));
+    };
+    hero.eyebrowTitleSpacingDesktop = normalizeHeroSpacing(hero.eyebrowTitleSpacingDesktop);
+    hero.eyebrowTitleSpacingMobile = normalizeHeroSpacing(hero.eyebrowTitleSpacingMobile);
+    delete hero.eyebrowTitleSpacing;
     if (!['portrait','landscape','background'].includes(heroImage.layout)) heroImage.layout = 'portrait';
     if (!['portrait','landscape','hidden'].includes(heroImage.mobileLayout)) heroImage.mobileLayout = 'portrait';
     if (!['duotone','natural','mono','warm'].includes(heroImage.blend)) heroImage.blend = 'duotone';
