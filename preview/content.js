@@ -6,16 +6,20 @@ window.practiceContent = {
   "practiceName": "Carina Schmida, BA.pth.",
   "practitionerName": "Carina Schmida",
   "siteIcon": "assets/icon4_tiny.png",
+  "showHeaderIcon": false,
   "navigation": {
     "home": "Startseite"
   },
   "hero": {
     "eyebrow": "Psychotherapeutin in Ausbildung unter Supervision",
-    "title": "Jeder Mensch verdient es, gehört zu werden.",
-    "sentence": "Ich begleite Sie einfühlsam und kompetent auf Ihrem Weg zu mehr Klarheit, Stabilität und Wohlbefinden.",
-    "contactButton": "Erstgespräch anfragen",
-    "titleSize": "small",
-    "titleWidthDesktop": 42
+    "title": "Gefühle annehmen.\nGedanken ordnen.\nLeben gestalten.",
+    "sentence": "",
+    "contactButton": "Erstgespräch vereinbaren",
+    "titleSize": 54,
+    "titleLineGap": 27,
+    "titleWidthDesktop": 42,
+    "eyebrowTitleSpacingDesktop": 50,
+    "eyebrowTitleSpacingMobile": 15
   },
   "heroImage": {
     "src": "assets/carina_close2.JPG",
@@ -49,14 +53,14 @@ window.practiceContent = {
       "content": {
         "eyebrow": "Psychotherapie",
         "title": "",
-        "intro": "Manchmal hilft es, nicht allein weitergehen zu müssen.",
+        "intro": "**Manchmal hilft es, nicht allein weitergehen zu müssen.**",
         "text": "Ob bei Ängsten, Depressionen oder anderen psychischen Krisen – als Verhaltenstherapeutin unterstütze ich Sie dabei, belastende Gefühle, Gedanken und Verhaltensweisen zu erkennen und schrittweise zu verändern.\n\nRespekt, Wertschätzung und Empathie bilden die Basis unserer Zusammenarbeit. In einem sicheren, geschützten Rahmen können Sie sich öffnen, vorhandene Stärken und Ressourcen wiederentdecken, hilfreiche Strategien erlernen und neue Wege erkunden.\n\nMein Ziel ist, dass Sie mehr Klarheit und Selbstwirksamkeit gewinnen – und damit mehr Lebensfreude und Wohlbefinden in Ihr Leben einziehen können.\n\nIch würde mich freuen, Sie kennenlernen und ein Stück auf Ihrem Weg in eine möglichst unbeschwerte Zukunft begleiten zu dürfen.",
         "items": []
       }
     },
     {
       "id": "schwerpunkte",
-      "layout": "topics",
+      "layout": "titleCards",
       "internalName": "Schwerpunkte",
       "navigationLabel": "Schwerpunkte",
       "background": "rose",
@@ -65,43 +69,50 @@ window.practiceContent = {
         "headingModeDesktop": "eyebrow",
         "headingModeMobile": "eyebrow",
         "titleSize": "standard",
-        "listStyle": "clean-tiles",
+        "itemTitleFont": "sans",
+        "itemTitleSize": 22,
+        "itemTitleLineGap": 0,
+        "listStyle": "gradient-pills",
         "gradientStart": "#d11137",
         "gradientEnd": "#6d0918"
       },
       "content": {
         "eyebrow": "Schwerpunkte",
         "title": "Wobei ich Sie begleiten kann.",
-        "intro": "Psychotherapie ist so individuell wie die Menschen, die sie in Anspruch nehmen. Zu meinen Schwerpunkten zählen:",
+        "intro": "Psychotherapie ist so individuell wie die Menschen, die sie in Anspruch nehmen. Zu meinen Schwerpunkten zählen unter anderem:",
         "items": [
           {
-            "text": "Ängste, Zwänge und Panikattacken"
+            "title": "ADHS"
           },
           {
-            "text": "Depressionen"
+            "title": "Essstörungen"
           },
           {
-            "text": "Essstörungen"
+            "title": "Ängste und Panikattacken"
           },
           {
-            "text": "Trauma und Belastungsstörungen"
+            "title": "Depressionen"
           },
           {
-            "text": "Psychosomatische Beschwerden"
+            "title": "Zwänge"
           },
           {
-            "text": "ADHS"
+            "title": "Trauma und Belastungsstörungen"
           },
           {
-            "text": "Krisenhafte Lebenssituationen"
+            "title": "Psychosomatische Beschwerden"
+          },
+          {
+            "title": "Krisenhafte Lebenssituationen"
           }
-        ]
+        ],
+        "footer": "Bei Bedarf besteht die Möglichkeit, Verhaltenstherapie mit Biofeedback zu kombinieren."
       }
     },
     {
       "id": "berufserfahrung",
       "layout": "timeline",
-      "internalName": "Vertikale Zeitleiste",
+      "internalName": "Beruf und Ausbildung",
       "navigationLabel": "Über mich",
       "background": "paper",
       "customBackground": "#f7f2ef",
@@ -109,59 +120,38 @@ window.practiceContent = {
         "headingModeDesktop": "eyebrow",
         "headingModeMobile": "eyebrow",
         "titleSize": "compact",
-        "timelineStyle": "alternating-path"
+        "timelineStyle": "alternating-path",
+        "timelineTransitionDuration": 650
       },
       "content": {
         "eyebrow": "Über mich",
         "title": "Psychosoziale Berufserfahrung.",
-        "intro": "Als Psychotherapeutin in Ausbildung unter Supervision stehe ich im regelmäßigen fachlichen Austausch mit erfahrenen Psychotherapeut:innen.\n\nMeine bisherige Berufserfahrung im psychosozialen Bereich:",
+        "intro": "Hier sehen Sie einen Überblick über meine bisherige Berufserfahrung im psychosozialen Bereich sowie meine psychotherapeutische Ausbildung.",
         "items": [
           {
-            "period": "Seit 2024",
-            "title": "SFU-Ambulanz für Erwachsene",
-            "detail": ""
+            "period": "Seit 2023",
+            "title": "Praxisgemeinschaft Apädo",
+            "detail": "Wien"
           },
           {
-            "period": "Seit 2023",
-            "title": "Institut Apädo",
-            "detail": ""
+            "period": "2024/25 ",
+            "title": "SFU-Ambulanz für Erwachsene",
+            "detail": "Wien"
           },
           {
             "period": "2022",
-            "title": "Gerontopsychiatrische Station",
-            "detail": "Klinik Donaustadt Wien"
+            "title": "Klinik Donaustadt Wien",
+            "detail": "Gerontopsychiatrische Station"
           },
           {
             "period": "2021",
             "title": "Sozialpädagogische Kinder- und Jugend-Wohngemeinschaft",
             "detail": "Volkshilfe Wien"
           }
-        ]
-      }
-    },
-    {
-      "id": "ausbildung",
-      "layout": "timeline",
-      "internalName": "Vertikale Zeitleiste",
-      "navigationLabel": "",
-      "background": "rose",
-      "customBackground": "#f7f2ef",
-      "appearance": {
-        "headingModeDesktop": "eyebrow",
-        "headingModeMobile": "eyebrow",
-        "titleSize": "compact",
-        "timelineStyle": "classic-lines"
-      },
-      "content": {
-        "eyebrow": "Ausbildung",
-        "title": "Ausbildung",
-        "intro": "Meine psychotherapeutische und ergänzende Ausbildung:",
-        "items": [
-          {
-            "period": "Laufend",
-            "title": "Lerntherapeut*in & Kinder- und Elterncoach nach Apädo",
-            "detail": ""
-          },
+        ],
+        "primaryViewLabel": "Berufserfahrung",
+        "secondaryViewLabel": "Ausbildung",
+        "secondaryItems": [
           {
             "period": "Laufend",
             "title": "Magisterstudium der Psychotherapiewissenschaft",
@@ -171,6 +161,11 @@ window.practiceContent = {
             "period": "Laufend",
             "title": "Fachspezifikum Verhaltenstherapie",
             "detail": "Sigmund Freud Privatuniversität Wien"
+          },
+          {
+            "period": "2026",
+            "title": "Lerntherapeutin und Kinder- & Elterncoach",
+            "detail": "nach Apädo"
           },
           {
             "period": "2023",
@@ -188,10 +183,10 @@ window.practiceContent = {
     {
       "id": "praxis",
       "layout": "wideImage",
-      "internalName": "Text über breitem Bild",
+      "internalName": "Praxis",
       "navigationLabel": "Praxis",
-      "background": "paper",
-      "customBackground": "#f7f2ef",
+      "background": "soft",
+      "customBackground": "#f2f2f2",
       "appearance": {
         "headingModeDesktop": "title",
         "headingModeMobile": "eyebrow",
@@ -201,7 +196,7 @@ window.practiceContent = {
       "content": {
         "eyebrow": "Praxis",
         "title": "Praxis",
-        "text": "Die helle, ruhige Praxis bietet einen geschützten Raum für Gespräche, neue Perspektiven und persönliche Entwicklung.",
+        "text": "Der Praxisraum bietet einen geschützten Ort für Gespräche, neue Perspektiven und persönliche Entwicklung.",
         "images": [
           {
             "imageSrc": "assets/office_horizontal.JPG",
@@ -219,6 +214,56 @@ window.practiceContent = {
       }
     },
     {
+      "id": "rahmenbedingungen",
+      "layout": "conditions",
+      "internalName": "Rahmenbedingungen",
+      "navigationLabel": "Rahmenbedingungen",
+      "background": "paper",
+      "customBackground": "#f7f2ef",
+      "appearance": {
+        "headingModeDesktop": "eyebrow",
+        "headingModeMobile": "eyebrow",
+        "titleSize": "compact",
+        "highlightTextSize": 30,
+        "highlightPaddingTop": 32,
+        "highlightPaddingBottom": 32,
+        "highlightCenterContent": false,
+        "highlightGradientStart": "#f4e4e4",
+        "highlightGradientEnd": "#fcfaf8"
+      },
+      "content": {
+        "eyebrow": "Rahmenbedingungen",
+        "title": "Rahmenbedingungen",
+        "intro": "",
+        "highlightLabel": "",
+        "highlightText": "Psychotherapeutin in Ausbildung unter Supervision",
+        "highlightDetail": "Als Psychotherapeutin in Ausbildung unter Supervision stehe ich im regelmäßigen fachlichen Austausch mit erfahrenen Psychotherapeut:innen. Im Sinne der Qualitätssicherung bekomme ich zusätzlichen Input, um Ihre Therapie bestmöglich gestalten zu können.",
+        "items": [
+          {
+            "title": "Zielgruppe",
+            "text": "derzeit vor allem Erwachsene,\naber auch Kinder und Jugendliche"
+          },
+          {
+            "title": "Setting",
+            "text": "Einzelsetting,\nauf Anfrage auch Paar- und Familiensetting möglich"
+          },
+          {
+            "title": "Kosten",
+            "text": "ab 80 € für eine Einzelstunde (50 Minuten)\nBitte beachten Sie, dass derzeit keine Verrechnung mit gesetzlichen Krankenkassen möglich ist."
+          },
+          {
+            "title": "Absageregelung",
+            "text": "Psychotherapiestunden, die gar nicht oder weniger als 24 Stunden vor dem vereinbarten Termin abgesagt werden, werden in voller Höhe in Rechnung gestellt."
+          },
+          {
+            "title": "Verschwiegenheit",
+            "text": "Gemäß §44 des Psychotherapiegesetzes (BGBl. I Nr. 49/2024) bin ich zur Verschwiegenheit über alle Therapieinhalte gegenüber Dritten verpflichtet."
+          }
+        ],
+        "note": ""
+      }
+    },
+    {
       "id": "kontakt",
       "layout": "contact",
       "internalName": "Kontaktblock mit Karte",
@@ -228,17 +273,54 @@ window.practiceContent = {
       "appearance": {
         "headingModeDesktop": "eyebrow",
         "headingModeMobile": "eyebrow",
-        "titleSize": "standard"
+        "titleSize": "standard",
+        "contactTextBelowTitleDesktop": true
       },
       "content": {
         "eyebrow": "Kontakt",
         "title": "Erstgespräch & Kontakt.",
-        "text": "Wenn Sie Fragen haben oder ein Erstgespräch vereinbaren möchten, freue ich mich über Ihre Nachricht.",
-        "addressLine1": "Neubaugasse 7 / Stiege II / 2. Stock / Top 49 ",
-        "addressLine2": "1070 Wien",
-        "phoneLabel": "+43 670 3519322",
-        "phoneHref": "+43 670 3519322",
-        "email": "schmida.psychotherapie@gmail.com",
+        "text": "Ich gehöre seit 2023 zum Team der Praxisgemeinschaft Apädo (Leitung: Mag. Doris Pühringer). Entsprechend finden Sie hier sowohl meine persönlichen Kontaktdaten, als auch die der Praxisgemeinschaft.\n\nWenn Sie Fragen haben oder ein Erstgespräch vereinbaren möchten, freue ich mich über Ihre Nachricht.",
+        "personalDetailsTitle": "Persönlicher Kontakt",
+        "personalDetails": [
+          {
+            "title": "Telefon",
+            "content": "+43 670 3519322",
+            "type": "phone"
+          },
+          {
+            "title": "E-Mail",
+            "content": "schmida.psychotherapie@gmail.com",
+            "type": "email"
+          },
+          {
+            "title": "Adresse",
+            "content": "Neubaugasse 7 / Stiege II / 2. Stock / Top 49\n1070 Wien",
+            "type": "address"
+          },
+          {
+            "title": "Öffentliche Erreichbarkeit",
+            "content": "U3, 13A, 14A",
+            "type": "text"
+          }
+        ],
+        "officeDetailsTitle": "Praxisgemeinschaft Apädo",
+        "officeDetails": [
+          {
+            "title": "Telefon",
+            "content": "+43 1 524 62 93",
+            "type": "phone"
+          },
+          {
+            "title": "E-Mail",
+            "content": "apaedo@inode.at",
+            "type": "email"
+          },
+          {
+            "title": "Website",
+            "content": "www.apaedo.at",
+            "type": "website"
+          }
+        ],
         "mapEmbed": "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d664.8465953807859!2d16.34879082855037!3d48.19917319210002!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x476d07f4eca9ce37%3A0xddd9c34524055e49!2sInstitut%20Ap%C3%A4do%20KG!5e0!3m2!1sen!2sat!4v1785022156931!5m2!1sen!2sat",
         "mapLink": "https://maps.app.goo.gl/KBTCqJBim6ZuFhDj9",
         "mapLabel": "Google Maps"

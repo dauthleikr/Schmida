@@ -18,17 +18,22 @@
     .replace(/_([^_]+)_/g,'<em>$1</em>')
     .replace(/\[([^\]]+)\]\((https?:\/\/[^\s)]+)\)/g,'<a href="$2" target="_blank" rel="noreferrer">$1</a>')
     .replace(/\n/g,'<br>');
-  const eyebrow = (value) => value ? `<p class="eyebrow">${formatMarkup(value)}</p>` : '';
+  const hasText = (value) => String(value ?? '').trim().length > 0;
+  const eyebrow = (value) => hasText(value) ? `<p class="eyebrow">${formatMarkup(value)}</p>` : '';
   const headingMarkup = (body,mode) => {
-    if (mode === 'both') return `${eyebrow(body.eyebrow)}<h2>${formatMarkup(body.title)}</h2>`;
+    if (mode === 'both') return `${eyebrow(body.eyebrow)}${hasText(body.title) ? `<h2>${formatMarkup(body.title)}</h2>` : ''}`;
     const value = mode === 'title' ? body.title : body.eyebrow;
-    return `<h2 class="section-heading-accent">${formatMarkup(value)}</h2>`;
+    return hasText(value) ? `<h2 class="section-heading-accent">${formatMarkup(value)}</h2>` : '';
   };
   const sectionHeading = (section) => {
     const body = section.content;
     const desktop = section.appearance?.headingModeDesktop || 'eyebrow';
     const mobile = section.appearance?.headingModeMobile || 'eyebrow';
-    return `<div class="section-heading-variant section-heading-desktop">${headingMarkup(body,desktop)}</div><div class="section-heading-variant section-heading-mobile">${headingMarkup(body,mobile)}</div>`;
+    const variant = (mode,className) => {
+      const markup = headingMarkup(body,mode);
+      return markup ? `<div class="section-heading-variant ${className}">${markup}</div>` : '';
+    };
+    return `${variant(desktop,'section-heading-desktop')}${variant(mobile,'section-heading-mobile')}`;
   };
   const imageMarkup = (body, className = 'office-placeholder', attributes = '', imageAttributes = '') => body.imageSrc
     ? `<div class="${className}" ${attributes} role="img" aria-label="${escapeAttribute(body.imageAlt)}" style="--section-image-position:${escapeAttribute(body.imagePosition || 'center center')}"><img class="section-image" src="${escapeAttribute(body.imageSrc)}" alt="${escapeAttribute(body.imageAlt)}" ${imageAttributes}>${body.caption ? `<p class="image-caption">${formatMarkup(body.caption)}</p>` : ''}</div>`
@@ -61,6 +66,46 @@
       return '';
     }
   };
+  const safeExternalUrl = (value) => {
+    try {
+      const raw = String(value || '').trim();
+      const hasProtocol = /^[a-z][a-z\d+.-]*:/i.test(raw);
+      const looksLikeDomain = /^(?:www\.)?[a-z\d](?:[a-z\d.-]*[a-z\d])?\.[a-z]{2,}(?::\d+)?(?:[/?#].*)?$/i.test(raw);
+      const url = new URL(!hasProtocol && looksLikeDomain ? `https://${raw}` : raw);
+      return ['http:','https:'].includes(url.protocol) ? url.href : '';
+    } catch {
+      return '';
+    }
+  };
+
+  const renderCardGrid = (section,{ titleOnly = false } = {}) => {
+    const body = section.content;
+    const columns = titleOnly && body.items.length > 6
+      ? 4
+      : body.items.length > 4 ? 3 : Math.max(1,body.items.length);
+    const cards = body.items.map((item,index) => {
+      const classes = ['focus-card',
+        titleOnly ? 'title-card' : '',
+        index % columns === 0 ? 'is-row-start' : '',
+        index % columns === columns - 1 || index === body.items.length - 1 ? 'is-row-end' : ''
+      ].filter(Boolean).join(' ');
+      const titleMarkup = titleOnly
+        ? String(item.title ?? '').split(/\r?\n/).map((line) => `<span class="title-card-line">${formatMarkup(line)}</span>`).join('')
+        : formatMarkup(item.title);
+      const description = titleOnly ? '' : `<p>${formatMarkup(item.text)}</p>`;
+      return `<article class="${classes}"><h3>${titleMarkup}</h3>${description}</article>`;
+    }).join('');
+    const layoutClass = titleOnly ? 'layout-title-cards' : 'layout-cards';
+    const titleFont = section.appearance?.itemTitleFont === 'sans' ? 'var(--sans)' : 'var(--serif)';
+    const titleSize = Math.min(36,Math.max(16,Number(section.appearance?.itemTitleSize) || 25));
+    const titleLineGap = Math.min(24,Math.max(0,Number(section.appearance?.itemTitleLineGap) || 0));
+    const titleStyles = titleOnly ? ` style="--title-card-font:${titleFont};--title-card-size:${titleSize}px;--title-card-line-gap:${titleLineGap}px"` : '';
+    const footer = titleOnly && hasText(body.footer) ? `<p class="title-cards-footer section-intro-text">${formatMarkup(body.footer)}</p>` : '';
+    return `<section class="section dynamic-section ${layoutClass}"${titleStyles}><div class="page"><div class="focus-header"><div>${sectionHeading(section)}</div><p class="section-intro-text">${formatMarkup(body.intro)}</p></div><div class="focus-grid" data-count="${body.items.length}" style="--card-columns:${columns}">${cards}</div>${footer}</div></section>`;
+  };
+
+  const timelineItemsMarkup = (items) => items.map((item) => `<li><span class="timeline-period">${formatMarkup(item.period)}</span><div class="timeline-entry"><h3>${formatMarkup(item.title)}</h3>${item.detail ? `<p>${formatMarkup(item.detail)}</p>` : ''}</div></li>`).join('');
+  let timelineToggleId = 0;
 
   const renderers = {
     intro: (section) => {
@@ -73,12 +118,8 @@
       const body = section.content;
       return `<section class="section dynamic-section layout-note"><div class="page therapy-grid"><div class="therapy-copy">${sectionHeading(section)}<p>${formatMarkup(body.text)}</p></div><div class="therapy-note">${formatMarkup(body.note)}</div></div></section>`;
     },
-    cards: (section) => {
-      const body = section.content;
-      const columns = body.items.length > 4 ? 3 : Math.max(1,body.items.length);
-      const cards = body.items.map((item) => `<article class="focus-card"><h3>${formatMarkup(item.title)}</h3><p>${formatMarkup(item.text)}</p></article>`).join('');
-      return `<section class="section dynamic-section layout-cards"><div class="page"><div class="focus-header"><div>${sectionHeading(section)}</div><p class="section-intro-text">${formatMarkup(body.intro)}</p></div><div class="focus-grid" data-count="${body.items.length}" style="--card-columns:${columns}">${cards}</div></div></section>`;
-    },
+    cards: (section) => renderCardGrid(section),
+    titleCards: (section) => renderCardGrid(section,{ titleOnly:true }),
     image: (section) => {
       const body = section.content;
       return `<section class="section dynamic-section layout-image"><div class="page practice-grid"><div class="practice-copy">${sectionHeading(section)}<p>${formatMarkup(body.text)}</p></div>${imageMarkup(body)}</div></section>`;
@@ -115,30 +156,80 @@
     },
     timeline: (section) => {
       const body = section.content;
-      const items = body.items.map((item) => `<li><span class="timeline-period">${formatMarkup(item.period)}</span><div class="timeline-entry"><h3>${formatMarkup(item.title)}</h3>${item.detail ? `<p>${formatMarkup(item.detail)}</p>` : ''}</div></li>`).join('');
       const timelineStyle = section.appearance?.timelineStyle || 'classic-lines';
-      return `<section class="section dynamic-section layout-timeline"><div class="page timeline-grid"><div class="timeline-copy">${sectionHeading(section)}<p class="section-intro-text">${formatMarkup(body.intro)}</p></div><ol class="timeline-list" data-timeline-style="${escapeAttribute(timelineStyle)}">${items}</ol></div></section>`;
+      const secondaryItems = Array.isArray(body.secondaryItems) ? body.secondaryItems : [];
+      const hasToggle = timelineStyle === 'alternating-path' && secondaryItems.length > 0;
+      if (!hasToggle) {
+        return `<section class="section dynamic-section layout-timeline"><div class="page timeline-grid"><div class="timeline-copy">${sectionHeading(section)}<p class="section-intro-text">${formatMarkup(body.intro)}</p></div><ol class="timeline-list" data-timeline-style="${escapeAttribute(timelineStyle)}">${timelineItemsMarkup(body.items)}</ol></div></section>`;
+      }
+
+      const toggleId = `timeline-toggle-${++timelineToggleId}`;
+      const transitionDuration = Math.min(2000,Math.max(0,Number(section.appearance?.timelineTransitionDuration) || 0));
+      const viewMarkup = (key,items,active) => `<div class="timeline-view${active ? ' is-active' : ''}" data-timeline-view="${key}" id="${toggleId}-panel-${key}" role="tabpanel" aria-labelledby="${toggleId}-tab-${key}" ${active ? '' : 'hidden'}><ol class="timeline-list" data-timeline-style="${escapeAttribute(timelineStyle)}">${timelineItemsMarkup(items)}</ol></div>`;
+      return `<section class="section dynamic-section layout-timeline layout-timeline-toggle" data-timeline-transition-duration="${transitionDuration}"><div class="page timeline-grid"><div class="timeline-copy">${sectionHeading(section)}<p class="section-intro-text">${formatMarkup(body.intro)}</p></div><div class="timeline-switchable"><div class="timeline-toggle-wrap"><div class="timeline-toggle" data-timeline-toggle role="tablist" aria-label="Werdegang auswählen"><button type="button" id="${toggleId}-tab-primary" role="tab" aria-selected="true" aria-controls="${toggleId}-panel-primary" data-timeline-toggle-target="primary">${formatMarkup(body.primaryViewLabel || 'Berufserfahrung')}</button><button type="button" id="${toggleId}-tab-secondary" role="tab" aria-selected="false" aria-controls="${toggleId}-panel-secondary" data-timeline-toggle-target="secondary" tabindex="-1">${formatMarkup(body.secondaryViewLabel || 'Ausbildung')}</button></div></div><div class="timeline-panels">${viewMarkup('primary',body.items,true)}${viewMarkup('secondary',secondaryItems,false)}</div></div></div></section>`;
     },
     pricing: (section) => {
       const body = section.content;
       const rows = body.items.map((item) => `<div class="price-row"><div class="price-name"><span>${formatMarkup(item.name)}</span><span class="price-duration">${formatMarkup(item.duration)}</span></div><div class="price-value">${formatMarkup(item.price)}</div></div>`).join('');
       return `<section class="section dynamic-section layout-pricing"><div class="page costs-grid"><div class="costs-copy">${sectionHeading(section)}<p class="section-intro-text">${formatMarkup(body.intro)}</p></div><div><div class="price-list">${rows}</div>${body.note ? `<p class="reimbursement">${formatMarkup(body.note)}</p>` : ''}</div></div></section>`;
     },
+    conditions: (section) => {
+      const body = section.content;
+      const items = body.items.map((item) => `<article class="condition-item"><h3>${formatMarkup(item.title)}</h3><p>${formatMarkup(item.text)}</p></article>`).join('');
+      const textSize = Math.min(80,Math.max(22,Number(section.appearance?.highlightTextSize) || 50));
+      const gradientStart = section.appearance?.highlightGradientStart || '#f4e4e4';
+      const gradientEnd = section.appearance?.highlightGradientEnd || '#fcfaf8';
+      const highlightInk = readableInk(interpolateColor(gradientStart,gradientEnd,.5));
+      const highlightBorder = highlightInk === '#ffffff' ? 'rgba(255,255,255,.36)' : 'rgba(41,17,23,.22)';
+      const normalizePadding = (value) => {
+        const numeric = Number(value);
+        return Math.min(80,Math.max(0,Number.isFinite(numeric) ? numeric : 32));
+      };
+      const paddingTop = normalizePadding(section.appearance?.highlightPaddingTop);
+      const paddingBottom = normalizePadding(section.appearance?.highlightPaddingBottom);
+      const highlightStyle = `--conditions-highlight-size:${textSize / 16}rem;--conditions-highlight-padding-top:${paddingTop}px;--conditions-highlight-padding-bottom:${paddingBottom}px;--conditions-highlight-start:${gradientStart};--conditions-highlight-end:${gradientEnd};--conditions-highlight-ink:${highlightInk};--conditions-highlight-border:${highlightBorder}`;
+      const hasHighlightLabel = hasText(body.highlightLabel);
+      const highlightClass = ['conditions-highlight',hasHighlightLabel ? '' : 'conditions-highlight-without-label',section.appearance?.highlightCenterContent === true ? 'conditions-highlight-centered' : ''].filter(Boolean).join(' ');
+      const highlightLabel = hasHighlightLabel ? `<p class="conditions-highlight-label">${formatMarkup(body.highlightLabel)}</p>` : '';
+      const highlight = `<div class="${highlightClass}" style="${escapeAttribute(highlightStyle)}">${highlightLabel}<div><p class="conditions-highlight-text">${formatMarkup(body.highlightText)}</p><p class="conditions-highlight-detail">${formatMarkup(body.highlightDetail)}</p></div></div>`;
+      return `<section class="section dynamic-section layout-conditions"><div class="page conditions-grid"><div class="conditions-copy">${sectionHeading(section)}<p class="section-intro-text">${formatMarkup(body.intro)}</p>${highlight}</div><div class="conditions-details"><div class="conditions-list">${items}</div>${body.note ? `<p class="conditions-note">${formatMarkup(body.note)}</p>` : ''}</div></div></section>`;
+    },
     contact: (section) => {
       const body = section.content;
-      const phoneHref = String(body.phoneHref || '').replace(/[^\d+]/g,'');
-      const address = [body.addressLine1,body.addressLine2].filter(Boolean);
-      const details = [
-        address.length ? `<div><div class="detail-label">Praxis</div><p class="detail-value">${address.map(formatMarkup).join('<br>')}</p></div>` : '',
-        body.phoneLabel ? `<div><div class="detail-label">Telefon</div>${phoneHref ? `<a class="detail-value" href="tel:${escapeAttribute(phoneHref)}">${formatMarkup(body.phoneLabel)}</a>` : `<span class="detail-value">${formatMarkup(body.phoneLabel)}</span>`}</div>` : '',
-        body.email ? `<div><div class="detail-label">E-Mail</div>${String(body.email).includes('@') ? `<a class="detail-value" href="mailto:${escapeAttribute(body.email)}">${formatMarkup(body.email)}</a>` : `<span class="detail-value">${formatMarkup(body.email)}</span>`}</div>` : ''
-      ].join('');
+      const contactCopyClass = section.appearance?.contactTextBelowTitleDesktop === true ? ' contact-copy-text-below' : '';
+      const mapHref = safeExternalUrl(body.mapLink);
+      const detail = (label,value) => value ? `<div class="contact-detail"><div class="detail-label">${label}</div>${value}</div>` : '';
+      const value = (text) => `<span class="detail-value">${formatMarkup(text)}</span>`;
+      const link = (href,text) => `<a class="detail-value" href="${escapeAttribute(href)}">${formatMarkup(text)}</a>`;
+      const detailMarkup = (item) => {
+        const content = String(item.content || '').trim();
+        if (!content) return '';
+        if (item.type === 'phone') {
+          const href = content.replace(/[^\d+]/g,'');
+          return detail(formatMarkup(item.title),href ? link(`tel:${href}`,content) : value(content));
+        }
+        if (item.type === 'email') {
+          return detail(formatMarkup(item.title),content.includes('@') ? link(`mailto:${content}`,content) : value(content));
+        }
+        if (item.type === 'website') {
+          const href = safeExternalUrl(content);
+          const markup = href ? `<a class="detail-value" href="${escapeAttribute(href)}" target="_blank" rel="noreferrer">${formatMarkup(content)}</a>` : value(content);
+          return detail(formatMarkup(item.title),markup);
+        }
+        if (item.type === 'address' && mapHref) {
+          return detail(formatMarkup(item.title),`<a class="detail-value detail-value-address" href="${escapeAttribute(mapHref)}" target="_blank" rel="noreferrer">${formatMarkup(content)}</a>`);
+        }
+        return detail(formatMarkup(item.title),`<p class="detail-value">${formatMarkup(content)}</p>`);
+      };
+      const personalDetails = (body.personalDetails || []).map(detailMarkup).join('');
+      const officeDetails = (body.officeDetails || []).map(detailMarkup).join('');
+      const group = (title,details,key) => `<section class="contact-group" data-contact-group="${key}"><h3>${formatMarkup(title)}</h3><div class="contact-group-items">${details}</div></section>`;
       const embedUrl = safeMapEmbedUrl(body.mapEmbed);
-      const mapLink = body.mapLink && body.mapLabel ? `<a class="map-link" href="${escapeAttribute(body.mapLink)}" target="_blank" rel="noreferrer">${formatMarkup(body.mapLabel)}</a>` : '';
+      const mapLink = mapHref && body.mapLabel ? `<a class="map-link" href="${escapeAttribute(mapHref)}" target="_blank" rel="noreferrer">${formatMarkup(body.mapLabel)}</a>` : '';
       const map = embedUrl
         ? `<div class="map map-embed">${mapLink}<iframe src="${escapeAttribute(embedUrl)}" title="Standort auf Google Maps" loading="lazy" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe></div>`
         : mapLink ? `<div class="map">${mapLink}</div>` : '';
-      return `<section class="section dynamic-section contact-section layout-contact"><div class="page contact-grid"><div class="contact-copy">${sectionHeading(section)}<p class="section-intro-text">${formatMarkup(body.text)}</p></div><div class="contact-details">${details}</div></div>${map}</section>`;
+      return `<section class="section dynamic-section contact-section layout-contact"><div class="page contact-grid"><div class="contact-copy${contactCopyClass}">${sectionHeading(section)}<p class="section-intro-text">${formatMarkup(body.text)}</p></div><div class="contact-details">${group(body.personalDetailsTitle || 'Persönlicher Kontakt',personalDetails,'personal')}${group(body.officeDetailsTitle || 'Praxis',officeDetails,'office')}</div></div>${map}</section>`;
     }
   };
 
@@ -201,6 +292,75 @@
   });
 
   const wrappers = [...host.querySelectorAll('.content-section')];
+  const initializeTimelineToggle = (toggle) => {
+    const tabs = [...toggle.querySelectorAll('[data-timeline-toggle-target]')];
+    const section = toggle.closest('.layout-timeline-toggle');
+    const panels = [...section.querySelectorAll('[data-timeline-view]')];
+    const reducedMotion = matchMedia('(prefers-reduced-motion:reduce)').matches;
+    const transitionDuration = Math.min(2000,Math.max(0,Number(section.dataset.timelineTransitionDuration) || 0));
+    const outgoingDuration = Math.round(transitionDuration * .4);
+    const incomingDuration = transitionDuration - outgoingDuration;
+    let transitionId = 0;
+    const switchPanel = async (key) => {
+      const target = panels.find((panel) => panel.dataset.timelineView === key);
+      const current = panels.find((panel) => panel.classList.contains('is-active')) || panels.find((panel) => !panel.hidden);
+      const currentTransition = ++transitionId;
+      panels.forEach((panel) => {
+        panel.getAnimations().forEach((animation) => animation.cancel());
+        panel.hidden = panel !== current;
+      });
+      if (!target || target === current) {
+        current?.classList.add('is-active');
+        return;
+      }
+
+      const offset = reducedMotion ? '0' : '-6px';
+      const outgoing = current.animate(
+        [{ opacity:1,transform:'translateY(0)' },{ opacity:0,transform:`translateY(${offset})` }],
+        { duration:outgoingDuration,easing:'ease-in',fill:'both' }
+      );
+      await outgoing.finished.catch(() => {});
+      if (currentTransition !== transitionId) return;
+      outgoing.cancel();
+
+      current.hidden = true;
+      current.classList.remove('is-active');
+      target.hidden = false;
+      target.classList.add('is-active');
+
+      const incomingOffset = reducedMotion ? '0' : '7px';
+      const incoming = target.animate(
+        [{ opacity:0,transform:`translateY(${incomingOffset})` },{ opacity:1,transform:'translateY(0)' }],
+        { duration:incomingDuration,easing:'cubic-bezier(.16,1,.3,1)',fill:'both' }
+      );
+      await incoming.finished.catch(() => {});
+      if (currentTransition === transitionId) {
+        incoming.cancel();
+      }
+    };
+    const activate = (key,{ focus = false } = {}) => {
+      tabs.forEach((tab) => {
+        const active = tab.dataset.timelineToggleTarget === key;
+        tab.setAttribute('aria-selected',String(active));
+        tab.tabIndex = active ? 0 : -1;
+        if (active && focus) tab.focus();
+      });
+      void switchPanel(key);
+    };
+    tabs.forEach((tab,index) => {
+      tab.addEventListener('click',() => activate(tab.dataset.timelineToggleTarget));
+      tab.addEventListener('keydown',(event) => {
+        if (!['ArrowLeft','ArrowRight','Home','End'].includes(event.key)) return;
+        event.preventDefault();
+        const nextIndex = event.key === 'Home' ? 0
+          : event.key === 'End' ? tabs.length - 1
+          : (index + (event.key === 'ArrowRight' ? 1 : -1) + tabs.length) % tabs.length;
+        activate(tabs[nextIndex].dataset.timelineToggleTarget,{ focus:true });
+      });
+    });
+  };
+  wrappers.forEach((wrapper) => wrapper.querySelectorAll('[data-timeline-toggle]').forEach(initializeTimelineToggle));
+
   const initializeCarousel = (carousel) => {
     const slides = [...carousel.querySelectorAll('[data-carousel-slide]')];
     const dots = [...carousel.querySelectorAll('[data-carousel-dot]')];
@@ -240,10 +400,45 @@
       stop();
       show(next);
     };
+    const stage = carousel.querySelector('.carousel-stage');
+    const reserveStageHeight = () => {
+      if (!stage) return;
+      const stageWidth = stage.getBoundingClientRect().width;
+      if (!stageWidth) return;
+      const heights = slides.map((slide) => {
+        const image = slide.querySelector('.section-image');
+        if (!image) return 0;
+        const naturalWidth = Number(image.naturalWidth);
+        const naturalHeight = Number(image.naturalHeight);
+        return naturalWidth && naturalHeight ? stageWidth * naturalHeight / naturalWidth : image.getBoundingClientRect().height;
+      });
+      const reservedHeight = Math.max(...heights,0);
+      if (reservedHeight) stage.style.setProperty('--carousel-reserved-height',`${reservedHeight}px`);
+    };
+    slides.forEach((slide) => slide.querySelector('.section-image')?.addEventListener('load',reserveStageHeight));
+    window.addEventListener('resize',reserveStageHeight,{ passive:true });
+    reserveStageHeight();
+    let swipeStart;
+    const finishSwipe = (event) => {
+      if (!swipeStart || event.pointerId !== swipeStart.pointerId) return;
+      const horizontal = event.clientX - swipeStart.x;
+      const vertical = event.clientY - swipeStart.y;
+      swipeStart = undefined;
+      if (Math.abs(horizontal) < 48 || Math.abs(horizontal) <= Math.abs(vertical) * 1.2) return;
+      browse(current + (horizontal < 0 ? 1 : -1));
+    };
 
     carousel.querySelector('[data-carousel-previous]')?.addEventListener('click',() => browse(current - 1));
     carousel.querySelector('[data-carousel-next]')?.addEventListener('click',() => browse(current + 1));
     dots.forEach((dot,index) => dot.addEventListener('click',() => browse(index)));
+    stage?.addEventListener('pointerdown',(event) => {
+      if (event.pointerType === 'mouse' && event.button !== 0) return;
+      swipeStart = { pointerId:event.pointerId,x:event.clientX,y:event.clientY };
+      try { stage.setPointerCapture(event.pointerId); } catch {}
+    });
+    stage?.addEventListener('pointerup',finishSwipe);
+    stage?.addEventListener('pointercancel',() => { swipeStart = undefined; });
+    stage?.addEventListener('dragstart',(event) => event.preventDefault());
     carousel.addEventListener('mouseenter',() => {
       temporarilyPaused = true;
       stop();

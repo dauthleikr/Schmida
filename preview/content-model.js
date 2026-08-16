@@ -29,6 +29,7 @@
     ['standard', 'Standard'],
     ['large', 'Groß']
   ];
+  const heroTitleSizeLegacyValues = { tiny: 56, small: 68, compact: 80, standard: 90, large: 108 };
   const imagePositionOptions = [
     ['center top', 'Mitte oben'],
     ['center 30%', 'Oberes Drittel'],
@@ -41,6 +42,17 @@
     ['eyebrow', 'Nur Bereichsbezeichnung'],
     ['title', 'Nur Titel'],
     ['both', 'Beides']
+  ];
+  const contactDetailItemFields = [
+    { key: 'title', label: 'Titel', type: 'text' },
+    { key: 'content', label: 'Inhalt', type: 'rich', editorRows: 2 },
+    { key: 'type', label: 'Typ', type: 'select', options: [
+      ['text','Text'],
+      ['phone','Telefon'],
+      ['email','E-Mail'],
+      ['website','Website'],
+      ['address','Adresse']
+    ] }
   ];
   const titleAppearance = (extraFields = [],extraDefaults = {}) => ({
     appearanceFields: [
@@ -95,6 +107,28 @@
         { key: 'items', label: 'Karten', type: 'collection', min: 2, max: 6, addLabel: 'Karte hinzufügen', itemFields: [{ key: 'title', label: 'Titel', type: 'text' }, { key: 'text', label: 'Beschreibung', type: 'rich', editorRows: 2 }] }
       ],
       defaults: { eyebrow: 'Schwerpunkte', title: 'Womit Sie zu mir kommen können.', intro: 'Eine kurze Einleitung zu den folgenden Themen.', items: [{ title: 'Erstes Thema', text: 'Kurze Beschreibung.' }, { title: 'Zweites Thema', text: 'Kurze Beschreibung.' }] }
+    },
+    titleCards: {
+      ...titleAppearance([
+        { key: 'itemTitleFont', label: 'Schriftart der Einzeltitel', type: 'select', options: [
+          ['serif','Serifenschrift (wie Überschriften)'],
+          ['sans','Sans-Serif (wie Einleitung)']
+        ] },
+        { key: 'itemTitleSize', label: 'Schriftgröße der Einzeltitel', type: 'range', min: 16, max: 36, step: 1, unit: 'px', help: 'Gilt für alle Titel in diesem Raster.' },
+        { key: 'itemTitleLineGap', label: 'Abstand zwischen Titelzeilen', type: 'range', min: 0, max: 24, step: 1, unit: 'px', help: 'Gilt für manuelle Zeilenumbrüche. Automatische Umbrüche bleiben kompakt.' }
+      ],{ itemTitleFont: 'serif',itemTitleSize: 25,itemTitleLineGap: 0 }),
+      label: 'Titelraster',
+      description: 'Einleitung mit einem kompakten Raster aus zwei bis acht Titeln.',
+      defaultNavigation: 'Schwerpunkte',
+      defaultBackground: 'paper',
+      fields: [
+        { key: 'eyebrow', label: 'Bereichsbezeichnung', type: 'text' },
+        { key: 'title', label: 'Titel', type: 'rich', editorRows: 3 },
+        { key: 'intro', label: 'Einleitung', type: 'rich', editorRows: 4 },
+        { key: 'items', label: 'Titel', type: 'collection', min: 2, max: 8, addLabel: 'Titel hinzufügen', itemFields: [{ key: 'title', label: 'Titel', type: 'rich', editorRows: 3 }] },
+        { key: 'footer', label: 'Text unter den Titeln', type: 'rich', editorRows: 3 }
+      ],
+      defaults: { eyebrow: 'Schwerpunkte', title: 'Womit Sie zu mir kommen können.', intro: 'Eine kurze Einleitung zu den folgenden Themen.', items: [{ title: 'Erstes Thema' }, { title: 'Zweites Thema' }], footer: '' }
     },
     image: {
       ...titleAppearance(),
@@ -174,8 +208,9 @@
           ['year-focus','Große Jahreszahlen'],
           ['alternating-path','Wechselnder Pfad'],
           ['soft-steps','Sanfte Etappen']
-        ] }
-      ],{ timelineStyle: 'classic-lines' }),
+        ] },
+        { key: 'timelineTransitionDuration', label: 'Dauer des Zeitleistenwechsels', type: 'range', min: 0, max: 2000, step: 50, unit: 'ms', help: 'Gesamtdauer des Aus- und Einblendens. 0 ms deaktiviert den Übergang.', visibleWhen: { scope: 'appearance',key: 'timelineStyle',values: ['alternating-path'] } }
+      ],{ timelineStyle: 'classic-lines',timelineTransitionDuration: 600 }),
       label: 'Zeitleiste',
       description: 'Eine flexible chronologische Liste mit verschiedenen Darstellungen für Ausbildung oder Berufserfahrung.',
       defaultNavigation: 'Über mich',
@@ -184,9 +219,12 @@
         { key: 'eyebrow', label: 'Bereichsbezeichnung', type: 'text' },
         { key: 'title', label: 'Titel', type: 'rich', editorRows: 3 },
         { key: 'intro', label: 'Einleitung', type: 'rich', editorRows: 4 },
-        { key: 'items', label: 'Stationen', type: 'collection', min: 2, max: 12, addLabel: 'Station hinzufügen', itemFields: [{ key: 'period', label: 'Zeitraum', type: 'text' }, { key: 'title', label: 'Station', type: 'text' }, { key: 'detail', label: 'Zusatz', type: 'text' }] }
+        { key: 'items', label: 'Stationen', type: 'collection', min: 2, max: 12, addLabel: 'Station hinzufügen', itemFields: [{ key: 'period', label: 'Zeitraum', type: 'text' }, { key: 'title', label: 'Station', type: 'text' }, { key: 'detail', label: 'Zusatz', type: 'text' }] },
+        { key: 'primaryViewLabel', label: 'Umschalter: erste Ansicht', type: 'text', visibleWhen: { scope: 'appearance',key: 'timelineStyle',values: ['alternating-path'] } },
+        { key: 'secondaryViewLabel', label: 'Umschalter: zweite Ansicht', type: 'text', visibleWhen: { scope: 'appearance',key: 'timelineStyle',values: ['alternating-path'] } },
+        { key: 'secondaryItems', label: 'Stationen der zweiten Ansicht', type: 'collection', min: 0, max: 12, addLabel: 'Station hinzufügen', visibleWhen: { scope: 'appearance',key: 'timelineStyle',values: ['alternating-path'] }, itemFields: [{ key: 'period', label: 'Zeitraum', type: 'text' }, { key: 'title', label: 'Station', type: 'text' }, { key: 'detail', label: 'Zusatz', type: 'text' }] }
       ],
-      defaults: { eyebrow: 'Über mich', title: 'Ausbildung und Erfahrung.', intro: 'Eine kurze Einleitung zum Werdegang.', items: [{ period: 'Seit 2024', title: 'Erste Station', detail: 'Ort oder Institution' }, { period: '2023', title: 'Zweite Station', detail: 'Ort oder Institution' }] }
+      defaults: { eyebrow: 'Über mich', title: 'Ausbildung und Erfahrung.', intro: 'Eine kurze Einleitung zum Werdegang.', items: [{ period: 'Seit 2024', title: 'Erste Station', detail: 'Ort oder Institution' }, { period: '2023', title: 'Zweite Station', detail: 'Ort oder Institution' }], primaryViewLabel: 'Berufserfahrung',secondaryViewLabel: 'Ausbildung',secondaryItems: [] }
     },
     pricing: {
       ...titleAppearance(),
@@ -203,8 +241,47 @@
       ],
       defaults: { eyebrow: 'Kosten', title: 'Transparent von Anfang an.', intro: 'Beschreiben Sie hier die Rahmenbedingungen.', items: [{ name: 'Einzeltherapie', duration: '50 Minuten', price: 'EUR 110' }], note: 'Ergänzender Hinweis zu Kosten oder Erstattung.' }
     },
+    conditions: {
+      ...titleAppearance([
+        { key: 'highlightTextSize', label: 'Schriftgröße des hervorgehobenen Texts', type: 'range', min: 22, max: 80, step: 1, unit: 'px' },
+        { key: 'highlightPaddingTop', label: 'Abstand oben in der Hervorhebungsbox', type: 'range', min: 0, max: 80, step: 1, unit: 'px' },
+        { key: 'highlightPaddingBottom', label: 'Abstand unten in der Hervorhebungsbox', type: 'range', min: 0, max: 80, step: 1, unit: 'px' },
+        { key: 'highlightCenterContent', label: 'Inhalt horizontal zentrieren', type: 'checkbox', help: 'Zentriert Hinweiszeile, hervorgehobenen Text und Detailtext gemeinsam.' },
+        { key: 'highlightGradientStart', label: 'Verlaufsfarbe Start', type: 'color' },
+        { key: 'highlightGradientEnd', label: 'Verlaufsfarbe Ende', type: 'color' }
+      ],{ highlightTextSize: 50,highlightPaddingTop: 32,highlightPaddingBottom: 32,highlightCenterContent: false,highlightGradientStart: '#f4e4e4',highlightGradientEnd: '#fcfaf8' }),
+      label: 'Rahmenbedingungen mit Hervorhebung',
+      description: 'Ein quadratischer Hinweis mit einstellbarem Verlauf und kompakte Informationen zu Dauer, Absage und Versicherung.',
+      defaultNavigation: 'Rahmenbedingungen',
+      defaultBackground: 'paper',
+      fields: [
+        { key: 'eyebrow', label: 'Bereichsbezeichnung', type: 'text' },
+        { key: 'title', label: 'Titel', type: 'rich', editorRows: 3 },
+        { key: 'intro', label: 'Einleitung', type: 'rich', editorRows: 4 },
+        { key: 'highlightLabel', label: 'Kleine Hinweiszeile', type: 'text' },
+        { key: 'highlightText', label: 'Hervorgehobener Text', type: 'rich', editorRows: 3 },
+        { key: 'highlightDetail', label: 'Detailtext', type: 'rich', editorRows: 4 },
+        { key: 'items', label: 'Rahmenbedingungen', type: 'collection', min: 2, max: 6, addLabel: 'Information hinzufügen', itemFields: [{ key: 'title', label: 'Titel', type: 'text' }, { key: 'text', label: 'Beschreibung', type: 'rich', editorRows: 3 }] },
+        { key: 'note', label: 'Abschließender Hinweis (optional)', type: 'rich', editorRows: 3 }
+      ],
+      defaults: {
+        eyebrow: 'Rahmenbedingungen',
+        title: 'Klarheit von Anfang an.',
+        intro: 'Damit Sie gut planen können, finden Sie hier die wichtigsten organisatorischen Informationen.',
+        highlightLabel: 'Gut zu wissen',
+        highlightText: 'Klarheit schafft Vertrauen.',
+        highlightDetail: 'Offene Fragen und individuelle Vereinbarungen besprechen wir in Ruhe im Erstgespräch.',
+        items: [
+          { title: 'Absageregelung', text: 'Termine können bis 24 Stunden vorher kostenfrei abgesagt werden.' },
+          { title: 'Versicherung', text: 'Bitte klären Sie eine mögliche Kostenübernahme direkt mit Ihrer Versicherung.' }
+        ],
+        note: ''
+      }
+    },
     contact: {
-      ...titleAppearance(),
+      ...titleAppearance([
+        { key: 'contactTextBelowTitleDesktop', label: 'Einleitung unter dem Titel (Desktop)', type: 'checkbox', help: 'Setzt den Kontakttext auf Desktop unter den Titel und über die volle Breite.' }
+      ],{ contactTextBelowTitleDesktop: false }),
       label: 'Kontaktblock mit Karte',
       description: 'Kontakttext, Adresse, Telefon, E-Mail und eine Kartenfläche.',
       defaultNavigation: 'Kontakt',
@@ -213,16 +290,15 @@
         { key: 'eyebrow', label: 'Bereichsbezeichnung', type: 'text' },
         { key: 'title', label: 'Titel', type: 'rich', editorRows: 3 },
         { key: 'text', label: 'Einleitung', type: 'rich', editorRows: 4 },
-        { key: 'addressLine1', label: 'Straße', type: 'text' },
-        { key: 'addressLine2', label: 'Postleitzahl und Ort', type: 'text' },
-        { key: 'phoneLabel', label: 'Telefonnummer', type: 'text' },
-        { key: 'phoneHref', label: 'Telefon-Link', type: 'text' },
-        { key: 'email', label: 'E-Mail', type: 'text' },
+        { key: 'personalDetailsTitle', label: 'Spaltentitel: Persönlicher Kontakt', type: 'text' },
+        { key: 'personalDetails', label: 'Persönliche Kontaktdaten', type: 'collection', min: 0, max: 10, addLabel: 'Zeile hinzufügen', itemFields: contactDetailItemFields },
+        { key: 'officeDetailsTitle', label: 'Spaltentitel: Praxis', type: 'text' },
+        { key: 'officeDetails', label: 'Kontaktdaten der Praxis', type: 'collection', min: 0, max: 10, addLabel: 'Zeile hinzufügen', itemFields: contactDetailItemFields },
         { key: 'mapEmbed', label: 'Google-Maps-Einbettungs-URL (optional)', type: 'text' },
         { key: 'mapLink', label: 'Externer Kartenlink (optional)', type: 'text' },
         { key: 'mapLabel', label: 'Beschriftung des Kartenlinks', type: 'text' }
       ],
-      defaults: { eyebrow: 'Kontakt', title: 'Nehmen Sie Kontakt auf.', text: 'Beschreiben Sie, wie Sie erreichbar sind.', addressLine1: 'Musterstraße 12', addressLine2: '1010 Wien', phoneLabel: '+43 660 123 45 67', phoneHref: '+436601234567', email: 'praxis@beispiel.at', mapEmbed: '', mapLink: 'https://www.openstreetmap.org/', mapLabel: 'Karte in OpenStreetMap öffnen' }
+      defaults: { eyebrow: 'Kontakt', title: 'Nehmen Sie Kontakt auf.', text: 'Beschreiben Sie, wie Sie erreichbar sind.', personalDetailsTitle: 'Persönlicher Kontakt',personalDetails: [{ title: 'Telefon',content: '+43 660 123 45 67',type: 'phone' },{ title: 'E-Mail',content: 'praxis@beispiel.at',type: 'email' }],officeDetailsTitle: 'Praxis',officeDetails: [{ title: 'Adresse',content: 'Musterstraße 12\n1010 Wien',type: 'address' }],mapEmbed: '',mapLink: 'https://www.openstreetmap.org/',mapLabel: 'Karte in OpenStreetMap öffnen' }
     }
   };
 
@@ -256,6 +332,11 @@
       delete sourceContent.imagePosition;
       delete sourceContent.caption;
     }
+    if (layout === 'conditions') {
+      delete sourceContent.feeLabel;
+      delete sourceContent.feeAmount;
+      delete sourceContent.feeMeta;
+    }
     const content = mergeDefaults(definition.defaults, sourceContent);
     const sourceAppearance = { ...(section?.appearance || {}) };
     if (headingModeOptions.some(([value]) => value === sourceAppearance.headingMode)) {
@@ -270,6 +351,12 @@
       }
       if (field.type === 'color' && !/^#[0-9a-f]{6}$/i.test(appearance[field.key] || '')) {
         appearance[field.key] = definition.appearanceDefaults?.[field.key] || '#000000';
+      }
+      if (field.type === 'checkbox') appearance[field.key] = appearance[field.key] === true;
+      if (field.type === 'range') {
+        const fallback = Number(definition.appearanceDefaults?.[field.key]) || field.min || 0;
+        const value = Number(appearance[field.key]);
+        appearance[field.key] = Math.min(field.max,Math.max(field.min,Number.isFinite(value) ? value : fallback));
       }
     });
     definition.fields.filter((field) => field.type === 'collection').forEach((field) => {
@@ -294,123 +381,31 @@
     };
   };
 
-  const migrateLegacySections = (source) => {
-    const legacy = [
-      {
-        key: 'intro',
-        section: {
-          id: 'psychotherapy',
-          layout: 'intro',
-          navigationLabel: source.navigation?.psychotherapy || 'Psychotherapie',
-          background: 'paper',
-          content: {
-            eyebrow: source.therapy?.label || 'Psychotherapie',
-            title: source.introduction?.title || '',
-            text: source.introduction?.text || '',
-            items: (source.introduction?.items || []).filter(Boolean).map((text) => ({ text }))
-          }
-        }
-      },
-      {
-        key: 'therapy',
-        section: {
-          id: 'therapy-details',
-          layout: 'note',
-          navigationLabel: '',
-          background: 'rose',
-          content: {
-            eyebrow: source.therapy?.label || '',
-            title: source.therapy?.title || '',
-            text: source.therapy?.text || '',
-            note: source.therapy?.note || ''
-          }
-        }
-      },
-      {
-        key: 'focusAreas',
-        section: {
-          id: 'focus-areas',
-          layout: 'cards',
-          navigationLabel: source.navigation?.focusAreas || 'Schwerpunkte',
-          background: 'paper',
-          content: {
-            eyebrow: source.focusAreas?.label || '',
-            title: source.focusAreas?.title || '',
-            intro: source.focusAreas?.intro || '',
-            items: (source.focusAreas?.areas || []).map(([title, text]) => ({ title, text }))
-          }
-        }
-      },
-      {
-        key: 'practice',
-        section: {
-          id: 'practice',
-          layout: 'image',
-          navigationLabel: '',
-          background: 'soft',
-          content: {
-            eyebrow: source.practice?.label || '',
-            title: source.practice?.title || '',
-            text: source.practice?.text || '',
-            imageSrc: source.practice?.imageSrc || '',
-            imageAlt: source.practice?.imageAlt || '',
-            caption: source.practice?.caption || 'Foto des Praxisraums folgt'
-          }
-        }
-      },
-      {
-        key: 'costs',
-        section: {
-          id: 'costs',
-          layout: 'pricing',
-          navigationLabel: source.navigation?.costs || 'Kosten',
-          background: 'paper',
-          content: {
-            eyebrow: source.costs?.label || '',
-            title: source.costs?.title || '',
-            intro: source.costs?.intro || '',
-            items: (source.costs?.entries || []).map(([name, duration, price]) => ({ name, duration, price })),
-            note: source.costs?.reimbursement || ''
-          }
-        }
-      },
-      {
-        key: 'contact',
-        section: {
-          id: 'contact',
-          layout: 'contact',
-          navigationLabel: source.navigation?.contact || 'Kontakt',
-          background: 'dark',
-          content: {
-            eyebrow: source.contact?.label || '',
-            title: source.contact?.title || '',
-            text: source.contact?.text || '',
-            addressLine1: source.contact?.address?.[0] || '',
-            addressLine2: source.contact?.address?.[1] || '',
-            phoneLabel: source.contact?.phoneLabel || '',
-            phoneHref: source.contact?.phoneHref || '',
-            email: source.contact?.email || '',
-            mapEmbed: source.contact?.mapEmbed || '',
-            mapLink: source.contact?.mapLink || '',
-            mapLabel: source.contact?.mapLabel || ''
-          }
-        }
-      }
-    ];
-    const layout = source.sectionLayout || {};
-    const order = [...new Set([...(layout.order || []), ...legacy.map(({ key }) => key)])];
-    const enabled = { intro: true, therapy: true, focusAreas: true, practice: true, costs: true, contact: true, ...(layout.enabled || {}) };
-    return order.map((key) => legacy.find((entry) => entry.key === key)).filter(Boolean).filter(({ key }) => enabled[key]).map(({ section }) => section);
-  };
-
   const normalize = (input) => {
     const source = input && typeof input === 'object' ? clone(input) : {};
-    const sections = Array.isArray(source.sections) ? source.sections : migrateLegacySections(source);
-    const hero = mergeDefaults({ eyebrow: '', title: '', sentence: '', contactButton: 'Kontakt aufnehmen', titleSize: 'standard', titleWidthDesktop: 42 }, source.hero);
+    const sections = Array.isArray(source.sections) ? source.sections : [];
+    const heroSource = source.hero && typeof source.hero === 'object' ? source.hero : {};
+    const hero = mergeDefaults({ eyebrow: '', title: '', sentence: '', contactButton: 'Kontakt aufnehmen', titleSize: 90, titleLineGap: 0, titleWidthDesktop: 42, eyebrowTitleSpacingDesktop: 15, eyebrowTitleSpacingMobile: 15 }, heroSource);
     const heroImage = mergeDefaults({ src: 'assets/carina_close2.JPG', alt: '', layout: 'portrait', blend: 'duotone', position: 'center top', mobileLayout: 'portrait', mobilePosition: 'center center', overlay: 'soft', blendWidthDesktop: 32, blendWidthMobile: 28 }, source.heroImage);
     const sectionSpacing = mergeDefaults({ desktop: 104,mobile: 64 },source.sectionSpacing);
-    if (!titleSizeOptions.some(([value]) => value === hero.titleSize)) hero.titleSize = 'standard';
+    const legacyHeroTitleSize = heroTitleSizeLegacyValues[hero.titleSize];
+    const numericHeroTitleSize = Number(hero.titleSize);
+    hero.titleSize = Math.min(120,Math.max(40,Number.isFinite(numericHeroTitleSize) ? numericHeroTitleSize : legacyHeroTitleSize || heroTitleSizeLegacyValues.standard));
+    const numericHeroTitleLineGap = Number(hero.titleLineGap);
+    hero.titleLineGap = Math.min(40,Math.max(0,Number.isFinite(numericHeroTitleLineGap) ? numericHeroTitleLineGap : 0));
     hero.titleWidthDesktop = Math.min(55,Math.max(30,Number(hero.titleWidthDesktop) || 42));
+    const legacyEyebrowTitleSpacing = Number(heroSource.eyebrowTitleSpacing);
+    if (Number.isFinite(legacyEyebrowTitleSpacing)) {
+      if (!Object.prototype.hasOwnProperty.call(heroSource,'eyebrowTitleSpacingDesktop')) hero.eyebrowTitleSpacingDesktop = legacyEyebrowTitleSpacing;
+      if (!Object.prototype.hasOwnProperty.call(heroSource,'eyebrowTitleSpacingMobile')) hero.eyebrowTitleSpacingMobile = legacyEyebrowTitleSpacing;
+    }
+    const normalizeHeroSpacing = (value) => {
+      const numeric = Number(value);
+      return Math.min(80,Math.max(0,Number.isFinite(numeric) ? numeric : 15));
+    };
+    hero.eyebrowTitleSpacingDesktop = normalizeHeroSpacing(hero.eyebrowTitleSpacingDesktop);
+    hero.eyebrowTitleSpacingMobile = normalizeHeroSpacing(hero.eyebrowTitleSpacingMobile);
+    delete hero.eyebrowTitleSpacing;
     if (!['portrait','landscape','background'].includes(heroImage.layout)) heroImage.layout = 'portrait';
     if (!['portrait','landscape','hidden'].includes(heroImage.mobileLayout)) heroImage.mobileLayout = 'portrait';
     if (!['duotone','natural','mono','warm'].includes(heroImage.blend)) heroImage.blend = 'duotone';
@@ -427,6 +422,7 @@
       practiceName: String(source.practiceName || 'Praxis für Psychotherapie'),
       practitionerName: String(source.practitionerName || ''),
       siteIcon: relativeAssetPath(source.siteIcon || 'assets/icon4_tiny.png'),
+      showHeaderIcon: source.showHeaderIcon !== false,
       navigation: { home: String(source.navigation?.home || 'Startseite') },
       hero,
       heroImage,

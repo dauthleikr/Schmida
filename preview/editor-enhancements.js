@@ -3,10 +3,10 @@
   const editor = document.querySelector('#editor');
   const status = document.querySelector('#status');
   const draftKey = 'practice-content-draft-v3';
-  const legacyDraftKeys = ['practice-content-draft-v2','practice-content-draft-v1'];
   let connectedFile;
   let previewTimer;
   let previewSectionIndex = null;
+  const collapsedSections = new Set();
 
   const clone = model.clone;
   const escapeHtml = (value) => String(value ?? '').replace(/[&<>"']/g,(character) => ({
@@ -68,6 +68,9 @@
     if (field.type === 'color') {
       return `<div class="field${wide}"><label for="${escapeHtml(path)}">${escapeHtml(field.label)}</label><input type="color" id="${escapeHtml(path)}" data-path="${escapeHtml(path)}" value="${escapeHtml(value)}"></div>`;
     }
+    if (field.type === 'checkbox') {
+      return `<div class="field${wide}"><label class="checkbox-field" for="${escapeHtml(path)}"><input type="checkbox" id="${escapeHtml(path)}" data-path="${escapeHtml(path)}" ${value ? 'checked' : ''}><span>${escapeHtml(field.label)}</span></label>${field.help ? `<p class="help">${escapeHtml(field.help)}</p>` : ''}</div>`;
+    }
     return `<div class="field${wide}"><label for="${escapeHtml(path)}">${escapeHtml(field.label)}</label><input id="${escapeHtml(path)}" data-path="${escapeHtml(path)}" value="${escapeHtml(value)}"></div>`;
   };
 
@@ -83,6 +86,12 @@
     ['--paper','Papier']
   ];
 
+  const fieldIsVisible = (field,section) => {
+    if (!field.visibleWhen) return true;
+    const source = field.visibleWhen.scope === 'content' ? section.content : section.appearance;
+    return field.visibleWhen.values.includes(source[field.visibleWhen.key]);
+  };
+
   function renderGeneral() {
     const panel = document.querySelector('#general');
     const theme = model.themes[data.colorTheme] || model.themes.wine;
@@ -92,6 +101,7 @@
         ${fieldMarkup({ label:'Praxisname',type:'text' },'practiceName',data.practiceName)}
         ${fieldMarkup({ label:'Name der Person',type:'text' },'practitionerName',data.practitionerName)}
         ${fieldMarkup({ label:'Website-Icon',type:'text' },'siteIcon',data.siteIcon)}
+        ${fieldMarkup({ label:'Icon in der Kopfzeile anzeigen',type:'checkbox',help:'Das Website-Icon für Browser-Tabs bleibt davon unberührt.' },'showHeaderIcon',data.showHeaderIcon)}
         ${fieldMarkup({ label:'Navigation: Startseite',type:'text' },'navigation.home',data.navigation.home)}
         ${fieldMarkup({ label:'Bereichsabstand Desktop',type:'range',min:48,max:180,step:4,unit:'px',help:'Vertikaler Innenabstand ober- und unterhalb jedes Seitenbereichs.' },'sectionSpacing.desktop',data.sectionSpacing.desktop,{ compact:true })}
         ${fieldMarkup({ label:'Bereichsabstand Mobil',type:'range',min:36,max:120,step:4,unit:'px',help:'Vertikaler Innenabstand auf schmalen Bildschirmen.' },'sectionSpacing.mobile',data.sectionSpacing.mobile,{ compact:true })}
@@ -114,7 +124,10 @@
       <div class="grid">
         ${fieldMarkup({ label:'Überzeile',type:'text' },'hero.eyebrow',data.hero.eyebrow)}
         ${fieldMarkup({ label:'Titel',type:'rich',editorRows:3 },'hero.title',data.hero.title)}
-        ${fieldMarkup({ label:'Titelgröße',type:'select',options:model.titleSizeOptions },'hero.titleSize',data.hero.titleSize)}
+        ${fieldMarkup({ label:'Abstand Überzeile–Titel Desktop',type:'range',min:0,max:80,step:1,unit:'px',help:'Vertikaler Abstand zwischen Überzeile und Titel auf großen Bildschirmen.' },'hero.eyebrowTitleSpacingDesktop',data.hero.eyebrowTitleSpacingDesktop)}
+        ${fieldMarkup({ label:'Abstand Überzeile–Titel Mobil',type:'range',min:0,max:80,step:1,unit:'px',help:'Vertikaler Abstand zwischen Überzeile und Titel auf schmalen Bildschirmen.' },'hero.eyebrowTitleSpacingMobile',data.hero.eyebrowTitleSpacingMobile)}
+        ${fieldMarkup({ label:'Titelgröße',type:'range',min:40,max:120,step:1,unit:'px',help:'Feste Desktop-Größe des großen Startseitentitels.' },'hero.titleSize',data.hero.titleSize)}
+        ${fieldMarkup({ label:'Abstand zwischen manuellen Titelzeilen',type:'range',min:0,max:40,step:1,unit:'px',help:'Gilt nur zwischen Zeilen, die im Titeltext mit Enter getrennt wurden. Automatische Umbrüche bleiben kompakt.' },'hero.titleLineGap',data.hero.titleLineGap)}
         ${fieldMarkup({ label:'Titelbreite Desktop',type:'range',min:30,max:55,step:1,unit:'%',help:'Breite der Textspalte bei seitlichen Desktop-Bildern. Der übrige Platz bleibt vollständig dem Bild vorbehalten.' },'hero.titleWidthDesktop',data.hero.titleWidthDesktop)}
         ${fieldMarkup({ label:'Einleitung',type:'rich',editorRows:4 },'hero.sentence',data.hero.sentence)}
         ${fieldMarkup({ label:'Kontakt-Button',type:'text' },'hero.contactButton',data.hero.contactButton)}
@@ -149,10 +162,12 @@
   function renderSectionCard(section,index) {
     const definition = model.layouts[section.layout];
     const colorOptions = model.sectionColors.map((color) => `<option value="${color.key}" ${section.background === color.key ? 'selected' : ''}>${escapeHtml(color.label)}</option>`).join('');
-    return `<article class="section-editor" data-section-index="${index}" data-section-id="${escapeHtml(section.id)}">
+    const collapsed = collapsedSections.has(section.id);
+    return `<article class="section-editor${collapsed ? ' is-collapsed' : ''}" id="editor-section-${index}" data-section-index="${index}" data-section-id="${escapeHtml(section.id)}">
       <header class="section-editor-head">
         <div><h3 class="section-title">${escapeHtml(section.internalName)}</h3><p class="section-meta">Bereich ${index + 1} · ${escapeHtml(definition.label)} · ${section.navigationLabel ? `Navigation: ${escapeHtml(section.navigationLabel)}` : 'nicht in der Navigation'}</p></div>
         <div class="section-actions">
+          <button class="icon-button" type="button" data-section-collapse aria-expanded="${!collapsed}" aria-controls="section-editor-body-${index}" aria-label="Bereich ${collapsed ? 'ausklappen' : 'einklappen'}">${collapsed ? '+' : '−'}</button>
           <button class="section-preview-button" type="button" data-section-preview="mobile" aria-label="Mobilvorschau für ${escapeHtml(section.internalName)}">Mobil</button>
           <button class="section-preview-button" type="button" data-section-preview="desktop" aria-label="Desktopvorschau für ${escapeHtml(section.internalName)}">Desktop</button>
           <button class="icon-button" type="button" data-section-action="up" aria-label="Nach oben" ${index === 0 ? 'disabled' : ''}>↑</button>
@@ -160,17 +175,17 @@
           <button class="icon-button" type="button" data-section-action="remove" aria-label="Bereich entfernen">&times;</button>
         </div>
       </header>
-      <div class="section-editor-body">
+      <div class="section-editor-body" id="section-editor-body-${index}">
         <div class="section-settings">
           <div class="field"><label>Interner Name</label><input data-path="sections.${index}.internalName" value="${escapeHtml(section.internalName)}"><p class="help">Nur im Editor sichtbar.</p></div>
           <div class="field"><label>Layout</label><select data-section-layout>${Object.entries(model.layouts).map(([key,item]) => `<option value="${key}" ${section.layout === key ? 'selected' : ''}>${escapeHtml(item.label)}</option>`).join('')}</select></div>
           <div class="field"><label>Navigation</label><input data-path="sections.${index}.navigationLabel" value="${escapeHtml(section.navigationLabel)}"><p class="help">Leer lassen, um den Bereich nicht im Menü zu zeigen.</p></div>
           <div class="field"><label>Hintergrund</label><select data-section-background>${colorOptions}</select>${section.background === 'custom' ? `<div class="background-custom"><input type="color" data-section-custom-color value="${escapeHtml(section.customBackground)}"><input data-section-custom-code value="${escapeHtml(section.customBackground)}" spellcheck="false"></div>` : ''}</div>
-          ${(definition.appearanceFields || []).filter((field) => !field.visibleWhen || field.visibleWhen.values.includes(section.appearance[field.visibleWhen.key])).map((field) => fieldMarkup(field,`sections.${index}.appearance.${field.key}`,section.appearance[field.key],{ compact:true })).join('')}
+          ${(definition.appearanceFields || []).filter((field) => fieldIsVisible(field,section)).map((field) => fieldMarkup(field,`sections.${index}.appearance.${field.key}`,section.appearance[field.key],{ compact:true })).join('')}
           <p class="layout-description">${escapeHtml(definition.description)}</p>
         </div>
         <div class="section-fields">
-          ${definition.fields.map((field) => field.type === 'collection' ? collectionMarkup(index,field) : fieldMarkup(field,`sections.${index}.content.${field.key}`,section.content[field.key])).join('')}
+          ${definition.fields.filter((field) => fieldIsVisible(field,section)).map((field) => field.type === 'collection' ? collectionMarkup(index,field) : fieldMarkup(field,`sections.${index}.content.${field.key}`,section.content[field.key])).join('')}
         </div>
       </div>
     </article>`;
@@ -184,6 +199,10 @@
         <div class="field"><label for="new-layout">Layout für neuen Bereich</label><select id="new-layout">${Object.entries(model.layouts).map(([key,item]) => `<option value="${key}">${escapeHtml(item.label)} – ${escapeHtml(item.description)}</option>`).join('')}</select></div>
         <button class="button primary" type="button" id="add-section">Bereich hinzufügen</button>
       </div>`;
+    document.querySelector('[data-editor-section-nav]').innerHTML = data.sections.map((section,index) => {
+      const label = section.internalName.trim() || model.layouts[section.layout].label;
+      return `<a href="#editor-section-${index}" data-editor-section-link="${index}">${escapeHtml(label)}</a>`;
+    }).join('');
   }
 
   function renderFooter() {
@@ -216,16 +235,23 @@
   editor.addEventListener('input',(event) => {
     const path = event.target.dataset.path;
     if (path) {
-      setPath(data,path,event.target.value);
+      setPath(data,path,event.target.type === 'checkbox' ? event.target.checked : event.target.value);
       if (/^sections\.\d+\.internalName$/.test(path)) {
         const card = event.target.closest('[data-section-index]');
         const index = Number(card.dataset.sectionIndex);
-        card.querySelector('.section-title').textContent = event.target.value.trim() || model.layouts[data.sections[index].layout].label;
+        const label = event.target.value.trim() || model.layouts[data.sections[index].layout].label;
+        card.querySelector('.section-title').textContent = label;
+        document.querySelector(`[data-editor-section-link="${index}"]`).textContent = label;
       }
       const output = event.target.parentElement.querySelector('output');
       if (output) output.value = `${event.target.value}${output.dataset.unit || '%'}`;
       saveDraft();
-      if (path.endsWith('.appearance.listStyle')) renderSections();
+      const appearanceChange = path.match(/^sections\.(\d+)\.appearance\.([^.]+)$/);
+      if (appearanceChange) {
+        const section = data.sections[Number(appearanceChange[1])];
+        const fields = [...(model.layouts[section.layout].appearanceFields || []),...model.layouts[section.layout].fields];
+        if (fields.some((field) => field.visibleWhen?.key === appearanceChange[2])) renderSections();
+      }
       return;
     }
     const token = event.target.dataset.globalColor || event.target.dataset.globalColorCode;
@@ -315,6 +341,16 @@
       textarea.focus();
       textarea.setSelectionRange(start,start + replacement.length);
       textarea.dispatchEvent(new Event('input',{ bubbles:true }));
+      return;
+    }
+
+    const collapseButton = event.target.closest('[data-section-collapse]');
+    if (collapseButton) {
+      const card = collapseButton.closest('[data-section-index]');
+      const section = data.sections[Number(card.dataset.sectionIndex)];
+      if (collapsedSections.has(section.id)) collapsedSections.delete(section.id);
+      else collapsedSections.add(section.id);
+      renderSections();
       return;
     }
 
@@ -468,7 +504,7 @@
   document.querySelector('#reset').addEventListener('click',() => {
     if (!confirm('Entwurf wirklich zurücksetzen?')) return;
     localStorage.removeItem(draftKey);
-    legacyDraftKeys.forEach((key) => localStorage.removeItem(key));
+    collapsedSections.clear();
     data = model.normalize(window.practiceContent);
     renderAll();
     status.textContent = 'Entwurf zurückgesetzt';
