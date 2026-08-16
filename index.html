@@ -63,7 +63,7 @@
     .hero[data-title-size="large"] { --hero-title-size:clamp(3.6rem,8.2vw,7.7rem); }
     .hero-inner { position:relative; z-index:2; display:grid; grid-template-columns:minmax(0,var(--hero-title-width-desktop)) minmax(330px,1fr); align-items:start; gap:6vw; padding-bottom:var(--hero-ribbon-height); }
     .hero-copy { position:relative; z-index:4; align-self:center; padding:clamp(64px,8vw,112px) 0; }
-    .hero .eyebrow { color:var(--rose-300); }
+    .hero .eyebrow { margin-bottom:var(--hero-eyebrow-title-spacing-desktop,15px); color:var(--rose-300); }
     h1 { width:100%; max-width:none; margin-bottom:26px; font-size:var(--hero-title-size); line-height:.9; }
     .hero-statement { max-width:43ch; margin:0; color:rgba(255,255,255,.98); font-size:clamp(1rem,1.4vw,1.14rem); font-weight:500; text-shadow:0 2px 18px rgba(27,0,7,.84); }
     .hero-contact { display:inline-flex; align-items:center; justify-content:center; min-height:42px; margin-top:28px; padding:0 17px; border:1px solid var(--rose-300); color:#fff; font-size:.8rem; font-weight:700; letter-spacing:.03em; text-decoration:none; transition:background 180ms ease,color 180ms ease; }
@@ -316,6 +316,7 @@
       .nav-list.is-open { display:flex; }
       .nav-list a { display:block; padding:11px 0; }
       .hero { --mobile-wave-height:clamp(96px,27vw,118px); --hero-ribbon-height:var(--mobile-wave-height); }
+      .hero .eyebrow { margin-bottom:var(--hero-eyebrow-title-spacing-mobile,15px); }
       .hero-inner,.intro-grid,.therapy-grid,.practice-grid,.costs-grid,.conditions-grid,.focus-header,.topics-grid,.timeline-grid,.contact-copy { grid-template-columns:minmax(0,1fr); }
       .intro-grid,.therapy-grid,.practice-grid,.costs-grid,.conditions-grid,.topics-grid,.timeline-grid,.contact-copy { gap:36px; }
       .hero-inner { gap:0; padding:var(--hero-content-top) 0 0; }
@@ -491,6 +492,8 @@
       hero.dataset.mobileImageLayout = content.heroImage.mobileLayout;
       hero.dataset.imageBlend = content.heroImage.blend;
       hero.dataset.imageOverlay = content.heroImage.overlay;
+      hero.style.setProperty('--hero-eyebrow-title-spacing-desktop',`${content.hero.eyebrowTitleSpacingDesktop}px`);
+      hero.style.setProperty('--hero-eyebrow-title-spacing-mobile',`${content.hero.eyebrowTitleSpacingMobile}px`);
       hero.style.setProperty('--hero-title-width-desktop',`${content.hero.titleWidthDesktop}%`);
       hero.style.setProperty('--hero-image-position',content.heroImage.position);
       hero.style.setProperty('--hero-mobile-image-position',content.heroImage.mobilePosition);

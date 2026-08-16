@@ -1195,6 +1195,16 @@ test('rich-text controls and hero presentation remain editable', async ({ page }
   await expect(page.locator('output[for="heroImage.blendWidthMobile"]')).toHaveText('45%');
   await expect(page.locator('[data-path="hero.titleSize"] option')).toHaveCount(5);
   await page.selectOption('[data-path="hero.titleSize"]','tiny');
+  await page.locator('[data-path="hero.eyebrowTitleSpacingDesktop"]').evaluate((input:HTMLInputElement) => {
+    input.value = '32';
+    input.dispatchEvent(new Event('input',{ bubbles:true }));
+  });
+  await page.locator('[data-path="hero.eyebrowTitleSpacingMobile"]').evaluate((input:HTMLInputElement) => {
+    input.value = '18';
+    input.dispatchEvent(new Event('input',{ bubbles:true }));
+  });
+  await expect(page.locator('output[for="hero.eyebrowTitleSpacingDesktop"]')).toHaveText('32px');
+  await expect(page.locator('output[for="hero.eyebrowTitleSpacingMobile"]')).toHaveText('18px');
   await page.locator('[data-path="hero.titleWidthDesktop"]').evaluate((input:HTMLInputElement) => {
     input.value = '46';
     input.dispatchEvent(new Event('input',{ bubbles:true }));
@@ -1209,6 +1219,8 @@ test('rich-text controls and hero presentation remain editable', async ({ page }
   await expect(preview.locator('.hero')).toHaveAttribute('data-image-blend','natural');
   await expect(preview.locator('.hero')).toHaveAttribute('data-mobile-image-layout','portrait');
   await expect(preview.locator('.hero')).toHaveAttribute('data-title-size','tiny');
+  await expect(preview.locator('.hero')).toHaveCSS('--hero-eyebrow-title-spacing-desktop','32px');
+  await expect(preview.locator('.hero .eyebrow')).toHaveCSS('margin-bottom','32px');
   await expect(preview.locator('.hero')).toHaveCSS('--hero-title-width-desktop','46%');
   await expect(preview.locator('.hero')).toHaveCSS('--hero-blend-desktop','55%');
   await expect(preview.locator('.hero')).toHaveCSS('--hero-blend-mobile','45%');
@@ -1222,6 +1234,12 @@ test('rich-text controls and hero presentation remain editable', async ({ page }
   });
   expect(backgroundBounds.left).toBeLessThanOrEqual(0);
   expect(backgroundBounds.right).toBeGreaterThanOrEqual(backgroundBounds.viewportWidth);
+
+  await page.getByRole('button',{ name:'Vorschau schließen' }).click();
+  await page.getByRole('button',{ name:'Vorschau Mobil' }).click();
+  const mobilePreview = page.frameLocator('#preview-frame');
+  await expect(mobilePreview.locator('.hero')).toHaveCSS('--hero-eyebrow-title-spacing-mobile','18px');
+  await expect(mobilePreview.locator('.hero .eyebrow')).toHaveCSS('margin-bottom','18px');
 });
 
 test('normalizes and validates the current section schema', async ({ page }) => {
@@ -1260,6 +1278,16 @@ test('normalizes and validates the current section schema', async ({ page }) => 
 
   const spacing = await page.evaluate(() => window.practiceContentModel.normalize({ sectionSpacing:{ desktop:999,mobile:2 } }).sectionSpacing);
   expect(spacing).toEqual({ desktop:180,mobile:36 });
+  const heroSpacing = await page.evaluate(() => [
+    window.practiceContentModel.normalize({}).hero.eyebrowTitleSpacingDesktop,
+    window.practiceContentModel.normalize({}).hero.eyebrowTitleSpacingMobile,
+    window.practiceContentModel.normalize({ hero:{ eyebrowTitleSpacingDesktop:999,eyebrowTitleSpacingMobile:-4 } }).hero.eyebrowTitleSpacingDesktop,
+    window.practiceContentModel.normalize({ hero:{ eyebrowTitleSpacingDesktop:999,eyebrowTitleSpacingMobile:-4 } }).hero.eyebrowTitleSpacingMobile,
+    window.practiceContentModel.normalize({ hero:{ eyebrowTitleSpacing:24 } }).hero.eyebrowTitleSpacingDesktop,
+    window.practiceContentModel.normalize({ hero:{ eyebrowTitleSpacing:24 } }).hero.eyebrowTitleSpacingMobile,
+    window.practiceContentModel.normalize({ hero:{ eyebrowTitleSpacingDesktop:7,eyebrowTitleSpacing:24 } }).hero.eyebrowTitleSpacingDesktop
+  ]);
+  expect(heroSpacing).toEqual([15,15,80,0,24,24,7]);
   const heroWidths = await page.evaluate(() => [
     window.practiceContentModel.normalize({ hero:{ titleWidthDesktop:99 } }).hero.titleWidthDesktop,
     window.practiceContentModel.normalize({ hero:{ titleWidthDesktop:2 } }).hero.titleWidthDesktop
