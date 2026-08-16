@@ -15,9 +15,10 @@ window.practiceContent = {
     "title": "Gefühle annehmen.\nGedanken ordnen.\nLeben gestalten.",
     "sentence": "",
     "contactButton": "Erstgespräch vereinbaren",
-    "titleSize": "tiny",
+    "titleSize": 54,
+    "titleLineGap": 27,
     "titleWidthDesktop": 42,
-    "eyebrowTitleSpacingDesktop": 80,
+    "eyebrowTitleSpacingDesktop": 50,
     "eyebrowTitleSpacingMobile": 15
   },
   "heroImage": {
@@ -70,6 +71,7 @@ window.practiceContent = {
         "titleSize": "standard",
         "itemTitleFont": "sans",
         "itemTitleSize": 22,
+        "itemTitleLineGap": 0,
         "listStyle": "gradient-pills",
         "gradientStart": "#d11137",
         "gradientEnd": "#6d0918"
@@ -103,7 +105,8 @@ window.practiceContent = {
           {
             "title": "Krisenhafte Lebenssituationen"
           }
-        ]
+        ],
+        "footer": "Bei Bedarf besteht die Möglichkeit, Verhaltenstherapie mit Biofeedback zu kombinieren."
       }
     },
     {
@@ -222,6 +225,9 @@ window.practiceContent = {
         "headingModeMobile": "eyebrow",
         "titleSize": "compact",
         "highlightTextSize": 30,
+        "highlightPaddingTop": 32,
+        "highlightPaddingBottom": 32,
+        "highlightCenterContent": false,
         "highlightGradientStart": "#f4e4e4",
         "highlightGradientEnd": "#fcfaf8"
       },
@@ -243,7 +249,7 @@ window.practiceContent = {
           },
           {
             "title": "Kosten",
-            "text": "ab 80 € für eine Einzelstunde (50 Minuten)\nBitte beachten Sie, dass derzeit keine Verrechnung mit der Krankenkasse möglich ist."
+            "text": "ab 80 € für eine Einzelstunde (50 Minuten)\nBitte beachten Sie, dass derzeit keine Verrechnung mit gesetzlichen Krankenkassen möglich ist."
           },
           {
             "title": "Absageregelung",
@@ -267,7 +273,8 @@ window.practiceContent = {
       "appearance": {
         "headingModeDesktop": "eyebrow",
         "headingModeMobile": "eyebrow",
-        "titleSize": "standard"
+        "titleSize": "standard",
+        "contactTextBelowTitleDesktop": true
       },
       "content": {
         "eyebrow": "Kontakt",
