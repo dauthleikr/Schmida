@@ -408,6 +408,7 @@ test('hero image stays uncropped and all content remains above the ribbon', asyn
     { width:720,height:900 },
     { width:900,height:650 },
     { width:901,height:650 },
+    { width:1024,height:700 },
     { width:1280,height:720 },
     { width:1920,height:900 },
     { width:2400,height:1200 }
@@ -432,6 +433,7 @@ test('hero image stays uncropped and all content remains above the ribbon', asyn
         heroTop:hero.top,
         heroBottom:hero.bottom,
         imageTop:imageBox.top,
+        imageLeft:imageBox.left,
         imageRight:imageBox.right,
         imageBottom:imageBox.bottom,
         imageWidth:imageBox.width,
@@ -447,6 +449,8 @@ test('hero image stays uncropped and all content remains above the ribbon', asyn
         heroInnerLeft:heroInner.left,
         heroInnerRight:heroInner.right,
         copyBottom:copy.bottom,
+        copyRight:copy.right,
+        columnGap:parseFloat(getComputedStyle(document.querySelector('.hero-inner')!).columnGap) || 0,
         contactBottom:contact.bottom,
         viewportWidth:document.documentElement.clientWidth
       };
@@ -470,6 +474,8 @@ test('hero image stays uncropped and all content remains above the ribbon', asyn
       expect(layout.imageBottom).toBeCloseTo(layout.heroBottom,0);
     } else if (layout.responsiveLayout === 'side-by-side') {
       expect(layout.imageTop).toBeCloseTo(layout.heroTop,0);
+      expect(layout.imageWidth).toBeGreaterThanOrEqual(layout.viewportWidth - layout.copyRight - layout.columnGap - 1);
+      expect(layout.imageLeft).toBeGreaterThanOrEqual(layout.copyRight + 23);
       expect(layout.imageRight).toBeGreaterThanOrEqual(layout.viewportWidth - 1);
       expect(layout.imageBottom).toBeCloseTo(layout.ribbonBottom,0);
       expect(layout.imageBottom).toBeCloseTo(layout.heroBottom,0);
