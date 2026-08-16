@@ -210,7 +210,18 @@ test('places editable Rahmenbedingungen directly after Praxis', async ({ page })
     conditions.locator('.conditions-details').boundingBox()
   ]);
   expect(desktopBalance[0]!.x + desktopBalance[0]!.width).toBeLessThan(desktopBalance[1]!.x);
-  expect(desktopBalance[0]!.width).toBeCloseTo(desktopBalance[0]!.height,0);
+  const highlightSizing = await conditions.locator('.conditions-highlight').evaluate((box) => {
+    const style = getComputedStyle(box);
+    const childrenHeight = [...box.children].reduce((height,child) => {
+      const childStyle = getComputedStyle(child);
+      return height + child.getBoundingClientRect().height + parseFloat(childStyle.marginTop) + parseFloat(childStyle.marginBottom);
+    },0);
+    return {
+      height: box.getBoundingClientRect().height,
+      expectedHeight: parseFloat(style.paddingTop) + childrenHeight + parseFloat(style.paddingBottom) + parseFloat(style.borderTopWidth) + parseFloat(style.borderBottomWidth)
+    };
+  });
+  expect(highlightSizing.height).toBeCloseTo(highlightSizing.expectedHeight,0);
   const firstConditionLayout = await conditions.locator('.condition-item').first().evaluate((item) => {
     const title = item.querySelector('h3')!.getBoundingClientRect();
     const detail = item.querySelector('p')!.getBoundingClientRect();
@@ -307,6 +318,9 @@ test('title grids stay compact without per-item descriptions', async ({ page }) 
   const editor = page.locator('.section-editor').last();
   await expect(editor.locator('[data-path*=".content.items."][data-path$=".title"]')).toHaveCount(2);
   await expect(editor.locator('[data-path*=".content.items."][data-path$=".text"]')).toHaveCount(0);
+  const footer = editor.locator('[data-path$=".content.footer"]');
+  await expect(footer).toHaveCount(1);
+  await footer.fill('Ein abschließender Hinweis zu diesen Schwerpunkten.');
   const font = editor.locator('[data-path$=".appearance.itemTitleFont"]');
   const size = editor.locator('[data-path$=".appearance.itemTitleSize"]');
   await expect(font).toHaveValue('serif');
@@ -331,6 +345,12 @@ test('title grids stay compact without per-item descriptions', async ({ page }) 
   await expect(cards.first().locator('h3')).toHaveCSS('font-family',/Inter|ui-sans-serif|system-ui/);
   await expect(cards.first().locator('h3')).toHaveCSS('font-size','32px');
   await expect(grid).toHaveCSS('grid-template-columns',/\d+(?:\.\d+)?px \d+(?:\.\d+)?px \d+(?:\.\d+)?px \d+(?:\.\d+)?px/);
+  await expect(preview.locator('.layout-title-cards .title-cards-footer')).toHaveText('Ein abschließender Hinweis zu diesen Schwerpunkten.');
+  const footerTypography = await preview.locator('.layout-title-cards').evaluate((section) => ({
+    intro: getComputedStyle(section.querySelector('.focus-header .section-intro-text')!).fontSize,
+    footer: getComputedStyle(section.querySelector('.title-cards-footer')!).fontSize
+  }));
+  expect(footerTypography.footer).toBe(footerTypography.intro);
 
   await page.locator('#preview-frame').evaluate((frame:HTMLIFrameElement) => frame.style.width = '760px');
   await expect(grid).toHaveCSS('grid-template-columns',/\d+(?:\.\d+)?px \d+(?:\.\d+)?px/);

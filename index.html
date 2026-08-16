@@ -127,6 +127,7 @@
     .layout-title-cards .focus-header { margin-bottom:40px; }
     .focus-card.title-card { display:flex; min-height:104px; align-items:center; padding-top:24px; padding-bottom:24px; }
     .focus-card.title-card h3 { max-width:18ch; margin-bottom:0; font-family:var(--title-card-font,var(--serif)); font-size:var(--title-card-size,1.55rem); }
+    .title-cards-footer { max-width:45ch; margin:32px 0 0; }
 
     .practice-grid { display:grid; grid-template-columns:.82fr 1.18fr; gap:clamp(46px,10vw,135px); align-items:center; }
     .practice-copy p { max-width:38ch; font-size:1.05rem; }
@@ -242,7 +243,7 @@
     .conditions-copy,.conditions-details { min-width:0; }
     .conditions-copy>p { max-width:38ch; }
     .conditions-details { border-top:1px solid var(--line); }
-    .conditions-highlight { display:flex; width:min(100%,390px); aspect-ratio:1; align-items:flex-start; flex-direction:column; justify-content:center; margin-top:clamp(36px,5vw,58px); padding:var(--conditions-highlight-padding-top,32px) clamp(28px,4vw,42px) var(--conditions-highlight-padding-bottom,32px); border:1px solid var(--conditions-highlight-border); color:var(--conditions-highlight-ink); text-align:left; background:linear-gradient(135deg,var(--conditions-highlight-start),var(--conditions-highlight-end)); }
+    .conditions-highlight { display:flex; width:min(100%,390px); align-items:flex-start; flex-direction:column; justify-content:center; margin-top:clamp(36px,5vw,58px); padding:var(--conditions-highlight-padding-top,32px) clamp(28px,4vw,42px) var(--conditions-highlight-padding-bottom,32px); border:1px solid var(--conditions-highlight-border); color:var(--conditions-highlight-ink); text-align:left; background:linear-gradient(135deg,var(--conditions-highlight-start),var(--conditions-highlight-end)); }
     .conditions-highlight-centered { align-items:center; text-align:center; }
     .conditions-highlight>div { width:100%; }
     .conditions-highlight-label { margin:0 0 clamp(26px,3vw,38px); color:inherit; font-size:.68rem; font-weight:750; letter-spacing:.12em; text-transform:uppercase; }
@@ -335,6 +336,7 @@
       .hero-ribbon { right:0; bottom:0; left:0; height:var(--mobile-wave-height); }
       .hero[data-mobile-image-layout="hidden"] .hero-copy { min-height:inherit; }
       .focus-header { gap:18px; margin-bottom:38px; }
+      .title-cards-footer { margin-top:28px; }
       .focus-grid { grid-template-columns:repeat(2,1fr); }
       .focus-card { min-height:190px; padding-left:0; }
       .focus-card:nth-child(odd) { border-right:1px solid var(--line); }

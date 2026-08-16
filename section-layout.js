@@ -93,10 +93,11 @@
       return `<article class="${classes}"><h3>${formatMarkup(item.title)}</h3>${description}</article>`;
     }).join('');
     const layoutClass = titleOnly ? 'layout-title-cards' : 'layout-cards';
-    const titleFont = section.appearance?.itemTitleFont === 'sans' ? 'var(--sans)' : 'var(--serif)';
-    const titleSize = Math.min(36,Math.max(16,Number(section.appearance?.itemTitleSize) || 25));
-    const titleStyles = titleOnly ? ` style="--title-card-font:${titleFont};--title-card-size:${titleSize / 16}rem"` : '';
-    return `<section class="section dynamic-section ${layoutClass}"${titleStyles}><div class="page"><div class="focus-header"><div>${sectionHeading(section)}</div><p class="section-intro-text">${formatMarkup(body.intro)}</p></div><div class="focus-grid" data-count="${body.items.length}" style="--card-columns:${columns}">${cards}</div></div></section>`;
+      const titleFont = section.appearance?.itemTitleFont === 'sans' ? 'var(--sans)' : 'var(--serif)';
+      const titleSize = Math.min(36,Math.max(16,Number(section.appearance?.itemTitleSize) || 25));
+      const titleStyles = titleOnly ? ` style="--title-card-font:${titleFont};--title-card-size:${titleSize / 16}rem"` : '';
+      const footer = titleOnly && hasText(body.footer) ? `<p class="title-cards-footer section-intro-text">${formatMarkup(body.footer)}</p>` : '';
+      return `<section class="section dynamic-section ${layoutClass}"${titleStyles}><div class="page"><div class="focus-header"><div>${sectionHeading(section)}</div><p class="section-intro-text">${formatMarkup(body.intro)}</p></div><div class="focus-grid" data-count="${body.items.length}" style="--card-columns:${columns}">${cards}</div>${footer}</div></section>`;
   };
 
   const timelineItemsMarkup = (items) => items.map((item) => `<li><span class="timeline-period">${formatMarkup(item.period)}</span><div class="timeline-entry"><h3>${formatMarkup(item.title)}</h3>${item.detail ? `<p>${formatMarkup(item.detail)}</p>` : ''}</div></li>`).join('');
