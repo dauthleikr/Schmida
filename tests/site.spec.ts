@@ -321,13 +321,20 @@ test('title grids stay compact without per-item descriptions', async ({ page }) 
   const footer = editor.locator('[data-path$=".content.footer"]');
   await expect(footer).toHaveCount(1);
   await footer.fill('Ein abschließender Hinweis zu diesen Schwerpunkten.');
+  await editor.locator('[data-path*=".content.items."][data-path$=".title"]').first().fill('Erster Satz\nZweiter Satz');
   const font = editor.locator('[data-path$=".appearance.itemTitleFont"]');
   const size = editor.locator('[data-path$=".appearance.itemTitleSize"]');
+  const lineGap = editor.locator('[data-path$=".appearance.itemTitleLineGap"]');
   await expect(font).toHaveValue('serif');
   await expect(size).toHaveValue('25');
+  await expect(lineGap).toHaveValue('0');
   await font.selectOption('sans');
   await size.evaluate((input:HTMLInputElement) => {
     input.value = '32';
+    input.dispatchEvent(new Event('input',{ bubbles:true }));
+  });
+  await lineGap.evaluate((input:HTMLInputElement) => {
+    input.value = '8';
     input.dispatchEvent(new Event('input',{ bubbles:true }));
   });
   for (let index = 0; index < 6; index += 1) {
@@ -344,6 +351,10 @@ test('title grids stay compact without per-item descriptions', async ({ page }) 
   await expect(cards.first()).toHaveCSS('min-height','104px');
   await expect(cards.first().locator('h3')).toHaveCSS('font-family',/Inter|ui-sans-serif|system-ui/);
   await expect(cards.first().locator('h3')).toHaveCSS('font-size','32px');
+  const titleLineHeight = await cards.first().locator('h3').evaluate((element) => parseFloat(getComputedStyle(element).lineHeight));
+  expect(titleLineHeight).toBeCloseTo(33.28,1);
+  await expect(cards.first().locator('.title-card-line')).toHaveCount(2);
+  await expect(cards.first().locator('h3')).toHaveCSS('row-gap','8px');
   await expect(grid).toHaveCSS('grid-template-columns',/\d+(?:\.\d+)?px \d+(?:\.\d+)?px \d+(?:\.\d+)?px \d+(?:\.\d+)?px/);
   await expect(preview.locator('.layout-title-cards .title-cards-footer')).toHaveText('Ein abschließender Hinweis zu diesen Schwerpunkten.');
   const footerTypography = await preview.locator('.layout-title-cards').evaluate((section) => ({
@@ -359,13 +370,15 @@ test('title grids stay compact without per-item descriptions', async ({ page }) 
   await page.locator('#preview-frame').evaluate((frame:HTMLIFrameElement) => frame.style.width = '440px');
   await expect(grid).toHaveCSS('grid-template-columns',/^[\d.]+px$/);
   await expect(cards.first().locator('h3')).toHaveCSS('font-size','32px');
+  const narrowTitleLineHeight = await cards.first().locator('h3').evaluate((element) => parseFloat(getComputedStyle(element).lineHeight));
+  expect(narrowTitleLineHeight).toBeCloseTo(33.28,1);
   const mobileFit = await grid.evaluate((element) => ({
     viewport:document.documentElement.clientWidth,
     scrollWidth:document.documentElement.scrollWidth,
     cardHeight:element.querySelector('.title-card')!.getBoundingClientRect().height
   }));
   expect(mobileFit.scrollWidth).toBeLessThanOrEqual(mobileFit.viewport);
-  expect(mobileFit.cardHeight).toBeLessThan(110);
+  expect(mobileFit.cardHeight).toBeLessThan(140);
 });
 
 test('provides a usable compact navigation', async ({ page }) => {
@@ -374,8 +387,16 @@ test('provides a usable compact navigation', async ({ page }) => {
   await expect(page.locator('.header-inner')).toHaveCSS('min-height','65px');
 
   const menu = page.getByRole('button',{ name:'Menü' });
+  await expect(menu).toBeVisible();
+  const headerBounds = await page.locator('.header-inner').boundingBox();
+  const menuBounds = await menu.boundingBox();
+  expect(menuBounds!.x + menuBounds!.width).toBeCloseTo(headerBounds!.x + headerBounds!.width,0);
+  const closedBackground = await menu.evaluate((element) => getComputedStyle(element).backgroundColor);
   await menu.click();
   await expect(menu).toHaveAttribute('aria-expanded','true');
+  await page.waitForTimeout(220);
+  const openBackground = await menu.evaluate((element) => getComputedStyle(element).backgroundColor);
+  expect(openBackground).not.toBe(closedBackground);
   await expect(page.getByRole('link',{ name:'Kontakt',exact:true })).toBeVisible();
   await page.getByRole('link',{ name:'Kontakt',exact:true }).click();
   await expect(page.locator('#kontakt')).toBeInViewport();
@@ -943,6 +964,9 @@ test('contact layout separates personal and office details with a safe map', asy
   for (const field of ['personalDetailsTitle','officeDetailsTitle','mapEmbed','mapLink']) {
     await expect(contact.locator(`[data-path$=".content.${field}"]`)).toBeVisible();
   }
+  const textBelowTitle = contact.locator('[data-path$=".appearance.contactTextBelowTitleDesktop"]');
+  await expect(textBelowTitle).toBeVisible();
+  await expect(textBelowTitle).not.toBeChecked();
   for (const collection of ['personalDetails','officeDetails']) {
     const rows = contact.locator(`.collection:has([data-collection-key="${collection}"])`);
     await expect(rows.locator('[data-collection-action="add"]')).toBeVisible();
@@ -963,6 +987,7 @@ test('contact layout separates personal and office details with a safe map', asy
     internalName:'Kontakt-Test',
     navigationLabel:'Kontakt',
     background:'dark',
+    appearance:{ contactTextBelowTitleDesktop:true },
     content:{
       eyebrow:'Kontakt',
       title:'Kontakt aufnehmen.',
@@ -1005,13 +1030,16 @@ test('contact layout separates personal and office details with a safe map', asy
   await expect(personal).toContainText('person@example.at');
   await expect(office).toContainText('Praxisgemeinschaft');
   await expect(office).toContainText('Praxis am Beispielplatz');
+  await expect(office.locator('.contact-detail').first().locator('.detail-value')).toHaveCSS('color','rgb(255, 255, 255)');
   await expect(office.getByRole('link',{ name:'www.praxis.example.at' })).toHaveAttribute('href','https://www.praxis.example.at/');
   await expect(office.getByRole('link',{ name:/Beispielplatz 1/ })).toHaveAttribute('href','https://maps.example.at/');
   const desktopColumns = await Promise.all([personal,office].map((group) => group.boundingBox()));
   expect(desktopColumns[1]!.x).toBeGreaterThan(desktopColumns[0]!.x + desktopColumns[0]!.width);
   expect(desktopColumns[1]!.y).toBeCloseTo(desktopColumns[0]!.y,0);
   const introBox = await desktopPage.locator('.contact-copy > .section-intro-text').boundingBox();
-  expect(introBox!.x).toBeCloseTo(desktopColumns[1]!.x,0);
+  const desktopPageBox = await desktopPage.locator('.contact-grid').boundingBox();
+  expect(introBox!.x).toBeCloseTo(desktopPageBox!.x,0);
+  expect(introBox!.width).toBeCloseTo(desktopPageBox!.width,0);
 
   await desktopPage.close();
   const mobilePage = await openFixture({ ...contactSection,content:{ ...contactSection.content,mapEmbed:'javascript:alert(1)' } },'mobile');
@@ -1019,6 +1047,11 @@ test('contact layout separates personal and office details with a safe map', asy
   const mobileGroups = [mobilePage.locator('[data-contact-group="personal"]'),mobilePage.locator('[data-contact-group="office"]')];
   const mobileColumns = await Promise.all(mobileGroups.map((group) => group.boundingBox()));
   expect(mobileColumns[1]!.y).toBeGreaterThan(mobileColumns[0]!.y + mobileColumns[0]!.height);
+  const mobileHeading = mobilePage.locator('.contact-copy .section-heading-mobile h2');
+  const mobileIntro = mobilePage.locator('.contact-copy > .section-intro-text');
+  const mobileHeadingBox = await mobileHeading.boundingBox();
+  const mobileIntroBox = await mobileIntro.boundingBox();
+  expect(mobileIntroBox!.y - (mobileHeadingBox!.y + mobileHeadingBox!.height)).toBeCloseTo(18,0);
   const mobileFit = await mobilePage.locator('.contact-details').evaluate((element) => ({
     viewport:document.documentElement.clientWidth,
     scrollWidth:document.documentElement.scrollWidth,
@@ -1360,6 +1393,11 @@ test('normalizes and validates the current section schema', async ({ page }) => 
     window.practiceContentModel.normalize({ sections:[{ layout:'conditions',appearance:{ highlightCenterContent:true } }] }).sections[0].appearance.highlightCenterContent
   ]);
   expect(highlightCentering).toEqual([false,true]);
+  const titleCardAppearance = await page.evaluate(() => {
+    const appearance = window.practiceContentModel.normalize({ sections:[{ layout:'titleCards',appearance:{ itemTitleSize:999,itemTitleLineGap:999 } }] }).sections[0].appearance;
+    return [appearance.itemTitleSize,appearance.itemTitleLineGap];
+  });
+  expect(titleCardAppearance).toEqual([36,24]);
   const heroWidths = await page.evaluate(() => [
     window.practiceContentModel.normalize({ hero:{ titleWidthDesktop:99 } }).hero.titleWidthDesktop,
     window.practiceContentModel.normalize({ hero:{ titleWidthDesktop:2 } }).hero.titleWidthDesktop

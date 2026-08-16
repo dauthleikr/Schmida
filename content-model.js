@@ -113,8 +113,9 @@
           ['serif','Serifenschrift (wie Überschriften)'],
           ['sans','Sans-Serif (wie Einleitung)']
         ] },
-        { key: 'itemTitleSize', label: 'Schriftgröße der Einzeltitel', type: 'range', min: 16, max: 36, step: 1, unit: 'px', help: 'Gilt für alle Titel in diesem Raster.' }
-      ],{ itemTitleFont: 'serif',itemTitleSize: 25 }),
+        { key: 'itemTitleSize', label: 'Schriftgröße der Einzeltitel', type: 'range', min: 16, max: 36, step: 1, unit: 'px', help: 'Gilt für alle Titel in diesem Raster.' },
+        { key: 'itemTitleLineGap', label: 'Abstand zwischen Titelzeilen', type: 'range', min: 0, max: 24, step: 1, unit: 'px', help: 'Gilt für manuelle Zeilenumbrüche. Automatische Umbrüche bleiben kompakt.' }
+      ],{ itemTitleFont: 'serif',itemTitleSize: 25,itemTitleLineGap: 0 }),
       label: 'Titelraster',
       description: 'Einleitung mit einem kompakten Raster aus zwei bis acht Titeln.',
       defaultNavigation: 'Schwerpunkte',
@@ -123,7 +124,7 @@
         { key: 'eyebrow', label: 'Bereichsbezeichnung', type: 'text' },
         { key: 'title', label: 'Titel', type: 'rich', editorRows: 3 },
         { key: 'intro', label: 'Einleitung', type: 'rich', editorRows: 4 },
-        { key: 'items', label: 'Titel', type: 'collection', min: 2, max: 8, addLabel: 'Titel hinzufügen', itemFields: [{ key: 'title', label: 'Titel', type: 'text' }] },
+        { key: 'items', label: 'Titel', type: 'collection', min: 2, max: 8, addLabel: 'Titel hinzufügen', itemFields: [{ key: 'title', label: 'Titel', type: 'rich', editorRows: 3 }] },
         { key: 'footer', label: 'Text unter den Titeln', type: 'rich', editorRows: 3 }
       ],
       defaults: { eyebrow: 'Schwerpunkte', title: 'Womit Sie zu mir kommen können.', intro: 'Eine kurze Einleitung zu den folgenden Themen.', items: [{ title: 'Erstes Thema' }, { title: 'Zweites Thema' }], footer: '' }
@@ -277,7 +278,9 @@
       }
     },
     contact: {
-      ...titleAppearance(),
+      ...titleAppearance([
+        { key: 'contactTextBelowTitleDesktop', label: 'Einleitung unter dem Titel (Desktop)', type: 'checkbox', help: 'Setzt den Kontakttext auf Desktop unter den Titel und über die volle Breite.' }
+      ],{ contactTextBelowTitleDesktop: false }),
       label: 'Kontaktblock mit Karte',
       description: 'Kontakttext, Adresse, Telefon, E-Mail und eine Kartenfläche.',
       defaultNavigation: 'Kontakt',

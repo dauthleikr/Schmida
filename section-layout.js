@@ -89,15 +89,19 @@
         index % columns === 0 ? 'is-row-start' : '',
         index % columns === columns - 1 || index === body.items.length - 1 ? 'is-row-end' : ''
       ].filter(Boolean).join(' ');
+      const titleMarkup = titleOnly
+        ? String(item.title ?? '').split(/\r?\n/).map((line) => `<span class="title-card-line">${formatMarkup(line)}</span>`).join('')
+        : formatMarkup(item.title);
       const description = titleOnly ? '' : `<p>${formatMarkup(item.text)}</p>`;
-      return `<article class="${classes}"><h3>${formatMarkup(item.title)}</h3>${description}</article>`;
+      return `<article class="${classes}"><h3>${titleMarkup}</h3>${description}</article>`;
     }).join('');
     const layoutClass = titleOnly ? 'layout-title-cards' : 'layout-cards';
-      const titleFont = section.appearance?.itemTitleFont === 'sans' ? 'var(--sans)' : 'var(--serif)';
-      const titleSize = Math.min(36,Math.max(16,Number(section.appearance?.itemTitleSize) || 25));
-      const titleStyles = titleOnly ? ` style="--title-card-font:${titleFont};--title-card-size:${titleSize / 16}rem"` : '';
-      const footer = titleOnly && hasText(body.footer) ? `<p class="title-cards-footer section-intro-text">${formatMarkup(body.footer)}</p>` : '';
-      return `<section class="section dynamic-section ${layoutClass}"${titleStyles}><div class="page"><div class="focus-header"><div>${sectionHeading(section)}</div><p class="section-intro-text">${formatMarkup(body.intro)}</p></div><div class="focus-grid" data-count="${body.items.length}" style="--card-columns:${columns}">${cards}</div>${footer}</div></section>`;
+    const titleFont = section.appearance?.itemTitleFont === 'sans' ? 'var(--sans)' : 'var(--serif)';
+    const titleSize = Math.min(36,Math.max(16,Number(section.appearance?.itemTitleSize) || 25));
+    const titleLineGap = Math.min(24,Math.max(0,Number(section.appearance?.itemTitleLineGap) || 0));
+    const titleStyles = titleOnly ? ` style="--title-card-font:${titleFont};--title-card-size:${titleSize}px;--title-card-line-gap:${titleLineGap}px"` : '';
+    const footer = titleOnly && hasText(body.footer) ? `<p class="title-cards-footer section-intro-text">${formatMarkup(body.footer)}</p>` : '';
+    return `<section class="section dynamic-section ${layoutClass}"${titleStyles}><div class="page"><div class="focus-header"><div>${sectionHeading(section)}</div><p class="section-intro-text">${formatMarkup(body.intro)}</p></div><div class="focus-grid" data-count="${body.items.length}" style="--card-columns:${columns}">${cards}</div>${footer}</div></section>`;
   };
 
   const timelineItemsMarkup = (items) => items.map((item) => `<li><span class="timeline-period">${formatMarkup(item.period)}</span><div class="timeline-entry"><h3>${formatMarkup(item.title)}</h3>${item.detail ? `<p>${formatMarkup(item.detail)}</p>` : ''}</div></li>`).join('');
@@ -192,6 +196,7 @@
     },
     contact: (section) => {
       const body = section.content;
+      const contactCopyClass = section.appearance?.contactTextBelowTitleDesktop === true ? ' contact-copy-text-below' : '';
       const mapHref = safeExternalUrl(body.mapLink);
       const detail = (label,value) => value ? `<div class="contact-detail"><div class="detail-label">${label}</div>${value}</div>` : '';
       const value = (text) => `<span class="detail-value">${formatMarkup(text)}</span>`;
@@ -224,7 +229,7 @@
       const map = embedUrl
         ? `<div class="map map-embed">${mapLink}<iframe src="${escapeAttribute(embedUrl)}" title="Standort auf Google Maps" loading="lazy" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe></div>`
         : mapLink ? `<div class="map">${mapLink}</div>` : '';
-      return `<section class="section dynamic-section contact-section layout-contact"><div class="page contact-grid"><div class="contact-copy">${sectionHeading(section)}<p class="section-intro-text">${formatMarkup(body.text)}</p></div><div class="contact-details">${group(body.personalDetailsTitle || 'Persönlicher Kontakt',personalDetails,'personal')}${group(body.officeDetailsTitle || 'Praxis',officeDetails,'office')}</div></div>${map}</section>`;
+      return `<section class="section dynamic-section contact-section layout-contact"><div class="page contact-grid"><div class="contact-copy${contactCopyClass}">${sectionHeading(section)}<p class="section-intro-text">${formatMarkup(body.text)}</p></div><div class="contact-details">${group(body.personalDetailsTitle || 'Persönlicher Kontakt',personalDetails,'personal')}${group(body.officeDetailsTitle || 'Praxis',officeDetails,'office')}</div></div>${map}</section>`;
     }
   };
 
