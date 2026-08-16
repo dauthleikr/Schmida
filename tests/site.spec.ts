@@ -414,6 +414,7 @@ test('hero image stays uncropped and all content remains above the ribbon', asyn
   ]) {
     await page.setViewportSize(viewport);
     await page.goto(siteUrl);
+    await expect(page.locator('.hero')).toHaveAttribute('data-responsive-layout',/^(mobile|side-by-side|stacked)$/);
 
     const layout = await page.evaluate(() => {
       const hero = document.querySelector('.hero')!.getBoundingClientRect();
@@ -427,6 +428,7 @@ test('hero image stays uncropped and all content remains above the ribbon', asyn
       const firstText = document.querySelector('.hero .eyebrow')!.getBoundingClientRect();
       const contact = document.querySelector('.hero-contact')!.getBoundingClientRect();
       return {
+        responsiveLayout:document.querySelector('.hero')!.getAttribute('data-responsive-layout'),
         heroTop:hero.top,
         heroBottom:hero.bottom,
         imageTop:imageBox.top,
@@ -459,15 +461,24 @@ test('hero image stays uncropped and all content remains above the ribbon', asyn
     expect(layout.contentTop - layout.heroTop).toBeCloseTo(expectedTopSpacing,0);
 
     if (viewport.width <= 900) {
+      expect(layout.responsiveLayout).toBe('mobile');
       expect(layout.titleLeft).toBeCloseTo(layout.heroInnerLeft,0);
       expect(layout.titleRight).toBeCloseTo(layout.heroInnerRight,0);
       expect(layout.titleWidth).toBeCloseTo(layout.heroInnerRight - layout.heroInnerLeft,0);
       expect(layout.imageRight).toBeGreaterThanOrEqual(layout.viewportWidth - 1);
       expect(layout.imageBottom).toBeCloseTo(layout.ribbonBottom,0);
       expect(layout.imageBottom).toBeCloseTo(layout.heroBottom,0);
-    } else {
+    } else if (layout.responsiveLayout === 'side-by-side') {
+      expect(layout.imageTop).toBeCloseTo(layout.heroTop,0);
       expect(layout.imageRight).toBeGreaterThanOrEqual(layout.viewportWidth - 1);
       expect(layout.imageBottom).toBeCloseTo(layout.ribbonBottom,0);
+      expect(layout.imageBottom).toBeCloseTo(layout.heroBottom,0);
+    } else {
+      expect(layout.responsiveLayout).toBe('stacked');
+      expect(layout.titleLeft).toBeCloseTo(layout.heroInnerLeft,0);
+      expect(layout.titleRight).toBeCloseTo(layout.heroInnerRight,0);
+      expect(layout.imageTop).toBeGreaterThanOrEqual(layout.copyBottom - 1);
+      expect(layout.imageRight).toBeGreaterThanOrEqual(layout.viewportWidth - 1);
       expect(layout.imageBottom).toBeCloseTo(layout.heroBottom,0);
     }
   }
@@ -478,6 +489,7 @@ test('hero image stays uncropped and all content remains above the ribbon', asyn
     image.src = 'assets/office_horizontal.JPG';
   });
   await page.locator('.hero-image').evaluate((image:HTMLImageElement) => image.decode());
+  await expect(page.locator('.hero')).toHaveAttribute('data-responsive-layout','stacked');
   await page.locator('[data-hero-field="title"]').evaluate((title) => {
     title.innerHTML = Array(8).fill('Eine zusätzliche Textzeile.').join('<br>');
   });
@@ -1301,7 +1313,7 @@ test('rich-text controls and hero presentation remain editable', async ({ page }
   });
   await expect(page.locator('output[for="hero.titleSize"]')).toHaveText('64px');
   const heroTitleLineGap = page.locator('[data-path="hero.titleLineGap"]');
-  await expect(heroTitleLineGap).toHaveValue('0');
+  await expect(heroTitleLineGap).toHaveAttribute('type','range');
   await heroTitleLineGap.evaluate((input:HTMLInputElement) => {
     input.value = '12';
     input.dispatchEvent(new Event('input',{ bubbles:true }));

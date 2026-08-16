@@ -371,12 +371,12 @@
     }
 
     @media (min-width:901px) {
-      .hero[data-image-layout="landscape"] .hero-inner {
+      .hero[data-image-layout="landscape"]:not(.hero-layout-stacked) .hero-inner {
         grid-template-columns:minmax(220px,var(--hero-title-width-desktop)) minmax(0,1fr);
         gap:clamp(32px,5vw,72px);
       }
 
-      .hero[data-image-layout="landscape"] .hero-copy {
+      .hero[data-image-layout="landscape"]:not(.hero-layout-stacked) .hero-copy {
         align-self:start;
         padding:var(--hero-content-top) 0 0;
       }
@@ -385,17 +385,55 @@
         bottom:0;
       }
 
-      .hero[data-image-layout="landscape"] .hero-image-wrap {
-        width:calc(100% + max(24px,calc((100vw - 1120px)/2)));
+      .hero[data-image-layout="landscape"]:not(.hero-layout-stacked) .hero-image-wrap {
+        position:absolute;
+        z-index:1;
+        top:0;
+        right:calc((100vw - 100%) / -2);
+        bottom:0;
+        width:auto;
+        aspect-ratio:var(--hero-image-aspect,1);
         min-height:0;
-        align-self:end;
-        margin-bottom:calc(-1 * var(--hero-ribbon-height));
+        margin:0;
       }
 
-      .hero[data-image-layout="landscape"] .hero-image {
-        height:auto;
+      .hero[data-image-layout="landscape"]:not(.hero-layout-stacked) .hero-image {
+        height:100%;
         object-fit:contain;
       }
+
+      .hero.hero-layout-stacked .hero-inner {
+        display:grid;
+        grid-template-columns:minmax(0,1fr);
+        gap:0;
+        padding:var(--hero-content-top) 0 0;
+      }
+
+      .hero.hero-layout-stacked .hero-copy {
+        display:block;
+        width:100%;
+        min-height:0;
+        padding:0 0 52px;
+      }
+
+      .hero.hero-layout-stacked .eyebrow { margin-bottom:var(--hero-eyebrow-title-spacing-mobile,15px); }
+      .hero.hero-layout-stacked h1 { width:100%; max-width:none; }
+
+      .hero.hero-layout-stacked .hero-image-wrap {
+        position:relative;
+        inset:auto;
+        left:calc((100vw - 100%) / -2);
+        width:100vw;
+        aspect-ratio:auto;
+        min-height:0;
+        justify-self:start;
+        margin:0;
+        transform:none;
+      }
+
+      .hero.hero-layout-stacked .hero-image { height:auto; object-fit:contain; object-position:center center; }
+      .hero.hero-layout-stacked[data-image-overlay="soft"] .hero-image-wrap::after { background:linear-gradient(180deg,var(--wine-950) 0%,transparent var(--hero-blend-mobile,28%)); }
+      .hero.hero-layout-stacked[data-image-overlay="strong"] .hero-image-wrap::after { background:linear-gradient(180deg,var(--wine-950) 0%,var(--wine-950),transparent var(--hero-blend-mobile,28%)); }
     }
 
     @media (max-width:440px) {
@@ -510,8 +548,33 @@
       hero.style.setProperty('--hero-mobile-image-position',content.heroImage.mobilePosition);
       hero.style.setProperty('--hero-blend-desktop',`${content.heroImage.blendWidthDesktop}%`);
       hero.style.setProperty('--hero-blend-mobile',`${content.heroImage.blendWidthMobile}%`);
+      const heroCopy = hero.querySelector('.hero-copy');
+      const heroImageWrap = hero.querySelector('.hero-image-wrap');
+      let heroLayoutFrame = 0;
+      const updateHeroCollisionLayout = () => {
+        hero.classList.remove('hero-layout-stacked');
+        const viewportWidth = document.documentElement.clientWidth;
+        if (viewportWidth <= 900 || hero.dataset.imageLayout !== 'landscape') {
+          hero.dataset.responsiveLayout = viewportWidth <= 900 ? 'mobile' : 'side-by-side';
+          return;
+        }
+        if (!image.naturalWidth || !image.naturalHeight) return;
+        hero.style.setProperty('--hero-image-aspect',`${image.naturalWidth} / ${image.naturalHeight}`);
+        const imageLeft = heroImageWrap.getBoundingClientRect().left;
+        const textRight = heroCopy.getBoundingClientRect().right;
+        const shouldStack = imageLeft < textRight + 24;
+        hero.classList.toggle('hero-layout-stacked',shouldStack);
+        hero.dataset.responsiveLayout = shouldStack ? 'stacked' : 'side-by-side';
+      };
+      const scheduleHeroCollisionLayout = () => {
+        cancelAnimationFrame(heroLayoutFrame);
+        heroLayoutFrame = requestAnimationFrame(updateHeroCollisionLayout);
+      };
+      image.addEventListener('load',scheduleHeroCollisionLayout);
+      window.addEventListener('resize',scheduleHeroCollisionLayout,{ passive:true });
       image.src = content.heroImage.src;
       image.alt = content.heroImage.alt || `Porträt von ${content.practitionerName}`;
+      scheduleHeroCollisionLayout();
     })();
   </script>
   <script src="section-layout.js"></script>
