@@ -1083,6 +1083,8 @@ test('contact layout separates personal and office details with a safe map', asy
   const mobileHeadingBox = await mobileHeading.boundingBox();
   const mobileIntroBox = await mobileIntro.boundingBox();
   expect(mobileIntroBox!.y - (mobileHeadingBox!.y + mobileHeadingBox!.height)).toBeCloseTo(18,0);
+  const mobileDetailsBox = await mobilePage.locator('.contact-details').boundingBox();
+  expect(mobileDetailsBox!.y - (mobileIntroBox!.y + mobileIntroBox!.height)).toBeCloseTo(24,0);
   const mobileFit = await mobilePage.locator('.contact-details').evaluate((element) => ({
     viewport:document.documentElement.clientWidth,
     scrollWidth:document.documentElement.scrollWidth,
