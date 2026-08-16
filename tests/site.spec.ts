@@ -422,6 +422,8 @@ test('hero image stays uncropped and all content remains above the ribbon', asyn
       const imageBox = image.getBoundingClientRect();
       const ribbon = document.querySelector('.hero-ribbon')!.getBoundingClientRect();
       const copy = document.querySelector('.hero-copy')!.getBoundingClientRect();
+      const heroInner = document.querySelector('.hero-inner')!.getBoundingClientRect();
+      const title = document.querySelector('.hero h1')!.getBoundingClientRect();
       const firstText = document.querySelector('.hero .eyebrow')!.getBoundingClientRect();
       const contact = document.querySelector('.hero-contact')!.getBoundingClientRect();
       return {
@@ -437,6 +439,11 @@ test('hero image stays uncropped and all content remains above the ribbon', asyn
         ribbonTop:ribbon.top,
         ribbonBottom:ribbon.bottom,
         contentTop:firstText.top,
+        titleLeft:title.left,
+        titleRight:title.right,
+        titleWidth:title.width,
+        heroInnerLeft:heroInner.left,
+        heroInnerRight:heroInner.right,
         copyBottom:copy.bottom,
         contactBottom:contact.bottom,
         viewportWidth:document.documentElement.clientWidth
@@ -452,6 +459,9 @@ test('hero image stays uncropped and all content remains above the ribbon', asyn
     expect(layout.contentTop - layout.heroTop).toBeCloseTo(expectedTopSpacing,0);
 
     if (viewport.width <= 900) {
+      expect(layout.titleLeft).toBeCloseTo(layout.heroInnerLeft,0);
+      expect(layout.titleRight).toBeCloseTo(layout.heroInnerRight,0);
+      expect(layout.titleWidth).toBeCloseTo(layout.heroInnerRight - layout.heroInnerLeft,0);
       expect(layout.imageRight).toBeGreaterThanOrEqual(layout.viewportWidth - 1);
       expect(layout.imageBottom).toBeCloseTo(layout.ribbonBottom,0);
       expect(layout.imageBottom).toBeCloseTo(layout.heroBottom,0);
