@@ -518,6 +518,46 @@ test('provides a usable compact navigation', async ({ page }) => {
   await expect(page.locator('#kontakt')).toBeInViewport();
 });
 
+test('homepage contains long text and wide tables without document overflow', async ({ page }) => {
+  for (const width of [320,390,600,900]) {
+    await page.setViewportSize({ width,height:844 });
+    await page.goto(siteUrl);
+    await page.locator('.dynamic-section .page').first().evaluate((container) => {
+      const probe = document.createElement('div');
+      const longText = document.createElement('p');
+      longText.textContent = `https://example.test/${'rahmenbedingungen'.repeat(30)}`;
+      const table = document.createElement('table');
+      table.innerHTML = `<tbody><tr><td style="white-space:nowrap">${'LangeTabellenspalte'.repeat(12)}</td><td>Zweite Spalte</td></tr></tbody>`;
+      probe.append(longText,table);
+      container.append(probe);
+    });
+
+    const fit = await page.locator('.dynamic-section .page').first().evaluate((container) => {
+      const viewport = document.documentElement.clientWidth;
+      const pageBox = container.getBoundingClientRect();
+      const header = document.querySelector('.site-header')!.getBoundingClientRect();
+      const table = container.querySelector('table')!;
+      return {
+        viewport,
+        documentWidth:document.documentElement.scrollWidth,
+        pageLeft:pageBox.left,
+        pageRight:pageBox.right,
+        headerLeft:header.left,
+        headerRight:header.right,
+        tableWidth:table.clientWidth,
+        tableScrollWidth:table.scrollWidth
+      };
+    });
+    const gutter = width <= 440 ? 16 : 20;
+    expect(fit.documentWidth).toBeLessThanOrEqual(fit.viewport);
+    expect(fit.pageLeft).toBeCloseTo(gutter,0);
+    expect(fit.pageRight).toBeCloseTo(fit.viewport - gutter,0);
+    expect(fit.headerLeft).toBeCloseTo(0,0);
+    expect(fit.headerRight).toBeCloseTo(fit.viewport,0);
+    expect(fit.tableScrollWidth).toBeGreaterThan(fit.tableWidth);
+  }
+});
+
 test('hero image stays uncropped and all content remains above the ribbon', async ({ page }) => {
   for (const viewport of [
     { width:390,height:844 },
