@@ -95,7 +95,10 @@
   font-size:.7rem;
   font-weight:750;
   letter-spacing:.06em;
+  overflow-wrap:normal;
   text-transform:uppercase;
+  white-space:nowrap;
+  word-break:normal;
 }
 
 .timeline-entry {
