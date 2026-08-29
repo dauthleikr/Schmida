@@ -6,6 +6,7 @@ import { extname, resolve, sep } from 'node:path';
 const siteUrl = `file:///${resolve('index.html').replace(/\\/g, '/')}`;
 const editorUrl = `file:///${resolve('editor.html').replace(/\\/g, '/')}`;
 const privacyUrl = `file:///${resolve('datenschutz.html').replace(/\\/g, '/')}`;
+const impressumUrl = `file:///${resolve('impressum.html').replace(/\\/g, '/')}`;
 
 test('all internal resources work from a nested static-server directory', async ({ page }) => {
   const root = resolve('.');
@@ -221,6 +222,46 @@ test('links to an editable Datenschutzerklärung', async ({ page }) => {
   await body.fill('Individuell gepflegter Datenschutzinhalt.');
   await page.reload();
   await expect(page.locator('[data-path="privacy.body"]')).toHaveValue('Individuell gepflegter Datenschutzinhalt.');
+});
+
+test('legal pages keep mobile margins and contain wide editable content', async ({ page }) => {
+  for (const url of [privacyUrl,impressumUrl]) {
+    for (const width of [320,390]) {
+      await page.setViewportSize({ width,height:844 });
+      await page.goto(url);
+      const bodySelector = url === privacyUrl ? '[data-privacy-body]' : '[data-impressum-body]';
+      await page.locator(bodySelector).evaluate((article) => {
+        const longText = document.createElement('p');
+        longText.textContent = `https://example.test/${'datenschutz'.repeat(30)}`;
+        const table = document.createElement('table');
+        table.innerHTML = `<tbody><tr><td style="white-space:nowrap">${'LangeTabellenspalte'.repeat(12)}</td><td>Zweite Spalte</td></tr></tbody>`;
+        article.append(longText,table);
+      });
+
+      const fit = await page.locator(bodySelector).evaluate((article) => {
+        const viewport = document.documentElement.clientWidth;
+        const shell = article.parentElement!.getBoundingClientRect();
+        const header = document.querySelector('.site-header')!.getBoundingClientRect();
+        const table = article.querySelector('table')!;
+        return {
+          viewport,
+          documentWidth:document.documentElement.scrollWidth,
+          shellLeft:shell.left,
+          shellRight:shell.right,
+          headerLeft:header.left,
+          headerRight:header.right,
+          tableWidth:table.clientWidth,
+          tableScrollWidth:table.scrollWidth
+        };
+      });
+      expect(fit.documentWidth).toBeLessThanOrEqual(fit.viewport);
+      expect(fit.shellLeft).toBeCloseTo(16,0);
+      expect(fit.shellRight).toBeCloseTo(fit.viewport - 16,0);
+      expect(fit.headerLeft).toBeCloseTo(0,0);
+      expect(fit.headerRight).toBeCloseTo(fit.viewport,0);
+      expect(fit.tableScrollWidth).toBeGreaterThan(fit.tableWidth);
+    }
+  }
 });
 
 test('self-hosts Inter without Google Fonts resources', async ({ page }) => {
