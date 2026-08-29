@@ -5,6 +5,12 @@ window.practiceContent = {
   "customColors": {},
   "practiceName": "Carina Schmida, BA.pth.",
   "practitionerName": "Carina Schmida",
+  "seo": {
+    "browserTitle": "Carina Schmida | Psychotherapie Wien",
+    "searchTitle": "Psychotherapie & Verhaltenstherapie in 1070 Wien | Carina Schmida",
+    "description": "Psychotherapie und Verhaltenstherapie für Erwachsene bei Carina Schmida in 1070 Wien (7. Bezirk), in der Praxisgemeinschaft Apädo.",
+    "siteUrl": "https://schmida-psychotherapie.at/"
+  },
   "siteIcon": "assets/icon4_tiny.png",
   "showHeaderIcon": false,
   "navigation": {

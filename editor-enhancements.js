@@ -96,10 +96,14 @@
     const panel = document.querySelector('#general');
     const theme = model.themes[data.colorTheme] || model.themes.wine;
     const palette = { ...theme,...data.customColors };
-    panel.innerHTML = `${panelHeading('Allgemein','Praxisname, Navigation und das übergreifende Farbsystem.')}
+    panel.innerHTML = `${panelHeading('Allgemein','Praxisname, Suchmaschinenangaben, Navigation und das übergreifende Farbsystem.')}
       <div class="grid">
         ${fieldMarkup({ label:'Praxisname',type:'text' },'practiceName',data.practiceName)}
         ${fieldMarkup({ label:'Name der Person',type:'text' },'practitionerName',data.practitionerName)}
+        ${fieldMarkup({ label:'SEO: kurzer Browser-Titel',type:'text' },'seo.browserTitle',data.seo.browserTitle)}
+        ${fieldMarkup({ label:'SEO: ausführlicher Such-/Social-Titel',type:'text' },'seo.searchTitle',data.seo.searchTitle)}
+        ${fieldMarkup({ label:'SEO: Beschreibung',type:'rich',editorRows:3 },'seo.description',data.seo.description)}
+        ${fieldMarkup({ label:'SEO: kanonische Website-URL',type:'text' },'seo.siteUrl',data.seo.siteUrl)}
         ${fieldMarkup({ label:'Website-Icon',type:'text' },'siteIcon',data.siteIcon)}
         ${fieldMarkup({ label:'Icon in der Kopfzeile anzeigen',type:'checkbox',help:'Das Website-Icon für Browser-Tabs bleibt davon unberührt.' },'showHeaderIcon',data.showHeaderIcon)}
         ${fieldMarkup({ label:'Navigation: Startseite',type:'text' },'navigation.home',data.navigation.home)}

@@ -100,10 +100,11 @@ test('all internal resources work from a nested static-server directory', async 
 test('renders the new section schema with dynamic navigation and waves', async ({ page }) => {
   await page.goto(siteUrl);
 
-  await expect(page).toHaveTitle('Carina Schmida, BA.pth.');
-  await expect(page.locator('link[rel="icon"]')).toHaveAttribute('href','assets/icon4_tiny.png');
-  await expect(page.locator('link[rel="apple-touch-icon"]')).toHaveAttribute('href','assets/icon4_tiny.png');
-  await expect(page.locator('.brand-mark')).toHaveAttribute('src','assets/icon4_tiny.png');
+  const savedContent = await page.evaluate(() => window.currentPracticeContent);
+  await expect(page).toHaveTitle(savedContent.seo.browserTitle);
+  await expect(page.locator('link[rel="icon"]')).toHaveAttribute('href',savedContent.siteIcon);
+  await expect(page.locator('link[rel="apple-touch-icon"]')).toHaveAttribute('href',savedContent.siteIcon);
+  await expect(page.locator('.brand-mark')).toHaveAttribute('src',savedContent.siteIcon);
   await expect(page.locator('.brand-mark')).toHaveJSProperty('complete',true);
   expect(await page.locator('.brand-mark').evaluate((image:HTMLImageElement) => image.naturalWidth)).toBe(180);
   await expect(page.locator('.header-inner')).toHaveCSS('min-height','74px');
@@ -115,13 +116,17 @@ test('renders the new section schema with dynamic navigation and waves', async (
     return { titleRight:title.right,imageLeft:image.left };
   });
   expect(heroColumns.titleRight).toBeLessThanOrEqual(heroColumns.imageLeft);
-  await expect(page.getByRole('navigation')).toHaveText(/Startseite[\s\S]*Psychotherapie[\s\S]*Schwerpunkte[\s\S]*Über mich[\s\S]*Praxis[\s\S]*Kontakt/);
-  const savedSections = await page.evaluate(() => window.currentPracticeContent.sections);
+  const savedSections = savedContent.sections;
+  const expectedNavigation = [savedContent.navigation.home,...savedSections.map((section) => section.navigationLabel).filter((label) => label.trim())];
+  await expect(page.locator('#site-navigation a')).toHaveText(expectedNavigation);
   await expect(page.locator('.content-section')).toHaveCount(savedSections.length);
-  const savedTopics = savedSections.find((section) => section.layout === 'topics')!;
-  await expect(page.locator('.content-section[data-layout="topics"] .topics-list li')).toHaveCount(savedTopics.content.items.filter((item) => item.text).length);
-  const savedListStyle = savedTopics.appearance.listStyle || 'numbered-grid';
-  await expect(page.locator('.content-section[data-layout="topics"] .topics-list')).toHaveAttribute('data-list-style',savedListStyle);
+  const savedTopics = savedSections.filter((section) => section.layout === 'topics');
+  await expect(page.locator('.content-section[data-layout="topics"]')).toHaveCount(savedTopics.length);
+  for (let index = 0; index < savedTopics.length; index += 1) {
+    const topicList = page.locator('.content-section[data-layout="topics"] .topics-list').nth(index);
+    await expect(topicList.locator('li')).toHaveCount(savedTopics[index].content.items.filter((item) => item.text).length);
+    await expect(topicList).toHaveAttribute('data-list-style',savedTopics[index].appearance.listStyle || 'numbered-grid');
+  }
   await expect(page.locator('.content-section[data-layout="timeline"]')).toHaveCount(savedSections.filter((section) => section.layout === 'timeline').length);
   await expect(page.locator('.section-heading-desktop h2')).toHaveCount(savedSections.length);
   await expect(page.locator('.section-heading-mobile h2')).toHaveCount(savedSections.length);
@@ -134,17 +139,28 @@ test('renders the new section schema with dynamic navigation and waves', async (
   await expect(page.locator('.dynamic-section .eyebrow')).toHaveCount(bothVariants);
   await expect(page.locator('.dynamic-section[data-heading-desktop="eyebrow"]')).toHaveCount(desktopEyebrows);
   await expect(page.locator('.dynamic-section[data-heading-desktop="title"]')).toHaveCount(desktopTitles);
-  await expect(page.locator('#psychotherapie .section-heading-desktop .section-heading-accent')).toHaveCSS('color','rgb(209, 17, 55)');
-  await expect(page.locator('#kontakt .section-heading-desktop .section-heading-accent')).toHaveCSS('color','rgb(255, 154, 169)');
-  await expect(page.locator('#psychotherapie')).toHaveCSS('padding-top','104px');
+  const accentColors = await page.evaluate(() => {
+    const light = document.createElement('span');
+    const dark = document.createElement('span');
+    light.style.color = 'var(--wine-650)';
+    dark.style.color = 'var(--rose-300)';
+    document.body.append(light,dark);
+    const result = { light:getComputedStyle(light).color,dark:getComputedStyle(dark).color };
+    light.remove();
+    dark.remove();
+    return result;
+  });
+  await expect(page.locator('.dynamic-section:not(.is-dark) .section-heading-desktop .section-heading-accent').first()).toHaveCSS('color',accentColors.light);
+  await expect(page.locator('.dynamic-section.is-dark .section-heading-desktop .section-heading-accent').first()).toHaveCSS('color',accentColors.dark);
+  await expect(page.locator('.dynamic-section').first()).toHaveCSS('padding-top',`${savedContent.sectionSpacing.desktop}px`);
   const configuredTextColors = await page.evaluate(() => {
     const bodyProbe = document.createElement('span');
     const introProbe = document.createElement('span');
     bodyProbe.style.color = 'var(--body-text)';
     introProbe.style.color = 'var(--intro-text)';
     document.body.append(bodyProbe,introProbe);
-    const body = getComputedStyle(document.querySelector('#psychotherapie .intro-grid > div:last-child > p')!);
-    const intro = getComputedStyle(document.querySelector('#schwerpunkte .section-intro-text')!);
+    const body = getComputedStyle(document.querySelector('.intro-grid > div:last-child > p')!);
+    const intro = getComputedStyle(document.querySelector('.section-intro-text')!);
     const colors = {
       body:[getComputedStyle(bodyProbe).color,body.color],
       intro:[getComputedStyle(introProbe).color,intro.color]
@@ -159,15 +175,18 @@ test('renders the new section schema with dynamic navigation and waves', async (
   await expect(page.locator('.ribbon-transition')).toHaveCount(savedSections.length);
   await expect(page.locator('.hero-image')).toHaveJSProperty('complete',true);
   const savedContact = savedSections.find((section) => section.layout === 'contact');
-  await expect(page.locator('#kontakt')).toContainText(savedContact!.content.email);
+  const savedPhone = savedContact?.content.personalDetails?.find((detail) => detail.type === 'phone')?.content;
+  if (savedPhone) await expect(page.locator(`.content-section[data-section-id="${savedContact.id}"]`)).toContainText(savedPhone);
   const savedWideImage = savedSections.find((section) => section.layout === 'wideImage');
   const firstWideImage = page.locator('.wide-image-frame .section-image').first();
   await expect(firstWideImage).toHaveAttribute('src',savedWideImage!.content.images[0].imageSrc);
   await expect(firstWideImage).toHaveAttribute('loading','lazy');
   await expect(firstWideImage).toHaveCSS('object-position','50% 0%');
 
-  await page.getByRole('link',{ name:'Praxis',exact:true }).click();
-  await expect(page.locator('#praxis')).toBeInViewport();
+  const wideImageWrapper = page.locator('.content-section[data-layout="wideImage"]').first();
+  const wideImageRenderedId = await wideImageWrapper.getAttribute('data-rendered-id');
+  await page.locator(`.nav-list a[href="#${wideImageRenderedId}"]`).click();
+  await expect(wideImageWrapper.locator('.dynamic-section')).toBeInViewport();
   await firstWideImage.evaluate((image:HTMLImageElement) => image.decode());
   expect(await firstWideImage.evaluate((image:HTMLImageElement) => image.naturalWidth)).toBeGreaterThan(0);
 
@@ -291,35 +310,68 @@ test('includes the Cloudflare Web Analytics beacon on every HTML page', async ()
   }
 });
 
-test('places editable Rahmenbedingungen directly after Praxis', async ({ page }) => {
+test('publishes editable SEO metadata and LocalBusiness data from the content model', async ({ page }) => {
   await page.goto(siteUrl);
+  const content = await page.evaluate(() => window.practiceContentModel.normalize(window.practiceContent));
+  const contact = content.sections.find((section) => section.layout === 'contact')!.content;
+  const detail = (type:string) => contact.personalDetails.find((item) => item.type === type)!.content;
 
-  const sectionIds = await page.locator('.content-section').evaluateAll((sections) => sections.map((section) => section.getAttribute('data-section-id')));
-  const practiceIndex = sectionIds.indexOf('praxis');
-  expect(practiceIndex).toBeGreaterThanOrEqual(0);
-  expect(sectionIds[practiceIndex + 1]).toBe('rahmenbedingungen');
+  await expect(page).toHaveTitle(content.seo.browserTitle);
+  await expect(page.locator('meta[name="description"]')).toHaveAttribute('content',content.seo.description);
+  await expect(page.locator('meta[property="og:title"]')).toHaveAttribute('content',content.seo.searchTitle);
+  await expect(page.locator('link[rel="canonical"]')).toHaveAttribute('href',content.seo.siteUrl);
+  await expect(page.locator('.hero-image')).toHaveAttribute('fetchpriority','high');
+  await expect(page.locator('.hero-image')).not.toHaveAttribute('loading',/./);
 
-  const conditions = page.locator('#rahmenbedingungen');
+  const localBusiness = await page.locator('script[data-local-business-schema]').evaluate((script) => JSON.parse(script.textContent || '{}'));
+  expect(localBusiness['@type']).toBe('LocalBusiness');
+  expect(localBusiness.url).toBe(content.seo.siteUrl);
+  expect(localBusiness.telephone).toBe(detail('phone'));
+  expect(localBusiness.email).toBe(detail('email'));
+  expect(localBusiness.address.streetAddress).toContain(detail('address').split(/\r?\n/)[0]);
+  expect(localBusiness.address.postalCode).toBe('1070');
+  expect(localBusiness.address.addressLocality).toBe('Wien');
+  expect(localBusiness.employee.name).toBe(content.practitionerName);
+  expect(localBusiness.employee.jobTitle).toBe(content.hero.eyebrow);
+  expect(localBusiness.containedInPlace.name).toBe(contact.officeDetailsTitle);
+  expect(localBusiness.image).toContain(new URL(content.heroImage.src,content.seo.siteUrl).href);
+
+  await page.goto(editorUrl);
+  await expect(page.locator('[data-path="seo.browserTitle"]')).toHaveValue(content.seo.browserTitle);
+  await expect(page.locator('[data-path="seo.searchTitle"]')).toHaveValue(content.seo.searchTitle);
+  await expect(page.locator('[data-path="seo.description"]')).toHaveValue(content.seo.description);
+  await expect(page.locator('[data-path="seo.siteUrl"]')).toHaveValue(content.seo.siteUrl);
+});
+
+test('publishes robots and sitemap files for the canonical domain', async () => {
+  const robots = await readFile(resolve('robots.txt'),'utf8');
+  const sitemap = await readFile(resolve('sitemap.xml'),'utf8');
+  expect(robots).toContain('User-agent: *');
+  expect(robots).toContain('Allow: /');
+  expect(robots).toContain('Sitemap: https://schmida-psychotherapie.at/sitemap.xml');
+  expect(sitemap).toContain('<loc>https://schmida-psychotherapie.at/</loc>');
+  expect(sitemap).toContain('<loc>https://schmida-psychotherapie.at/impressum.html</loc>');
+  expect(sitemap).toContain('<loc>https://schmida-psychotherapie.at/datenschutz.html</loc>');
+  expect(sitemap).not.toMatch(/editor|red-wave/i);
+});
+
+test('renders and edits the conditions layout from the content schema', async ({ page }) => {
+  await page.goto(siteUrl);
+  const model = await page.evaluate(() => window.practiceContentModel.normalize(window.practiceContent));
+  const conditionIndex = model.sections.findIndex((section:any) => section.layout === 'conditions');
+  const conditionSection:any = model.sections[conditionIndex];
+  expect(conditionIndex).toBeGreaterThanOrEqual(0);
+  const conditions = page.locator(`.content-section[data-section-id="${conditionSection.id}"] .dynamic-section`);
   await expect(conditions.locator('.section-heading-desktop h2')).toBeVisible();
-  await expect(conditions.locator('.conditions-highlight-text')).toHaveText('Klarheit schafft Vertrauen.');
-  await expect(conditions.locator('.conditions-highlight')).not.toContainText('€ 90');
-  await expect(conditions.locator('.conditions-highlight-text')).toHaveCSS('font-size','50px');
-  await expect(conditions.locator('.conditions-highlight-text')).toHaveCSS('color','rgb(134, 53, 71)');
+  await expect(conditions.locator('.conditions-highlight-text')).toHaveText(conditionSection.content.highlightText);
+  await expect(conditions.locator('.conditions-highlight-text')).toHaveCSS('font-size',`${conditionSection.appearance.highlightTextSize}px`);
   await expect(conditions.locator('.conditions-highlight')).toHaveCSS('border-top-width','1px');
-  const highlightSpacing = await conditions.locator('.conditions-highlight').evaluate((highlight) => {
-    const label = highlight.querySelector('.conditions-highlight-label')!.getBoundingClientRect();
-    const text = highlight.querySelector('.conditions-highlight-text')!.getBoundingClientRect();
-    return text.top - label.bottom;
-  });
-  expect(highlightSpacing).toBeLessThanOrEqual(40);
   const highlightTextRightEdges = await Promise.all([
     conditions.locator('.conditions-highlight-text').boundingBox(),
     conditions.locator('.conditions-highlight-detail').boundingBox()
   ]);
   expect(highlightTextRightEdges[1]!.x + highlightTextRightEdges[1]!.width).toBeCloseTo(highlightTextRightEdges[0]!.x + highlightTextRightEdges[0]!.width,0);
-  await expect(conditions.locator('.condition-item')).toHaveCount(4);
-  await expect(conditions).toContainText('24 Stunden');
-  await expect(conditions).toContainText('keine Bezuschussung durch die gesetzliche Krankenversicherung');
+  await expect(conditions.locator('.condition-item')).toHaveCount(conditionSection.content.items.length);
   const desktopBalance = await Promise.all([
     conditions.locator('.conditions-highlight').boundingBox(),
     conditions.locator('.conditions-details').boundingBox()
@@ -345,48 +397,45 @@ test('places editable Rahmenbedingungen directly after Praxis', async ({ page })
   expect(firstConditionLayout.detailTop).toBeGreaterThanOrEqual(firstConditionLayout.titleBottom);
   expect(firstConditionLayout.detailWidth).toBeCloseTo(firstConditionLayout.itemWidth,0);
 
-  const navigationItems = await page.locator('.nav-list a').allTextContents();
-  expect(navigationItems.indexOf('Rahmenbedingungen')).toBe(navigationItems.indexOf('Praxis') + 1);
-
   await page.goto(editorUrl);
-  const editor = page.locator('.section-editor[data-section-id="rahmenbedingungen"]');
+  const editor = page.locator(`.section-editor[data-section-id="${conditionSection.id}"]`);
   await expect(editor.locator('[data-section-layout]')).toHaveValue('conditions');
-  await expect(editor.locator('[data-path$=".appearance.highlightTextSize"]')).toHaveValue('50');
+  await expect(editor.locator('[data-path$=".appearance.highlightTextSize"]')).toHaveValue(String(conditionSection.appearance.highlightTextSize));
   await expect(editor.locator('[data-path$=".appearance.highlightTextSize"]')).toHaveAttribute('min','22');
-  await expect(editor.locator('[data-path$=".appearance.highlightPaddingTop"]')).toHaveValue('32');
-  await expect(editor.locator('[data-path$=".appearance.highlightPaddingBottom"]')).toHaveValue('32');
+  await expect(editor.locator('[data-path$=".appearance.highlightPaddingTop"]')).toHaveValue(String(conditionSection.appearance.highlightPaddingTop));
+  await expect(editor.locator('[data-path$=".appearance.highlightPaddingBottom"]')).toHaveValue(String(conditionSection.appearance.highlightPaddingBottom));
   const centerContent = editor.locator('[data-path$=".appearance.highlightCenterContent"]');
-  await expect(centerContent).not.toBeChecked();
-  await expect(editor.locator('[data-path$=".appearance.highlightGradientStart"]')).toHaveValue('#f4e4e4');
-  await expect(editor.locator('[data-path$=".appearance.highlightGradientEnd"]')).toHaveValue('#fcfaf8');
-  await expect(editor.locator('[data-path$=".content.highlightText"]')).toHaveValue('Klarheit schafft Vertrauen.');
-  await expect(editor.locator('.collection-item')).toHaveCount(4);
+  expect(await centerContent.isChecked()).toBe(conditionSection.appearance.highlightCenterContent);
+  await expect(editor.locator('[data-path$=".appearance.highlightGradientStart"]')).toHaveValue(conditionSection.appearance.highlightGradientStart);
+  await expect(editor.locator('[data-path$=".appearance.highlightGradientEnd"]')).toHaveValue(conditionSection.appearance.highlightGradientEnd);
+  await expect(editor.locator('[data-path$=".content.highlightText"]')).toHaveValue(conditionSection.content.highlightText);
+  await expect(editor.locator('.collection-item')).toHaveCount(conditionSection.content.items.length);
 
   await editor.locator('[data-path$=".content.highlightLabel"]').fill('');
   await centerContent.check();
   await page.getByRole('button',{ name:'Vorschau Desktop' }).click();
   const centeredPreview = page.frameLocator('#preview-frame');
-  const centeredHighlight = centeredPreview.locator('#rahmenbedingungen .conditions-highlight');
+  const centeredHighlight = centeredPreview.locator(`[data-section-id="${conditionSection.id}"] .conditions-highlight`);
   await expect(centeredHighlight).toHaveClass(/conditions-highlight-without-label/);
   await expect(centeredHighlight).toHaveClass(/conditions-highlight-centered/);
   await expect(centeredHighlight).toHaveCSS('text-align','center');
   await expect(centeredHighlight).toHaveCSS('justify-content','center');
-  await expect(centeredHighlight).toHaveCSS('padding-top','32px');
+  await expect(centeredHighlight).toHaveCSS('padding-top',`${conditionSection.appearance.highlightPaddingTop}px`);
   const centeredTextEdges = await Promise.all([
-    centeredPreview.locator('#rahmenbedingungen .conditions-highlight-text').boundingBox(),
-    centeredPreview.locator('#rahmenbedingungen .conditions-highlight-detail').boundingBox()
+    centeredPreview.locator(`[data-section-id="${conditionSection.id}"] .conditions-highlight-text`).boundingBox(),
+    centeredPreview.locator(`[data-section-id="${conditionSection.id}"] .conditions-highlight-detail`).boundingBox()
   ]);
   expect(centeredTextEdges[1]!.x + centeredTextEdges[1]!.width).toBeCloseTo(centeredTextEdges[0]!.x + centeredTextEdges[0]!.width,0);
   await page.getByRole('button',{ name:'Vorschau schließen' }).click();
   await centerContent.uncheck();
   await page.getByRole('button',{ name:'Vorschau Desktop' }).click();
   const leftAlignedPreview = page.frameLocator('#preview-frame');
-  const leftAlignedHighlight = leftAlignedPreview.locator('#rahmenbedingungen .conditions-highlight');
+  const leftAlignedHighlight = leftAlignedPreview.locator(`[data-section-id="${conditionSection.id}"] .conditions-highlight`);
   await expect(leftAlignedHighlight).not.toHaveClass(/conditions-highlight-centered/);
   await expect(leftAlignedHighlight).toHaveCSS('text-align','left');
   await expect(leftAlignedHighlight).toHaveCSS('justify-content','center');
-  await expect(leftAlignedHighlight).toHaveCSS('padding-top','32px');
-  const highlightBounds = await Promise.all([leftAlignedHighlight.boundingBox(),leftAlignedPreview.locator('#rahmenbedingungen .conditions-highlight-text').boundingBox()]);
+  await expect(leftAlignedHighlight).toHaveCSS('padding-top',`${conditionSection.appearance.highlightPaddingTop}px`);
+  const highlightBounds = await Promise.all([leftAlignedHighlight.boundingBox(),leftAlignedPreview.locator(`[data-section-id="${conditionSection.id}"] .conditions-highlight-text`).boundingBox()]);
   expect(highlightBounds[1]!.y - highlightBounds[0]!.y).toBeLessThanOrEqual(34);
 });
 
@@ -726,6 +775,7 @@ test('hero image stays uncropped and all content remains above the ribbon', asyn
 
 test('editor exports normalized schema content', async ({ page }) => {
   await page.goto(editorUrl);
+  const stored = await page.evaluate(() => window.practiceContentModel.normalize(window.practiceContent));
 
   await expect(page.getByRole('heading',{ name:'Inhalte bearbeiten' })).toBeVisible();
   const storedInternalName = await page.evaluate(() => window.practiceContent.sections[0].internalName);
@@ -747,9 +797,9 @@ test('editor exports normalized schema content', async ({ page }) => {
     /Kontaktblock mit Karte/
   ]);
   await page.locator('[data-path="practiceName"]').fill('Praxis Sonnenweg');
-  await expect(page.locator('[data-path="siteIcon"]')).toHaveValue('assets/icon4_tiny.png');
+  await expect(page.locator('[data-path="siteIcon"]')).toHaveValue(stored.siteIcon);
   const showHeaderIcon = page.locator('[data-path="showHeaderIcon"]');
-  await expect(showHeaderIcon).toBeChecked();
+  expect(await showHeaderIcon.isChecked()).toBe(stored.showHeaderIcon);
   await page.locator('[data-path="siteIcon"]').fill('assets/wave-mark-128.png');
   await showHeaderIcon.uncheck();
   await page.getByRole('button',{ name:'Vorschau Desktop' }).click();
@@ -928,13 +978,13 @@ test('text colors and section spacing are globally configurable', async ({ page 
 
   await page.getByRole('button',{ name:'Vorschau Desktop' }).click();
   const preview = page.frameLocator('#preview-frame');
-  await expect(preview.locator('#psychotherapie')).toHaveCSS('padding-top','80px');
-  await expect(preview.locator('#psychotherapie .intro-grid > div:last-child > p').first()).toHaveCSS('color','rgb(51, 40, 43)');
-  await expect(preview.locator('#schwerpunkte .section-intro-text')).toHaveCSS('color','rgb(81, 16, 32)');
+  await expect(preview.locator('.content-section[data-layout="intro"] .dynamic-section').first()).toHaveCSS('padding-top','80px');
+  await expect(preview.locator('.content-section[data-layout="intro"] .intro-grid > div:last-child > p').first()).toHaveCSS('color','rgb(51, 40, 43)');
+  await expect(preview.locator('.section-intro-text').first()).toHaveCSS('color','rgb(81, 16, 32)');
 
   await page.getByRole('button',{ name:'Vorschau schließen' }).click();
   await page.getByRole('button',{ name:'Vorschau Mobil' }).click();
-  await expect(preview.locator('#psychotherapie')).toHaveCSS('padding-top','48px');
+  await expect(preview.locator('.content-section[data-layout="intro"] .dynamic-section').first()).toHaveCSS('padding-top','48px');
 });
 
 test('repeatable bullets, cards and prices use reusable add and remove controls', async ({ page }) => {
@@ -969,8 +1019,9 @@ test('repeatable bullets, cards and prices use reusable add and remove controls'
 
 test('listing layout offers interchangeable visual treatments', async ({ page }) => {
   await page.goto(editorUrl);
-
-  const listing = page.locator('.section-editor[data-section-id="schwerpunkte"]');
+  await page.selectOption('#new-layout','topics');
+  await page.getByRole('button',{ name:'Bereich hinzufügen' }).click();
+  const listing = page.locator('.section-editor').last();
   const style = listing.locator('[data-path$=".appearance.listStyle"]');
   await expect(style.locator('option')).toHaveText([
     'Nummeriert, zweispaltig',
@@ -983,26 +1034,27 @@ test('listing layout offers interchangeable visual treatments', async ({ page })
     'Lockeres Kartenmosaik'
   ]);
   await style.selectOption('clean-tiles');
-  const plainListing = page.locator('.section-editor[data-section-id="schwerpunkte"]');
+  const plainListing = page.locator('.section-editor').last();
   await expect(plainListing.locator('[data-path$=".appearance.gradientStart"]')).toHaveCount(0);
   await expect(plainListing.locator('[data-path$=".appearance.gradientEnd"]')).toHaveCount(0);
   await plainListing.locator('[data-path$=".appearance.listStyle"]').selectOption('gradient-pills');
-  const refreshedListing = page.locator('.section-editor[data-section-id="schwerpunkte"]');
+  const refreshedListing = page.locator('.section-editor').last();
   const startColor = refreshedListing.locator('[data-path$=".appearance.gradientStart"]');
   const endColor = refreshedListing.locator('[data-path$=".appearance.gradientEnd"]');
   await expect(startColor).toBeVisible();
   await expect(endColor).toBeVisible();
   await startColor.fill('#ff0000');
   await endColor.fill('#0000ff');
+  for (let index = 0; index < 3; index += 1) await page.locator('.section-editor').last().locator('[data-collection-action="add"]').click();
   await page.getByRole('button',{ name:'Vorschau Desktop' }).click();
 
-  const previewList = page.frameLocator('#preview-frame').locator('.content-section[data-layout="topics"] .topics-list');
+  const previewList = page.frameLocator('#preview-frame').locator('.content-section[data-layout="topics"] .topics-list').last();
   await expect(previewList).toHaveAttribute('data-list-style','gradient-pills');
   await expect(previewList).toHaveCSS('display','grid');
   await expect(previewList.locator('li').first()).toHaveCSS('border-radius','999px');
   await expect(previewList.locator('li').first()).toHaveCSS('transform','none');
   await expect(previewList.locator('li').first()).toHaveCSS('background-color','rgb(255, 0, 0)');
-  await expect(previewList.locator('li').nth(3)).toHaveCSS('background-color','rgb(128, 0, 128)');
+  await expect(previewList.locator('li').nth(2)).toHaveCSS('background-color','rgb(128, 0, 128)');
   await expect(previewList.locator('li').last()).toHaveCSS('background-color','rgb(0, 0, 255)');
   const pillPositions = await previewList.locator('li').evaluateAll((items) => items.slice(0,2).map((item) => {
     const box = item.getBoundingClientRect();

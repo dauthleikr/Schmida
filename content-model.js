@@ -421,6 +421,12 @@
       customColors: source.customColors && typeof source.customColors === 'object' ? source.customColors : {},
       practiceName: String(source.practiceName || 'Praxis für Psychotherapie'),
       practitionerName: String(source.practitionerName || ''),
+      seo: mergeDefaults({
+        browserTitle: 'Carina Schmida | Psychotherapie Wien',
+        searchTitle: 'Psychotherapie & Verhaltenstherapie in 1070 Wien | Carina Schmida',
+        description: 'Psychotherapie und Verhaltenstherapie für Erwachsene bei Carina Schmida in 1070 Wien (7. Bezirk), in der Praxisgemeinschaft Apädo.',
+        siteUrl: 'https://schmida-psychotherapie.at/'
+      },source.seo),
       siteIcon: relativeAssetPath(source.siteIcon || 'assets/icon4_tiny.png'),
       showHeaderIcon: source.showHeaderIcon !== false,
       navigation: { home: String(source.navigation?.home || 'Startseite') },

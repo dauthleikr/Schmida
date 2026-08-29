@@ -3,11 +3,68 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="description" content="Verhaltenstherapie für Erwachsene und Biofeedback bei Carina Schmida.">
+  <meta name="description" content="Psychotherapie und Verhaltenstherapie für Erwachsene bei Carina Schmida in 1070 Wien (7. Bezirk), in der Praxisgemeinschaft Apädo." data-seo-description>
+  <meta name="robots" content="index,follow,max-image-preview:large">
+  <meta property="og:type" content="website">
+  <meta property="og:locale" content="de_AT">
+  <meta property="og:title" content="Psychotherapie &amp; Verhaltenstherapie in 1070 Wien | Carina Schmida" data-seo-search-title>
+  <meta property="og:description" content="Psychotherapie und Verhaltenstherapie für Erwachsene bei Carina Schmida in 1070 Wien (7. Bezirk), in der Praxisgemeinschaft Apädo." data-seo-description>
+  <meta property="og:url" content="https://schmida-psychotherapie.at/" data-seo-url>
+  <meta property="og:image" content="https://schmida-psychotherapie.at/assets/carina_close2.JPG" data-seo-image>
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Psychotherapie &amp; Verhaltenstherapie in 1070 Wien | Carina Schmida" data-seo-search-title>
+  <meta name="twitter:description" content="Psychotherapie und Verhaltenstherapie für Erwachsene bei Carina Schmida in 1070 Wien (7. Bezirk), in der Praxisgemeinschaft Apädo." data-seo-description>
+  <meta name="twitter:image" content="https://schmida-psychotherapie.at/assets/carina_close2.JPG" data-seo-image>
+  <link rel="canonical" href="https://schmida-psychotherapie.at/" data-seo-url>
   <link rel="icon" type="image/png" href="assets/icon4_tiny.png" data-site-icon>
   <link rel="apple-touch-icon" href="assets/icon4_tiny.png" data-site-icon>
   <link rel="stylesheet" href="fonts.css">
-  <title>Carina Schmida – Psychotherapie</title>
+  <title>Carina Schmida | Psychotherapie Wien</title>
+  <script type="application/ld+json" data-local-business-schema>
+    {
+      "@context": "https://schema.org",
+      "@type": "LocalBusiness",
+      "@id": "https://schmida-psychotherapie.at/#psychotherapie-praxis",
+      "name": "Carina Schmida – Psychotherapie",
+      "description": "Psychotherapie und Verhaltenstherapie durch Carina Schmida, Psychotherapeutin in Fachausbildung unter Lehrsupervision, in der Praxisgemeinschaft Apädo in 1070 Wien.",
+      "url": "https://schmida-psychotherapie.at/",
+      "image": [
+        "https://schmida-psychotherapie.at/assets/carina_close2.JPG",
+        "https://schmida-psychotherapie.at/assets/office_horizontal.JPG",
+        "https://schmida-psychotherapie.at/assets/office2.JPG"
+      ],
+      "telephone": "+43 670 3519322",
+      "email": "schmida.psychotherapie@gmail.com",
+      "priceRange": "ab 80 €",
+      "address": {
+        "@type": "PostalAddress",
+        "streetAddress": "Neubaugasse 7 / Stiege II / 2. Stock / Top 49",
+        "postalCode": "1070",
+        "addressLocality": "Wien",
+        "addressCountry": "AT"
+      },
+      "geo": {
+        "@type": "GeoCoordinates",
+        "latitude": 48.1991731921,
+        "longitude": 16.3487908286
+      },
+      "areaServed": {
+        "@type": "City",
+        "name": "Wien"
+      },
+      "employee": {
+        "@type": "Person",
+        "name": "Carina Schmida",
+        "jobTitle": "Psychotherapeutin in Fachausbildung unter Lehrsupervision"
+      },
+      "containedInPlace": {
+        "@type": "LocalBusiness",
+        "name": "Praxisgemeinschaft Apädo",
+        "url": "https://www.apaedo.at/"
+      },
+      "hasMap": "https://maps.app.goo.gl/KBTCqJBim6ZuFhDj9"
+    }
+  </script>
   <script src="content-model.js"></script>
   <script src="content.js"></script>
   <style>
@@ -511,7 +568,7 @@
           <p class="hero-statement" data-hero-field="sentence"></p>
           <a class="hero-contact" href="#" data-hero-field="contactButton"></a>
         </div>
-        <div class="hero-image-wrap"><img class="hero-image" src="assets/carina_close2.JPG" alt=""></div>
+        <div class="hero-image-wrap"><img class="hero-image" src="assets/carina_close2.JPG" alt="" fetchpriority="high"></div>
       </div>
       <div class="hero-ribbon"></div>
     </section>
@@ -545,7 +602,75 @@
       });
       document.documentElement.style.setProperty('--section-spacing-desktop',`${content.sectionSpacing.desktop}px`);
       document.documentElement.style.setProperty('--section-spacing-mobile',`${content.sectionSpacing.mobile}px`);
-      document.title = content.practiceName;
+      const siteUrl = (() => {
+        try { return new URL(content.seo.siteUrl).href; }
+        catch { return 'https://schmida-psychotherapie.at/'; }
+      })();
+      const absoluteUrl = (value) => {
+        try { return new URL(String(value || ''),siteUrl).href; }
+        catch { return siteUrl; }
+      };
+      const seoImage = absoluteUrl(content.heroImage.src);
+      document.title = content.seo.browserTitle || content.practiceName;
+      document.querySelectorAll('[data-seo-description]').forEach((meta) => { meta.content = content.seo.description; });
+      document.querySelectorAll('[data-seo-search-title]').forEach((meta) => { meta.content = content.seo.searchTitle; });
+      document.querySelectorAll('[data-seo-image]').forEach((meta) => { meta.content = seoImage; });
+      document.querySelectorAll('[data-seo-url]').forEach((element) => {
+        if (element.tagName === 'LINK') element.href = siteUrl;
+        else element.content = siteUrl;
+      });
+
+      const contactSection = content.sections.find((section) => section.layout === 'contact');
+      const contact = contactSection?.content || {};
+      const personalDetails = Array.isArray(contact.personalDetails) ? contact.personalDetails : [];
+      const officeDetails = Array.isArray(contact.officeDetails) ? contact.officeDetails : [];
+      const personalDetail = (type) => personalDetails.find((detail) => detail.type === type)?.content || '';
+      const addressLines = String(personalDetail('address')).split(/\r?\n/).map((line) => line.trim()).filter(Boolean);
+      const localityMatch = addressLines.at(-1)?.match(/^(\d{4})\s+(.+)$/);
+      const officeWebsiteValue = officeDetails.find((detail) => detail.type === 'website')?.content || '';
+      const officeWebsite = officeWebsiteValue
+        ? absoluteUrl(/^https?:\/\//i.test(officeWebsiteValue) ? officeWebsiteValue : `https://${officeWebsiteValue}`)
+        : '';
+      const practiceImages = [...new Set([
+        content.heroImage.src,
+        ...content.sections.filter((section) => section.layout === 'wideImage').flatMap((section) => section.content.images || []).map((item) => item.imageSrc)
+      ].filter(Boolean).map(absoluteUrl))];
+      const priceText = content.sections.find((section) => section.layout === 'conditions')?.content.items?.map((item) => item.text).join(' ') || '';
+      const priceRange = priceText.match(/(?:ab\s+)?\d+(?:[.,]\d+)?\s*€/i)?.[0] || '';
+      const mapCoordinates = String(contact.mapEmbed || '').match(/!2d(-?\d+(?:\.\d+)?)!3d(-?\d+(?:\.\d+)?)/);
+      const localBusiness = {
+        '@context':'https://schema.org',
+        '@type':'LocalBusiness',
+        '@id':absoluteUrl('#psychotherapie-praxis'),
+        name:`${content.practitionerName || content.practiceName} – Psychotherapie`,
+        description:content.seo.description,
+        url:siteUrl,
+        image:practiceImages,
+        telephone:personalDetail('phone'),
+        email:personalDetail('email'),
+        ...(priceRange ? { priceRange } : {}),
+        address:{
+          '@type':'PostalAddress',
+          streetAddress:localityMatch ? addressLines.slice(0,-1).join(', ') : addressLines.join(', '),
+          postalCode:localityMatch?.[1] || '',
+          addressLocality:localityMatch?.[2] || 'Wien',
+          addressCountry:'AT'
+        },
+        ...(mapCoordinates ? { geo:{ '@type':'GeoCoordinates',latitude:Number(mapCoordinates[2]),longitude:Number(mapCoordinates[1]) } } : {}),
+        areaServed:{ '@type':'City',name:'Wien' },
+        employee:{
+          '@type':'Person',
+          name:content.practitionerName,
+          jobTitle:content.hero.eyebrow
+        },
+        ...(contact.officeDetailsTitle ? { containedInPlace:{
+          '@type':'LocalBusiness',
+          name:contact.officeDetailsTitle,
+          ...(officeWebsite ? { url:officeWebsite } : {})
+        } } : {}),
+        ...(contact.mapLink ? { hasMap:contact.mapLink } : {})
+      };
+      document.querySelector('[data-local-business-schema]').textContent = JSON.stringify(localBusiness,null,2);
       document.querySelector('[data-practice-name]').textContent = content.practiceName;
       const brandMark = document.querySelector('.brand-mark');
       brandMark.src = content.siteIcon;
