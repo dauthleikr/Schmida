@@ -5,6 +5,7 @@ import { extname, resolve, sep } from 'node:path';
 
 const siteUrl = `file:///${resolve('index.html').replace(/\\/g, '/')}`;
 const editorUrl = `file:///${resolve('editor.html').replace(/\\/g, '/')}`;
+const privacyUrl = `file:///${resolve('datenschutz.html').replace(/\\/g, '/')}`;
 
 test('all internal resources work from a nested static-server directory', async ({ page }) => {
   const root = resolve('.');
@@ -15,7 +16,8 @@ test('all internal resources work from a nested static-server directory', async 
     '.css':'text/css; charset=utf-8',
     '.png':'image/png',
     '.jpg':'image/jpeg',
-    '.jpeg':'image/jpeg'
+    '.jpeg':'image/jpeg',
+    '.ttf':'font/ttf'
   };
   const server = createServer(async (request,response) => {
     try {
@@ -86,7 +88,7 @@ test('all internal resources work from a nested static-server directory', async 
     expect(await preview.locator('.hero-image').evaluate((image:HTMLImageElement) => image.currentSrc)).toMatch(`${baseUrl}assets/`);
 
     expect(badLocalResponses).toEqual([]);
-    for (const resource of ['index.html','editor.html','content-model.js','content.js','section-layout.js','editor-enhancements.js','listing-styles.css','timeline-styles.css']) {
+    for (const resource of ['index.html','editor.html','content-model.js','content.js','section-layout.js','editor-enhancements.js','fonts.css','assets/fonts/Inter-Variable.ttf','listing-styles.css','timeline-styles.css']) {
       expect(loadedLocalPaths).toContain(resource);
     }
   } finally {
@@ -189,10 +191,54 @@ test('links to the standalone editable Impressum page', async ({ page }) => {
   const title = page.locator('[data-path="impressum.title"]');
   const body = page.locator('[data-path="impressum.body"]');
   await expect(title).toHaveValue('Impressum');
-  await expect(body).toHaveValue(/Diensteanbieterin/);
+  await expect(body).toHaveValue(/Medieninhaberin/);
   await title.fill('Impressum der Praxis');
   await page.reload();
   await expect(page.locator('[data-path="impressum.title"]')).toHaveValue('Impressum der Praxis');
+});
+
+test('links to an editable Datenschutzerklärung', async ({ page }) => {
+  await page.goto(siteUrl);
+  const privacyLink = page.locator('[data-privacy-link]');
+  await expect(privacyLink).toHaveAttribute('href','datenschutz.html');
+  await expect(privacyLink).toHaveText('Datenschutz');
+  await privacyLink.click();
+  await expect(page).toHaveURL(privacyUrl);
+  const exportedPrivacy = await page.evaluate(() => window.practiceContentModel.normalize(window.practiceContent).privacy);
+  await expect(page.locator('[data-privacy-title]')).toHaveText(exportedPrivacy.title);
+  await expect(page.locator('[data-privacy-intro]')).toBeVisible({ visible:Boolean(exportedPrivacy.intro.trim()) });
+  await expect(page.locator('[data-privacy-body]')).toBeVisible({ visible:Boolean(exportedPrivacy.body.trim()) });
+  const inlineImpressumLink = page.locator('[data-privacy-body] a',{ hasText:'Impressum' });
+  await expect(inlineImpressumLink).toHaveAttribute('href','impressum.html');
+  await inlineImpressumLink.click();
+  await expect(page).toHaveURL(`file:///${resolve('impressum.html').replace(/\\/g, '/')}`);
+
+  await page.goto(editorUrl);
+  await expect(page.locator('#privacy-editor')).toContainText('Datenschutzerklärung');
+  await expect(page.locator('[data-path="privacy.title"]')).toHaveValue(exportedPrivacy.title);
+  const body = page.locator('[data-path="privacy.body"]');
+  await expect(body).toHaveValue(exportedPrivacy.body);
+  await body.fill('Individuell gepflegter Datenschutzinhalt.');
+  await page.reload();
+  await expect(page.locator('[data-path="privacy.body"]')).toHaveValue('Individuell gepflegter Datenschutzinhalt.');
+});
+
+test('self-hosts Inter without Google Fonts resources', async ({ page }) => {
+  for (const file of ['index.html','editor.html','impressum.html','datenschutz.html']) {
+    const source = await readFile(resolve(file),'utf8');
+    expect(source).not.toMatch(/fonts\.(?:googleapis|gstatic)\.com/i);
+    expect(source).toContain('href="fonts.css"');
+    expect(source).toMatch(/--sans:[^;]*\bInter\b/i);
+  }
+  const fontCss = await readFile(resolve('fonts.css'),'utf8');
+  expect(fontCss).toContain('assets/fonts/Inter-Variable.ttf');
+  expect(fontCss).toContain('assets/fonts/Inter-VariableItalic.ttf');
+  await page.goto(siteUrl);
+  const interFaces = await page.evaluate(async () => {
+    await document.fonts.ready;
+    return [...document.fonts].filter((face) => face.family.replace(/["']/g,'') === 'Inter').map((face) => ({ style:face.style,status:face.status }));
+  });
+  expect(interFaces).toContainEqual({ style:'normal',status:'loaded' });
 });
 
 test('places editable Rahmenbedingungen directly after Praxis', async ({ page }) => {
@@ -1009,11 +1055,15 @@ test('wide image layout supports an editor-managed carousel', async ({ page }) =
 });
 
 test('contact layout separates personal and office details with a safe map', async ({ page,context }) => {
-  await context.route('https://www.google.com/maps/embed**',(route) => route.fulfill({
-    status:200,
-    contentType:'text/html',
-    body:'<!doctype html><title>Map test</title>'
-  }));
+  let mapRequests = 0;
+  await context.route('https://www.google.com/maps/embed**',async (route) => {
+    mapRequests += 1;
+    await route.fulfill({
+      status:200,
+      contentType:'text/html',
+      body:'<!doctype html><title>Map test</title>'
+    });
+  });
   await page.goto(editorUrl);
   await page.selectOption('#new-layout','contact');
   await page.getByRole('button',{ name:'Bereich hinzufügen' }).click();
@@ -1080,7 +1130,15 @@ test('contact layout separates personal and office details with a safe map', asy
   await page.close();
   const desktopPage = await openFixture(contactSection,'desktop');
   const iframe = desktopPage.locator('.map-embed iframe');
+  await expect(iframe).toHaveCount(0);
+  const consent = desktopPage.locator('[data-map-consent]');
+  await expect(consent).toContainText('Google Maps ist aus Datenschutzgründen deaktiviert.');
+  await expect(consent).toContainText('Ihre IP-Adresse und technische Informationen');
+  await expect(consent.getByRole('link',{ name:'Datenschutzerklärung' })).toHaveAttribute('href','datenschutz.html');
+  expect(mapRequests).toBe(0);
+  await consent.getByRole('button',{ name:'Google Maps laden' }).click();
   await expect(iframe).toHaveAttribute('src','https://www.google.com/maps/embed?pb=test');
+  await expect.poll(() => mapRequests).toBe(1);
   const personal = desktopPage.locator('[data-contact-group="personal"]');
   const office = desktopPage.locator('[data-contact-group="office"]');
   await expect(personal).toContainText('Persönlicher Kontakt');

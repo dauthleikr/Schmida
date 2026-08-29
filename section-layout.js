@@ -225,9 +225,10 @@
       const officeDetails = (body.officeDetails || []).map(detailMarkup).join('');
       const group = (title,details,key) => `<section class="contact-group" data-contact-group="${key}"><h3>${formatMarkup(title)}</h3><div class="contact-group-items">${details}</div></section>`;
       const embedUrl = safeMapEmbedUrl(body.mapEmbed);
-      const mapLink = mapHref && body.mapLabel ? `<a class="map-link" href="${escapeAttribute(mapHref)}" target="_blank" rel="noreferrer">${formatMarkup(body.mapLabel)}</a>` : '';
+      const mapLabel = String(body.mapLabel || '').trim();
+      const mapLink = mapHref && mapLabel ? `<a class="map-link" href="${escapeAttribute(mapHref)}" target="_blank" rel="noreferrer">${formatMarkup(mapLabel)}</a>` : '';
       const map = embedUrl
-        ? `<div class="map map-embed">${mapLink}<iframe src="${escapeAttribute(embedUrl)}" title="Standort auf Google Maps" loading="lazy" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe></div>`
+        ? `<div class="map map-consent" data-map-consent data-map-embed-url="${escapeAttribute(embedUrl)}" data-map-link-url="${escapeAttribute(mapHref)}" data-map-link-label="${escapeAttribute(mapLabel)}"><div class="map-consent-inner"><p class="map-consent-title">Google Maps ist aus Datenschutzgründen deaktiviert.</p><div class="map-consent-text"><p>Wenn Sie die Karte laden, wird eine Verbindung zu Google hergestellt. Dabei werden insbesondere Ihre IP-Adresse und technische Informationen an Google übermittelt. Google kann dabei Cookies oder vergleichbare Technologien verwenden.</p><p>Mit Klick auf „Google Maps laden“ willigen Sie in diese Datenverarbeitung ein. Weitere Informationen finden Sie in unserer <a href="datenschutz.html">Datenschutzerklärung</a>.</p></div><button class="map-consent-button" type="button" data-load-google-map>Google Maps laden</button></div></div>`
         : mapLink ? `<div class="map">${mapLink}</div>` : '';
       return `<section class="section dynamic-section contact-section layout-contact"><div class="page contact-grid"><div class="contact-copy${contactCopyClass}">${sectionHeading(section)}<p class="section-intro-text">${formatMarkup(body.text)}</p></div><div class="contact-details">${group(body.personalDetailsTitle || 'Persönlicher Kontakt',personalDetails,'personal')}${group(body.officeDetailsTitle || 'Praxis',officeDetails,'office')}</div></div>${map}</section>`;
     }
@@ -292,6 +293,32 @@
   });
 
   const wrappers = [...host.querySelectorAll('.content-section')];
+  const initializeMapConsent = (map) => {
+    map.querySelector('[data-load-google-map]')?.addEventListener('click',() => {
+      const iframe = document.createElement('iframe');
+      iframe.title = 'Standort auf Google Maps';
+      iframe.loading = 'lazy';
+      iframe.referrerPolicy = 'strict-origin-when-cross-origin';
+      iframe.allowFullscreen = true;
+      iframe.src = map.dataset.mapEmbedUrl;
+      const linkUrl = map.dataset.mapLinkUrl;
+      const linkLabel = map.dataset.mapLinkLabel;
+      map.replaceChildren();
+      map.classList.remove('map-consent');
+      map.classList.add('map-embed');
+      if (linkUrl && linkLabel) {
+        const link = document.createElement('a');
+        link.className = 'map-link';
+        link.href = linkUrl;
+        link.target = '_blank';
+        link.rel = 'noreferrer';
+        link.textContent = linkLabel;
+        map.append(link);
+      }
+      map.append(iframe);
+    },{ once:true });
+  };
+  wrappers.forEach((wrapper) => wrapper.querySelectorAll('[data-map-consent]').forEach(initializeMapConsent));
   const initializeTimelineToggle = (toggle) => {
     const tabs = [...toggle.querySelectorAll('[data-timeline-toggle-target]')];
     const section = toggle.closest('.layout-timeline-toggle');

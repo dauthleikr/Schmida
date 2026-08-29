@@ -207,7 +207,7 @@
 
   function renderFooter() {
     const panel = document.querySelector('#footer-editor');
-    panel.innerHTML = `${panelHeading('Footer','Der kompakte dunkle Abschluss bleibt fest bestehen.')}<div class="grid">${fieldMarkup({ label:'Copyright-Zeile',type:'text' },'footer.copyright',data.footer.copyright)}${fieldMarkup({ label:'Linkbeschriftung zum Impressum',type:'text' },'footer.impressumLabel',data.footer.impressumLabel)}</div>`;
+    panel.innerHTML = `${panelHeading('Footer','Der kompakte dunkle Abschluss bleibt fest bestehen.')}<div class="grid">${fieldMarkup({ label:'Copyright-Zeile',type:'text' },'footer.copyright',data.footer.copyright)}${fieldMarkup({ label:'Linkbeschriftung zum Impressum',type:'text' },'footer.impressumLabel',data.footer.impressumLabel)}${fieldMarkup({ label:'Linkbeschriftung zum Datenschutz',type:'text' },'footer.privacyLabel',data.footer.privacyLabel)}</div>`;
   }
 
   function renderImpressum() {
@@ -220,12 +220,23 @@
     </div>`;
   }
 
+  function renderPrivacy() {
+    const panel = document.querySelector('#privacy-editor');
+    panel.innerHTML = `${panelHeading('Datenschutzerklärung','Die separate Datenschutz-Seite wird über diese Felder gepflegt und über den Footer verlinkt.')}<p class="editor-page-link"><a href="datenschutz.html" target="_blank" rel="noreferrer">Datenschutz-Seite öffnen ↗</a></p><div class="grid">
+      ${fieldMarkup({ label:'Überzeile',type:'text' },'privacy.eyebrow',data.privacy.eyebrow)}
+      ${fieldMarkup({ label:'Titel',type:'text' },'privacy.title',data.privacy.title)}
+      ${fieldMarkup({ label:'Einleitung',type:'rich',editorRows:3 },'privacy.intro',data.privacy.intro)}
+      ${fieldMarkup({ label:'Inhalt',type:'rich',editorRows:18 },'privacy.body',data.privacy.body)}
+    </div>`;
+  }
+
   function renderAll() {
     renderGeneral();
     renderHero();
     renderSections();
     renderFooter();
     renderImpressum();
+    renderPrivacy();
   }
 
   const refreshPreview = () => {

@@ -6,6 +6,7 @@
   <meta name="description" content="Verhaltenstherapie für Erwachsene und Biofeedback bei Carina Schmida.">
   <link rel="icon" type="image/png" href="assets/icon4_tiny.png" data-site-icon>
   <link rel="apple-touch-icon" href="assets/icon4_tiny.png" data-site-icon>
+  <link rel="stylesheet" href="fonts.css">
   <title>Carina Schmida – Psychotherapie</title>
   <script src="content-model.js"></script>
   <script src="content.js"></script>
@@ -283,6 +284,16 @@
     .map-link { position:relative; z-index:2; margin:0 0 26px 26px; color:#fff; font-size:.72rem; font-weight:700; letter-spacing:.08em; text-decoration:none; text-transform:uppercase; }
     .map-link::after { display:inline-block; margin-left:8px; content:"→"; }
     .map-link:hover { color:var(--rose-300); }
+    .map-consent { min-height:clamp(360px,38vw,480px); align-items:center; justify-content:center; padding:clamp(32px,6vw,64px) 24px; }
+    .map-consent-inner { position:relative; z-index:2; width:min(650px,100%); padding:clamp(26px,4vw,42px); border:1px solid rgba(255,255,255,.2); background:rgba(41,17,23,.92); box-shadow:0 18px 50px rgba(0,0,0,.22); color:#fff; text-align:center; }
+    .map-consent-title { margin:0 0 18px; color:#fff; font-family:var(--serif); font-size:clamp(1.45rem,2.6vw,2rem); line-height:1.15; }
+    .map-consent-text { margin:0 auto 24px; }
+    .map-consent-text p { margin:0 0 14px; color:rgba(255,255,255,.78); font-size:.9rem; line-height:1.65; }
+    .map-consent-text p:last-child { margin-bottom:0; }
+    .map-consent-text a { color:#fff; text-underline-offset:3px; }
+    .map-consent-text a:hover,.map-consent-text a:focus-visible { color:var(--rose-300); }
+    .map-consent-button { min-height:44px; padding:0 18px; border:1px solid var(--rose-300); background:var(--rose-300); color:var(--wine-950); font:inherit; font-size:.78rem; font-weight:750; letter-spacing:.03em; cursor:pointer; }
+    .map-consent-button:hover,.map-consent-button:focus-visible { background:#fff; border-color:#fff; }
     .map-embed { min-height:clamp(360px,38vw,480px); align-items:stretch; }
     .map-embed::before,.map-embed::after { display:none; }
     .map-embed iframe { display:block; width:100%; min-height:clamp(360px,38vw,480px); border:0; }
@@ -310,6 +321,7 @@
 
     .footer-band { background:var(--wine-950); }
     .site-footer { display:flex; align-items:center; justify-content:space-between; min-height:83px; color:rgba(255,255,255,.6); font-size:.72rem; }
+    .footer-links { display:flex; flex-wrap:wrap; gap:10px 18px; }
     .site-footer a { color:rgba(255,255,255,.82); text-underline-offset:3px; }
     .site-footer a:hover,.site-footer a:focus-visible { color:#fff; }
 
@@ -501,7 +513,7 @@
     </section>
     <div class="content-sections" id="content-sections"></div>
   </main>
-  <div class="footer-band"><footer class="page site-footer"><span data-footer-copyright></span><a href="impressum.html" data-impressum-link>Impressum</a></footer></div>
+  <div class="footer-band"><footer class="page site-footer"><span data-footer-copyright></span><nav class="footer-links" aria-label="Rechtliche Hinweise"><a href="impressum.html" data-impressum-link>Impressum</a><a href="datenschutz.html" data-privacy-link>Datenschutz</a></nav></footer></div>
   <script>
     (() => {
       let source = window.practiceContent;
@@ -520,6 +532,8 @@
         .replace(/\*\*([^*]+)\*\*/g,'<strong>$1</strong>')
         .replace(/_([^_]+)_/g,'<em>$1</em>')
         .replace(/\[([^\]]+)\]\((https?:\/\/[^\s)]+)\)/g,'<a href="$2" target="_blank" rel="noreferrer">$1</a>')
+        .replace(/\[([^\]]+)\]\(\/impressum(?:\.html)?\)/gi,'<a href="impressum.html">$1</a>')
+        .replace(/\[([^\]]+)\]\(((?:\.{0,2}\/)?[a-z\d][a-z\d._~\/-]*(?:[?#][^\s)]*)?)\)/gi,'<a href="$2">$1</a>')
         .replace(/\n/g,'<br>');
       const palette = { ...window.practiceContentModel.themes[content.colorTheme], ...content.customColors };
       Object.entries(palette).forEach(([token,value]) => {
@@ -539,6 +553,9 @@
       const impressumLink = document.querySelector('[data-impressum-link]');
       impressumLink.textContent = content.footer.impressumLabel;
       impressumLink.hidden = !String(content.footer.impressumLabel || '').trim();
+      const privacyLink = document.querySelector('[data-privacy-link]');
+      privacyLink.textContent = content.footer.privacyLabel;
+      privacyLink.hidden = !String(content.footer.privacyLabel || '').trim();
       const hero = document.querySelector('.hero');
       const image = document.querySelector('.hero-image');
       hero.dataset.titleSize = content.hero.titleSize;

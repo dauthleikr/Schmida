@@ -11,7 +11,11 @@ This is a static website that can be published directly with GitHub Pages or any
 5. Use **Vorschau Mobil** for a 390 px phone preview or **Vorschau Desktop** for the full-width draft.
 6. In Chrome or Edge on an HTTPS deployment, use **content.js verbinden** and **In content.js speichern** to update the selected local file. Other browsers can download the generated `content.js`.
 
-The Impressum is a separate page at `impressum.html`. Its overline, title, introduction, and rich text are editable in the **Impressum** area of the editor. The page is linked from the website footer.
+The Impressum and Datenschutzerklärung are separate pages at `impressum.html` and `datenschutz.html`. Their overlines, titles, introductions, and rich text are editable in the corresponding editor areas. Both pages are linked from the website footer.
+
+The Google Maps iframe is not created until a visitor explicitly clicks **Google Maps laden** in the privacy notice shown in its place.
+
+Inter is self-hosted from `assets/fonts/` and loaded through `fonts.css`; the site does not contact Google Fonts at runtime. The bundled font files are licensed under the included SIL Open Font License.
 
 Drafts are stored locally in the browser. Content is normalized and validated against the current section schema when loaded.
 

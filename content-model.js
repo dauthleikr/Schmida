@@ -428,13 +428,19 @@
       heroImage,
       sectionSpacing,
       sections: sections.map(normalizeSection),
-      footer: mergeDefaults({ copyright: '', impressumLabel: 'Impressum' }, source.footer),
+      footer: mergeDefaults({ copyright: '', impressumLabel: 'Impressum', privacyLabel: 'Datenschutz' }, source.footer),
       impressum: mergeDefaults({
         eyebrow: 'Rechtliche Hinweise',
         title: 'Impressum',
         intro: 'Angaben gemäß § 5 ECG und § 25 MedienG',
         body: '**Diensteanbieterin**\nCarina Schmida, BA.pth.\nNeubaugasse 7 / Stiege II / 2. Stock / Top 49\n1070 Wien\n\n**Kontakt**\nTelefon: +43 670 3519322\nE-Mail: schmida.psychotherapie@gmail.com\n\n**Berufsbezeichnung**\nPsychotherapeutin in Fachausbildung unter Lehrsupervision\nVerliehen in Österreich\n\n**Verantwortlich für den Inhalt**\nCarina Schmida, BA.pth.\n\n**Haftung für Inhalte**\nDie Inhalte dieser Website werden mit größtmöglicher Sorgfalt erstellt. Für die Richtigkeit, Vollständigkeit und Aktualität der Inhalte kann jedoch keine Gewähr übernommen werden.'
-      }, source.impressum)
+      }, source.impressum),
+      privacy: mergeDefaults({
+        eyebrow: '',
+        title: 'Datenschutzerklärung',
+        intro: '',
+        body: ''
+      }, source.privacy)
     };
   };
 
