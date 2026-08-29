@@ -11,7 +11,7 @@ window.practiceContent = {
     "home": "Startseite"
   },
   "hero": {
-    "eyebrow": "Psychotherapeutin in Ausbildung unter Supervision",
+    "eyebrow": "Psychotherapeutin in Fachausbildung unter Lehrsupervision",
     "title": "Gefühle annehmen.\nGedanken ordnen.\nLeben gestalten.",
     "sentence": "",
     "contactButton": "Erstgespräch vereinbaren",
@@ -236,12 +236,12 @@ window.practiceContent = {
         "title": "Rahmenbedingungen",
         "intro": "",
         "highlightLabel": "",
-        "highlightText": "Psychotherapeutin in Ausbildung unter Supervision",
-        "highlightDetail": "Als Psychotherapeutin in Ausbildung unter Supervision stehe ich im regelmäßigen fachlichen Austausch mit erfahrenen Psychotherapeut:innen. Im Sinne der Qualitätssicherung bekomme ich zusätzlichen Input, um Ihre Therapie bestmöglich gestalten zu können.",
+        "highlightText": "Psychotherapeutin in Fachausbildung unter Lehrsupervision",
+        "highlightDetail": "Als Psychotherapeutin in Fachausbildung unter Lehrsupervision stehe ich im regelmäßigen fachlichen Austausch mit erfahrenen Psychotherapeut:innen. Im Sinne der Qualitätssicherung bekomme ich zusätzlichen Input, um Ihre Therapie bestmöglich gestalten zu können.",
         "items": [
           {
             "title": "Zielgruppe",
-            "text": "derzeit vor allem Erwachsene,\naber auch Kinder und Jugendliche"
+            "text": "vor allem Erwachsene,\naber auch Kinder und Jugendliche"
           },
           {
             "title": "Setting",
