@@ -572,6 +572,37 @@ test('mobile overflow safeguards leave desktop grid sizing unchanged', async ({ 
   expect(mobileSizing.tableScrollWidth).toBeGreaterThan(mobileSizing.tableWidth);
 });
 
+test('tablet sections use full-width headings and stacked timelines', async ({ page }) => {
+  await page.setViewportSize({ width:820,height:1180 });
+  await page.goto(siteUrl);
+
+  const headings = page.locator('.dynamic-section h2');
+  expect(await headings.count()).toBeGreaterThan(0);
+  for (let index = 0; index < await headings.count(); index += 1) {
+    await expect(headings.nth(index)).toHaveCSS('max-width','none');
+  }
+
+  const timeline = page.locator('.content-section[data-layout="timeline"]').first();
+  await expect(timeline).toBeVisible();
+  const tabletLayout = await timeline.locator('.timeline-grid').evaluate((grid) => {
+    const copy = grid.querySelector(':scope > .timeline-copy')!.getBoundingClientRect();
+    const timelineContent = grid.querySelector(':scope > .timeline-switchable')!.getBoundingClientRect();
+    const firstItem = grid.querySelector('.timeline-list li')!;
+    return {
+      columns:getComputedStyle(grid).gridTemplateColumns.split(' ').length,
+      copyBottom:copy.bottom,
+      timelineTop:timelineContent.top,
+      firstItemColumns:getComputedStyle(firstItem).gridTemplateColumns.split(' ').length,
+      viewport:document.documentElement.clientWidth,
+      documentWidth:document.documentElement.scrollWidth
+    };
+  });
+  expect(tabletLayout.columns).toBe(1);
+  expect(tabletLayout.timelineTop).toBeGreaterThanOrEqual(tabletLayout.copyBottom);
+  expect(tabletLayout.firstItemColumns).toBe(1);
+  expect(tabletLayout.documentWidth).toBeLessThanOrEqual(tabletLayout.viewport);
+});
+
 test('hero image stays uncropped and all content remains above the ribbon', async ({ page }) => {
   for (const viewport of [
     { width:390,height:844 },
