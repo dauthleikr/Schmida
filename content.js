@@ -336,7 +336,7 @@ window.practiceContent = {
     "eyebrow": "Rechtliche Hinweise",
     "title": "Impressum",
     "intro": "Informationspflicht gemäß § 5 E-Commerce-Gesetz (ECG) und\nOffenlegungspflicht gemäß § 25 Mediengesetz.",
-    "body": "**Medieninhaberin und für den Inhalt verantwortlich:**\n\nCarina Schmida, BA.pth.\nNeubaugasse 7/2/49\n1070 Wien  \nÖsterreich\n\nE-Mail: schmida.psychotherapie@gmail.com\t\nTelefon: +43 670 3519322\n\n**Unternehmensgegenstand:**  \nPsychotherapie\n\n**Berufsbezeichnung:**  \nPsychotherapeutin in Fachausbildung unter Lehrsupervision \n\n**Verleihungsstaat:**  \nÖsterreich\n\n**Berufsrechtliche Vorschriften:**  \nPsychotherapiegesetz 2024 (PThG 2024)  \nAbrufbar im Rechtsinformationssystem des Bundes (RIS).\n\n**Zuständige Aufsichtsbehörde:**  \nBundesministerium für Arbeit, Soziales, Gesundheit, Pflege und Konsumentenschutz\n\n**Berufsverband:**  \nMitglied bei der Vereinigung Österreichischer PsychotherapeutInnen (VÖPP)"
+    "body": "**Medieninhaberin und für den Inhalt verantwortlich:**\nCarina Schmida, BA.pth.\nNeubaugasse 7/2/49\n1070 Wien  \nÖsterreich\n\nE-Mail: schmida.psychotherapie@gmail.com\t\nTelefon: +43 670 3519322\n\n**Unternehmensgegenstand:**  \nPsychotherapie\n\n**Berufsbezeichnung:**  \nPsychotherapeutin in Fachausbildung unter Lehrsupervision \n\n**Verleihungsstaat:**  \nÖsterreich\n\n**Berufsrechtliche Vorschriften:**  \nPsychotherapiegesetz 2024 (PThG 2024)  \nAbrufbar im Rechtsinformationssystem des Bundes (RIS).\n\n**Zuständige Aufsichtsbehörde:**  \nBundesministerium für Arbeit, Soziales, Gesundheit, Pflege und Konsumentenschutz\n\n**Berufsverband:**  \nMitglied bei der Vereinigung Österreichischer PsychotherapeutInnen (VÖPP)"
   },
   "privacy": {
     "eyebrow": "Rechtliche Hinweise",

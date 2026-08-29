@@ -109,7 +109,8 @@
         .replace(/\[([^\]]+)\]\((https?:\/\/[^\s)]+)\)/g,'<a href="$2" target="_blank" rel="noreferrer">$1</a>')
         .replace(/\[([^\]]+)\]\(\/impressum(?:\.html)?\)/gi,'<a href="impressum.html">$1</a>')
         .replace(/\[([^\]]+)\]\(((?:\.{0,2}\/)?[a-z\d][a-z\d._~\/-]*(?:[?#][^\s)]*)?)\)/gi,'<a href="$2">$1</a>')
-        .replace(/\n/g,'<br>');
+        .replace(/\n/g,'<br>')
+        .replace(/\<\/strong\>[\s]*\<br\>/g, '</strong>');
       const formatParagraphs = (value) => String(value ?? '').trim().split(/\r?\n\s*\r?\n/).filter(Boolean).map((paragraph) => `<p>${format(paragraph)}</p>`).join('');
       const palette = { ...window.practiceContentModel.themes[content.colorTheme], ...content.customColors };
       Object.entries(palette).forEach(([token,value]) => { if (token.startsWith('--')) document.documentElement.style.setProperty(token,value); });
