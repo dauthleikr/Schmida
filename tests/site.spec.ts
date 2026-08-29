@@ -518,6 +518,60 @@ test('provides a usable compact navigation', async ({ page }) => {
   await expect(page.locator('#kontakt')).toBeInViewport();
 });
 
+test('mobile overflow safeguards leave desktop grid sizing unchanged', async ({ page }) => {
+  await page.setViewportSize({ width:1280,height:900 });
+  await page.goto(siteUrl);
+  const desktopSizing = await page.locator('.hero-inner').evaluate((hero) => ({
+    documentOverflow:getComputedStyle(document.documentElement).overflowX,
+    bodyOverflow:getComputedStyle(document.body).overflowX,
+    copyMinWidth:getComputedStyle(hero.querySelector('.hero-copy')!).minWidth,
+    sectionWrap:getComputedStyle(document.querySelector('.dynamic-section')!).overflowWrap
+  }));
+  expect(desktopSizing).toEqual({
+    documentOverflow:'visible',
+    bodyOverflow:'visible',
+    copyMinWidth:'auto',
+    sectionWrap:'normal'
+  });
+
+  await page.setViewportSize({ width:390,height:844 });
+  await page.goto(siteUrl);
+  await page.locator('.dynamic-section .page').first().evaluate((container) => {
+    const probe = document.createElement('div');
+    const longText = document.createElement('p');
+    longText.textContent = `https://example.test/${'mobile-overflow-'.repeat(30)}`;
+    const table = document.createElement('table');
+    table.innerHTML = `<tbody><tr><td style="white-space:nowrap">${'Wide table cell '.repeat(30)}</td><td>Second cell</td></tr></tbody>`;
+    probe.append(longText,table);
+    container.append(probe);
+  });
+
+  const mobileSizing = await page.locator('.dynamic-section .page').first().evaluate((container) => {
+    const viewport = document.documentElement.clientWidth;
+    const pageBox = container.getBoundingClientRect();
+    const header = document.querySelector('.site-header')!.getBoundingClientRect();
+    const table = container.querySelector('table')!;
+    return {
+      viewport,
+      documentWidth:document.documentElement.scrollWidth,
+      documentOverflow:getComputedStyle(document.documentElement).overflowX,
+      pageLeft:pageBox.left,
+      pageRight:pageBox.right,
+      headerLeft:header.left,
+      headerRight:header.right,
+      tableWidth:table.clientWidth,
+      tableScrollWidth:table.scrollWidth
+    };
+  });
+  expect(mobileSizing.documentWidth).toBeLessThanOrEqual(mobileSizing.viewport);
+  expect(mobileSizing.documentOverflow).toBe('hidden');
+  expect(mobileSizing.pageLeft).toBeCloseTo(16,0);
+  expect(mobileSizing.pageRight).toBeCloseTo(mobileSizing.viewport - 16,0);
+  expect(mobileSizing.headerLeft).toBeCloseTo(0,0);
+  expect(mobileSizing.headerRight).toBeCloseTo(mobileSizing.viewport,0);
+  expect(mobileSizing.tableScrollWidth).toBeGreaterThan(mobileSizing.tableWidth);
+});
+
 test('hero image stays uncropped and all content remains above the ribbon', async ({ page }) => {
   for (const viewport of [
     { width:390,height:844 },
