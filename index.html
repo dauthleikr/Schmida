@@ -92,7 +92,7 @@
     }
 
     * { box-sizing:border-box; }
-    html { scroll-behavior:smooth; scroll-padding-top:84px; }
+    html { scroll-behavior:smooth; scroll-padding-top:84px; -webkit-text-size-adjust:100%; text-size-adjust:100%; }
     body { margin:0; background:var(--paper); color:var(--ink); font-family:var(--sans); font-size:16px; line-height:1.6; }
     a { color:inherit; }
     h1,h2,h3,p { margin-top:0; }
@@ -385,7 +385,8 @@
     @media (max-width:900px) {
       :root { --page:min(1120px,calc(100% - 40px)); }
       html,body { max-width:100%; overflow-x:hidden; }
-      .dynamic-section { overflow-wrap:anywhere; }
+      .dynamic-section p,.dynamic-section li,.dynamic-section dd,.dynamic-section td,.dynamic-section th,.dynamic-section a { overflow-wrap:anywhere; }
+      .dynamic-section h1,.dynamic-section h2,.dynamic-section h3 { overflow-wrap:normal; word-break:normal; }
       .dynamic-section table { display:block; width:100%; max-width:100%; overflow-x:auto; }
       .dynamic-section h2 { max-width:none; }
       .section-heading-desktop { display:none; }
@@ -528,7 +529,8 @@
       .price-row { grid-template-columns:1fr; gap:6px; }
       .price-value { max-width:none; text-align:left; }
       .conditions-highlight { margin-top:32px; padding-right:26px; padding-left:26px; }
-      .dynamic-section.layout-conditions { --section-title-size:clamp(1.9rem,9.2vw,2.45rem); }
+      .dynamic-section.layout-conditions { --section-title-size:clamp(1.5rem,7.8vw,2.2rem); }
+      .dynamic-section.layout-conditions .section-heading-mobile h2 { white-space:nowrap; }
       .contact-details { grid-template-columns:1fr; }
       .topics-list { grid-template-columns:1fr; }
       .map-link { margin-right:24px; }

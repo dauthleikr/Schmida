@@ -652,6 +652,52 @@ test('tablet sections use full-width headings and stacked timelines', async ({ p
   expect(tabletLayout.documentWidth).toBeLessThanOrEqual(tabletLayout.viewport);
 });
 
+test('mobile headings and timeline periods do not split inside words or years', async ({ page }) => {
+  for (const viewport of [
+    { width:320,height:740 },
+    { width:360,height:780 },
+    { width:412,height:915 },
+    { width:820,height:1180 }
+  ]) {
+    await page.setViewportSize(viewport);
+    await page.goto(siteUrl);
+
+    const conditionsHeading = page.locator('.content-section[data-layout="conditions"] .section-heading-mobile h2').first();
+    const headingMetrics = await conditionsHeading.evaluate((heading) => {
+      const range = document.createRange();
+      range.selectNodeContents(heading);
+      const box = range.getBoundingClientRect();
+      return {
+        lineCount:range.getClientRects().length,
+        left:box.left,
+        right:box.right,
+        pageRight:heading.closest('.page')!.getBoundingClientRect().right,
+        whiteSpace:getComputedStyle(heading).whiteSpace
+      };
+    });
+    expect(headingMetrics.lineCount).toBe(1);
+    expect(headingMetrics.right).toBeLessThanOrEqual(headingMetrics.pageRight + 1);
+    expect(headingMetrics.whiteSpace).toBe(viewport.width <= 440 ? 'nowrap' : 'normal');
+
+    const periods = page.locator('.content-section[data-layout="timeline"] .timeline-view:not([hidden]) .timeline-period');
+    expect(await periods.count()).toBeGreaterThan(0);
+    for (let index = 0; index < await periods.count(); index += 1) {
+      const periodMetrics = await periods.nth(index).evaluate((period) => {
+        const range = document.createRange();
+        range.selectNodeContents(period);
+        return {
+          lineCount:range.getClientRects().length,
+          whiteSpace:getComputedStyle(period).whiteSpace,
+          overflowWrap:getComputedStyle(period).overflowWrap
+        };
+      });
+      expect(periodMetrics.lineCount).toBe(1);
+      expect(periodMetrics.whiteSpace).toBe('nowrap');
+      expect(periodMetrics.overflowWrap).toBe('normal');
+    }
+  }
+});
+
 test('hero image stays uncropped and all content remains above the ribbon', async ({ page }) => {
   for (const viewport of [
     { width:390,height:844 },
@@ -1148,6 +1194,7 @@ test('wide image layout stacks its copy and offers designed image treatments', a
 
 test('wide image layout supports an editor-managed carousel', async ({ page }) => {
   await page.goto(editorUrl);
+  const fixtureImageSrc = await page.evaluate(() => window.practiceContentModel.normalize(window.practiceContent).heroImage.src);
 
   const wideImage = page.locator('.section-editor[data-section-id="praxis"]');
   const images = wideImage.locator('.collection:has([data-collection-key="images"])');
@@ -1157,7 +1204,7 @@ test('wide image layout supports an editor-managed carousel', async ({ page }) =
   await expect(wideImage.locator('.collection:has([data-collection-key="images"]) .collection-item')).toHaveCount(initialImageCount + 1);
 
   const secondImage = wideImage.locator('.collection:has([data-collection-key="images"]) .collection-item').last();
-  await secondImage.locator('[data-path$=".imageSrc"]').fill('assets/carina_profile.png');
+  await secondImage.locator('[data-path$=".imageSrc"]').fill(fixtureImageSrc);
   await secondImage.locator('[data-path$=".imageAlt"]').fill('Zweites Bild im Karussell');
   await wideImage.getByRole('button',{ name:/Desktopvorschau/ }).click();
 
