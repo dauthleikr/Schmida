@@ -11,7 +11,7 @@ window.practiceContent = {
     "home": "Startseite"
   },
   "hero": {
-    "eyebrow": "Psychotherapeutin in Ausbildung unter Supervision",
+    "eyebrow": "Psychotherapeutin in Fachausbildung unter Lehrsupervision",
     "title": "Gefühle annehmen.\nGedanken ordnen.\nLeben gestalten.",
     "sentence": "",
     "contactButton": "Erstgespräch vereinbaren",
@@ -236,12 +236,12 @@ window.practiceContent = {
         "title": "Rahmenbedingungen",
         "intro": "",
         "highlightLabel": "",
-        "highlightText": "Psychotherapeutin in Ausbildung unter Supervision",
-        "highlightDetail": "Als Psychotherapeutin in Ausbildung unter Supervision stehe ich im regelmäßigen fachlichen Austausch mit erfahrenen Psychotherapeut:innen. Im Sinne der Qualitätssicherung bekomme ich zusätzlichen Input, um Ihre Therapie bestmöglich gestalten zu können.",
+        "highlightText": "Psychotherapeutin in Fachausbildung unter Lehrsupervision",
+        "highlightDetail": "Als Psychotherapeutin in Fachausbildung unter Lehrsupervision stehe ich im regelmäßigen fachlichen Austausch mit erfahrenen Psychotherapeut:innen. Im Sinne der Qualitätssicherung bekomme ich zusätzlichen Input, um Ihre Therapie bestmöglich gestalten zu können.",
         "items": [
           {
             "title": "Zielgruppe",
-            "text": "derzeit vor allem Erwachsene,\naber auch Kinder und Jugendliche"
+            "text": "vor allem Erwachsene,\naber auch Kinder und Jugendliche"
           },
           {
             "title": "Setting",
@@ -328,6 +328,20 @@ window.practiceContent = {
     }
   ],
   "footer": {
-    "copyright": "© 2026 Carina Schmida, BA.pth."
+    "copyright": "© 2026 Carina Schmida, BA.pth.",
+    "impressumLabel": "Impressum",
+    "privacyLabel": "Datenschutz"
+  },
+  "impressum": {
+    "eyebrow": "Rechtliche Hinweise",
+    "title": "Impressum",
+    "intro": "Informationspflicht gemäß § 5 E-Commerce-Gesetz (ECG) und\nOffenlegungspflicht gemäß § 25 Mediengesetz.",
+    "body": "**Medieninhaberin und für den Inhalt verantwortlich:**\nCarina Schmida, BA.pth.\nNeubaugasse 7/2/49\n1070 Wien  \nÖsterreich\n\nE-Mail: schmida.psychotherapie@gmail.com\t\nTelefon: +43 670 3519322\n\n**Unternehmensgegenstand:**  \nPsychotherapie\n\n**Berufsbezeichnung:**  \nPsychotherapeutin in Fachausbildung unter Lehrsupervision \n\n**Verleihungsstaat:**  \nÖsterreich\n\n**Berufsrechtliche Vorschriften:**  \nPsychotherapiegesetz 2024 (PThG 2024)  \nAbrufbar im Rechtsinformationssystem des Bundes (RIS).\n\n**Zuständige Aufsichtsbehörde:**  \nBundesministerium für Arbeit, Soziales, Gesundheit, Pflege und Konsumentenschutz\n\n**Berufsverband:**  \nMitglied bei der Vereinigung Österreichischer PsychotherapeutInnen (VÖPP)"
+  },
+  "privacy": {
+    "eyebrow": "Rechtliche Hinweise",
+    "title": "Datenschutzerklärung",
+    "intro": "Diese Datenschutzerklärung informiert über die Verarbeitung\npersonenbezogener Daten beim Besuch dieser Website.",
+    "body": "** Verantwortliche **\n\nCarina Schmida, BA.pth.\n\nDie Kontaktdaten der Verantwortlichen finden Sie im [Impressum](/impressum).\n\n** Hosting über GitHub Pages **\n\nDiese Website wird über GitHub Pages bereitgestellt.\n\nAnbieter sind GitHub B.V., Prins Bernhardplein 200, 1097 JB Amsterdam, Niederlande, sowie GitHub, Inc., 88 Colin P. Kelly Jr. Street, San Francisco, CA 94107, USA.\n\nBeim Aufruf dieser Website werden technisch notwendige Verbindungsdaten verarbeitet. GitHub gibt insbesondere an, die IP-Adressen von Besuchern von GitHub-Pages-Websites zu Sicherheitszwecken zu protokollieren und zu speichern.\n\nDie Verarbeitung erfolgt zur sicheren und zuverlässigen Bereitstellung dieser Website. Rechtsgrundlage ist Art. 6 Abs. 1 lit. f DSGVO. Das berechtigte Interesse besteht im sicheren und technisch zuverlässigen Betrieb der Website.\n\nDie Speicherdauer richtet sich nach den von GitHub festgelegten Aufbewahrungsfristen und dem jeweiligen Verarbeitungszweck.\n\nGitHub kann personenbezogene Daten auch außerhalb des Europäischen Wirtschaftsraums, insbesondere in den USA, verarbeiten. Weitere Informationen zur Datenverarbeitung finden Sie in der Datenschutzerklärung von GitHub.\n\n** Cloudflare Web Analytics **\n\nWir verwenden Cloudflare Web Analytics zur statistischen Auswertung der Nutzung und zur Messung der technischen Performance dieser Website.\n\nAnbieter ist Cloudflare, Inc., 101 Townsend Street, San Francisco, CA 94107, USA.\n\nCloudflare Web Analytics verwendet nach Angaben des Anbieters keine Cookies oder Local-Storage-Einträge, erstellt keine individuellen Nutzerprofile und verwendet kein Fingerprinting zur Identifikation einzelner Besucher.\n\nZur Ermittlung der Messwerte verwendet Cloudflare Web Analytics einen JavaScript-Beacon und die Performance-API des Browsers. Dabei werden insbesondere technische Performance- und Nutzungsmetriken an Cloudflare übertragen.\n\nCloudflare gibt an, im Rahmen von Cloudflare Web Analytics keine personenbezogenen Daten der Websitebesucher zu erheben oder zu verwenden und einzelne Besucher nicht websiteübergreifend zu verfolgen.\n\nWeitere Informationen finden Sie in den Informationen zu Cloudflare Web Analytics und in der Datenschutzerklärung von Cloudflare.\n\n** Google Maps **\n\nAuf dieser Website kann der Kartendienst Google Maps geladen werden.\n\nAnbieter innerhalb des Europäischen Wirtschaftsraums ist Google Ireland Limited, Gordon House, Barrow Street, Dublin 4, Irland.\n\nGoogle Maps wird beim Aufruf dieser Website nicht automatisch geladen. Stattdessen wird zunächst ein Datenschutzhinweis angezeigt.\n\nErst wenn Sie durch Betätigung der Schaltfläche „Google Maps laden“ Ihre Einwilligung erteilen, wird eine Verbindung zu Google hergestellt. Dabei können insbesondere Ihre IP-Adresse sowie Informationen über Ihren Browser und Ihr Endgerät an Google übermittelt werden. Google kann im Rahmen der Bereitstellung von Google Maps Cookies oder vergleichbare Technologien verwenden.\n\nDie Verarbeitung erfolgt auf Grundlage Ihrer Einwilligung gemäß Art. 6 Abs. 1 lit. a DSGVO und § 165 Abs. 3 TKG 2021.\n\nDie Einwilligung ist freiwillig. Die Anschrift und Kontaktdaten sind auch ohne Aktivierung von Google Maps verfügbar.\n\nDie Entscheidung zum Laden von Google Maps wird von dieser Website nicht gespeichert. Nach einem erneuten Aufruf bzw. Neuladen der Seite bleibt Google Maps daher wieder deaktiviert, bis Sie es erneut aktivieren.\n\nIm Rahmen der Nutzung von Google Maps können Daten auch in den USA verarbeitet werden. Google LLC ist nach dem EU-US Data Privacy Framework zertifiziert.\n\nWeitere Informationen finden Sie in der Datenschutzerklärung von Google.\n\n** Cookies und lokale Speicherung **\n\nDiese Website setzt selbst keine Cookies und speichert keine Informationen im Local Storage oder in vergleichbaren Speichermechanismen des Browsers.\n\nCloudflare Web Analytics verwendet nach Angaben von Cloudflare ebenfalls keine Cookies oder Local-Storage-Einträge.\n\nWenn Sie Google Maps ausdrücklich aktivieren, kann Google Cookies oder vergleichbare Technologien einsetzen.\n\n** Ihre Rechte **\n\nSoweit personenbezogene Daten verarbeitet werden und die gesetzlichen Voraussetzungen vorliegen, stehen Ihnen insbesondere die Rechte auf Auskunft, Berichtigung, Löschung, Einschränkung der Verarbeitung, Widerspruch und Datenübertragbarkeit zu. Eine erteilte Einwilligung können Sie jederzeit mit Wirkung für die Zukunft widerrufen.\n\nSie haben außerdem das Recht, sich bei der Österreichischen Datenschutzbehörde zu beschweren:\n\nÖsterreichische Datenschutzbehörde  \nBarichgasse 40–42  \n1030 Wien  \nÖsterreich"
   }
 };

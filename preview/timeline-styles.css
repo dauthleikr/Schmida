@@ -347,7 +347,7 @@
   background:rgba(255,255,255,.13);
 }
 
-@media (max-width:760px) {
+@media (max-width:900px) {
   .timeline-toggle-wrap {
     margin-bottom:36px;
   }

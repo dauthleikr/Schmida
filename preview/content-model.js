@@ -421,6 +421,12 @@
       customColors: source.customColors && typeof source.customColors === 'object' ? source.customColors : {},
       practiceName: String(source.practiceName || 'Praxis für Psychotherapie'),
       practitionerName: String(source.practitionerName || ''),
+      seo: mergeDefaults({
+        browserTitle: 'Carina Schmida | Psychotherapie Wien',
+        searchTitle: 'Psychotherapie & Verhaltenstherapie in 1070 Wien | Carina Schmida',
+        description: 'Psychotherapie und Verhaltenstherapie für Erwachsene bei Carina Schmida in 1070 Wien (7. Bezirk), in der Praxisgemeinschaft Apädo.',
+        siteUrl: 'https://schmida-psychotherapie.at/'
+      },source.seo),
       siteIcon: relativeAssetPath(source.siteIcon || 'assets/icon4_tiny.png'),
       showHeaderIcon: source.showHeaderIcon !== false,
       navigation: { home: String(source.navigation?.home || 'Startseite') },
@@ -428,7 +434,19 @@
       heroImage,
       sectionSpacing,
       sections: sections.map(normalizeSection),
-      footer: mergeDefaults({ copyright: '' }, source.footer)
+      footer: mergeDefaults({ copyright: '', impressumLabel: 'Impressum', privacyLabel: 'Datenschutz' }, source.footer),
+      impressum: mergeDefaults({
+        eyebrow: 'Rechtliche Hinweise',
+        title: 'Impressum',
+        intro: 'Angaben gemäß § 5 ECG und § 25 MedienG',
+        body: '**Diensteanbieterin**\nCarina Schmida, BA.pth.\nNeubaugasse 7 / Stiege II / 2. Stock / Top 49\n1070 Wien\n\n**Kontakt**\nTelefon: +43 670 3519322\nE-Mail: schmida.psychotherapie@gmail.com\n\n**Berufsbezeichnung**\nPsychotherapeutin in Fachausbildung unter Lehrsupervision\nVerliehen in Österreich\n\n**Verantwortlich für den Inhalt**\nCarina Schmida, BA.pth.\n\n**Haftung für Inhalte**\nDie Inhalte dieser Website werden mit größtmöglicher Sorgfalt erstellt. Für die Richtigkeit, Vollständigkeit und Aktualität der Inhalte kann jedoch keine Gewähr übernommen werden.'
+      }, source.impressum),
+      privacy: mergeDefaults({
+        eyebrow: '',
+        title: 'Datenschutzerklärung',
+        intro: '',
+        body: ''
+      }, source.privacy)
     };
   };
 
