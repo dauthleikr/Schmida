@@ -677,7 +677,7 @@ test('mobile headings and timeline periods do not split inside words or years', 
     });
     expect(headingMetrics.lineCount).toBe(1);
     expect(headingMetrics.right).toBeLessThanOrEqual(headingMetrics.pageRight + 1);
-    expect(headingMetrics.whiteSpace).toBe(viewport.width <= 440 ? 'nowrap' : 'normal');
+    expect(headingMetrics.whiteSpace).toBe('normal');
 
     const periods = page.locator('.content-section[data-layout="timeline"] .timeline-view:not([hidden]) .timeline-period');
     expect(await periods.count()).toBeGreaterThan(0);
