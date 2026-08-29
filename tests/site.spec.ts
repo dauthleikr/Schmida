@@ -1143,6 +1143,7 @@ test('contact layout separates personal and office details with a safe map', asy
   const consent = desktopPage.locator('[data-map-consent]');
   await expect(consent).toContainText('Google Maps ist aus Datenschutzgründen deaktiviert.');
   await expect(consent).toContainText('Ihre IP-Adresse und technische Informationen');
+  await expect(consent.locator('.map-consent-text p').first()).toHaveCSS('font-size','13.12px');
   await expect(consent.getByRole('link',{ name:'Datenschutzerklärung' })).toHaveAttribute('href','datenschutz.html');
   expect(mapRequests).toBe(0);
   await consent.getByRole('button',{ name:'Google Maps laden' }).click();
