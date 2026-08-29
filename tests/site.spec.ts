@@ -241,6 +241,15 @@ test('self-hosts Inter without Google Fonts resources', async ({ page }) => {
   expect(interFaces).toContainEqual({ style:'normal',status:'loaded' });
 });
 
+test('includes the Cloudflare Web Analytics beacon on every HTML page', async () => {
+  const snippet = `<!-- Cloudflare Web Analytics --><script type='module' src='https://static.cloudflareinsights.com/beacon.min.js' data-cf-beacon='{"token": "758ef8a100e843e48eba0e219725cffd"}'></script><!-- End Cloudflare Web Analytics -->`;
+  for (const file of ['index.html','editor.html','impressum.html','datenschutz.html']) {
+    const source = await readFile(resolve(file),'utf8');
+    expect(source).toContain(snippet);
+    expect(source.lastIndexOf(snippet)).toBeLessThan(source.lastIndexOf('</body>'));
+  }
+});
+
 test('places editable Rahmenbedingungen directly after Praxis', async ({ page }) => {
   await page.goto(siteUrl);
 
