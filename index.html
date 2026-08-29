@@ -310,6 +310,8 @@
 
     .footer-band { background:var(--wine-950); }
     .site-footer { display:flex; align-items:center; justify-content:space-between; min-height:83px; color:rgba(255,255,255,.6); font-size:.72rem; }
+    .site-footer a { color:rgba(255,255,255,.82); text-underline-offset:3px; }
+    .site-footer a:hover,.site-footer a:focus-visible { color:#fff; }
 
     @media (max-width:900px) {
       :root { --page:min(100% - 40px,1120px); }
@@ -499,7 +501,7 @@
     </section>
     <div class="content-sections" id="content-sections"></div>
   </main>
-  <div class="footer-band"><footer class="page site-footer"><span data-footer-copyright></span></footer></div>
+  <div class="footer-band"><footer class="page site-footer"><span data-footer-copyright></span><a href="impressum.html" data-impressum-link>Impressum</a></footer></div>
   <script>
     (() => {
       let source = window.practiceContent;
@@ -534,6 +536,9 @@
       const formatHeroTitle = (value) => String(value ?? '').split(/\r?\n/).map((line) => `<span class="hero-title-line">${format(line)}</span>`).join('');
       document.querySelectorAll('[data-hero-field]').forEach((element) => { element.innerHTML = element.dataset.heroField === 'title' ? formatHeroTitle(content.hero.title) : format(content.hero[element.dataset.heroField]); });
       document.querySelector('[data-footer-copyright]').textContent = content.footer.copyright;
+      const impressumLink = document.querySelector('[data-impressum-link]');
+      impressumLink.textContent = content.footer.impressumLabel;
+      impressumLink.hidden = !String(content.footer.impressumLabel || '').trim();
       const hero = document.querySelector('.hero');
       const image = document.querySelector('.hero-image');
       hero.dataset.titleSize = content.hero.titleSize;

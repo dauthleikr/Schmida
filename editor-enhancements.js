@@ -207,7 +207,17 @@
 
   function renderFooter() {
     const panel = document.querySelector('#footer-editor');
-    panel.innerHTML = `${panelHeading('Footer','Der kompakte dunkle Abschluss bleibt fest bestehen.')}<div class="grid">${fieldMarkup({ label:'Copyright-Zeile',type:'text' },'footer.copyright',data.footer.copyright)}</div>`;
+    panel.innerHTML = `${panelHeading('Footer','Der kompakte dunkle Abschluss bleibt fest bestehen.')}<div class="grid">${fieldMarkup({ label:'Copyright-Zeile',type:'text' },'footer.copyright',data.footer.copyright)}${fieldMarkup({ label:'Linkbeschriftung zum Impressum',type:'text' },'footer.impressumLabel',data.footer.impressumLabel)}</div>`;
+  }
+
+  function renderImpressum() {
+    const panel = document.querySelector('#impressum-editor');
+    panel.innerHTML = `${panelHeading('Impressum','Die separate Impressum-Seite wird über diese Felder gepflegt und über den Footer verlinkt.')}<p class="editor-page-link"><a href="impressum.html" target="_blank" rel="noreferrer">Impressum-Seite öffnen ↗</a></p><div class="grid">
+      ${fieldMarkup({ label:'Überzeile',type:'text' },'impressum.eyebrow',data.impressum.eyebrow)}
+      ${fieldMarkup({ label:'Titel',type:'text' },'impressum.title',data.impressum.title)}
+      ${fieldMarkup({ label:'Einleitung',type:'rich',editorRows:3 },'impressum.intro',data.impressum.intro)}
+      ${fieldMarkup({ label:'Inhalt',type:'rich',editorRows:18 },'impressum.body',data.impressum.body)}
+    </div>`;
   }
 
   function renderAll() {
@@ -215,6 +225,7 @@
     renderHero();
     renderSections();
     renderFooter();
+    renderImpressum();
   }
 
   const refreshPreview = () => {

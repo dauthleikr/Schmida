@@ -176,6 +176,25 @@ test('renders the new section schema with dynamic navigation and waves', async (
   expect(seamCoverage.background).not.toBe('rgba(0, 0, 0, 0)');
 });
 
+test('links to the standalone editable Impressum page', async ({ page }) => {
+  await page.goto(siteUrl);
+  await expect(page.locator('[data-impressum-link]')).toHaveAttribute('href','impressum.html');
+  await page.getByRole('link',{ name:'Impressum',exact:true }).click();
+  await expect(page).toHaveURL(`file:///${resolve('impressum.html').replace(/\\/g, '/')}`);
+  await expect(page.locator('[data-impressum-title]')).toHaveText('Impressum');
+  await expect(page.locator('[data-impressum-body]')).toContainText('Carina Schmida, BA.pth.');
+
+  await page.goto(editorUrl);
+  await expect(page.locator('#impressum-editor')).toContainText('Impressum');
+  const title = page.locator('[data-path="impressum.title"]');
+  const body = page.locator('[data-path="impressum.body"]');
+  await expect(title).toHaveValue('Impressum');
+  await expect(body).toHaveValue(/Diensteanbieterin/);
+  await title.fill('Impressum der Praxis');
+  await page.reload();
+  await expect(page.locator('[data-path="impressum.title"]')).toHaveValue('Impressum der Praxis');
+});
+
 test('places editable Rahmenbedingungen directly after Praxis', async ({ page }) => {
   await page.goto(siteUrl);
 

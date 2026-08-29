@@ -42,6 +42,8 @@
     .panel-heading { display:flex; align-items:end; justify-content:space-between; gap:20px; margin-bottom:24px; }
     .panel-heading h2 { margin:0 0 5px; color:var(--wine-dark); font-family:var(--serif); font-size:2rem; font-weight:400; }
     .panel-heading p { margin:0; color:var(--muted); font-size:.84rem; }
+    .editor-page-link { margin:-8px 0 24px; color:var(--wine); font-size:.8rem; font-weight:700; }
+    .editor-page-link a { color:inherit; }
     .grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:18px; }
     .grid-wide { grid-column:1/-1; }
     .field { display:grid; align-content:start; gap:7px; min-width:0; }
@@ -151,12 +153,14 @@
       <a href="#sections-editor">Seitenbereiche</a>
       <div class="editor-nav-sections" data-editor-section-nav></div>
       <a href="#footer-editor">Footer</a>
+      <a href="#impressum-editor">Impressum</a>
     </nav>
     <main class="editor" id="editor">
       <section class="editor-panel" id="general"></section>
       <section class="editor-panel" id="hero-editor"></section>
       <section class="editor-panel" id="sections-editor"></section>
       <section class="editor-panel" id="footer-editor"></section>
+      <section class="editor-panel" id="impressum-editor"></section>
       <div class="footer-actions">
         <button class="button danger" type="button" id="reset">Entwurf zurücksetzen</button>
         <button class="button primary" type="button" id="download-bottom">content.js herunterladen</button>
