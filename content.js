@@ -5,6 +5,12 @@ window.practiceContent = {
   "customColors": {},
   "practiceName": "Carina Schmida, BA.pth.",
   "practitionerName": "Carina Schmida",
+  "seo": {
+    "browserTitle": "Carina Schmida | Psychotherapie Wien",
+    "searchTitle": "Psychotherapie & Verhaltenstherapie in 1070 Wien | Carina Schmida",
+    "description": "Psychotherapie und Verhaltenstherapie für Erwachsene bei Carina Schmida in 1070 Wien (7. Bezirk), in der Praxisgemeinschaft Apädo.",
+    "siteUrl": "https://schmida-psychotherapie.at/"
+  },
   "siteIcon": "assets/icon4_tiny.png",
   "showHeaderIcon": false,
   "navigation": {
@@ -15,6 +21,7 @@ window.practiceContent = {
     "title": "Gefühle annehmen.\nGedanken ordnen.\nLeben gestalten.",
     "sentence": "",
     "contactButton": "Erstgespräch vereinbaren",
+    "availabilityHint": "Plätze verfügbar!",
     "titleSize": 54,
     "titleLineGap": 27,
     "titleWidthDesktop": 42,
@@ -330,7 +337,13 @@ window.practiceContent = {
   "footer": {
     "copyright": "© 2026 Carina Schmida, BA.pth.",
     "impressumLabel": "Impressum",
-    "privacyLabel": "Datenschutz"
+    "privacyLabel": "Datenschutz",
+    "links": [
+      {
+        "label": "matchyourtherapy.at",
+        "url": "https://matchyourtherapy.at/p/carina-schmida"
+      }
+    ]
   },
   "impressum": {
     "eyebrow": "Rechtliche Hinweise",
