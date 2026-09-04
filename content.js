@@ -15,6 +15,7 @@ window.practiceContent = {
     "title": "Gefühle annehmen.\nGedanken ordnen.\nLeben gestalten.",
     "sentence": "",
     "contactButton": "Erstgespräch vereinbaren",
+    "availabilityHint": "Plätze verfügbar!",
     "titleSize": 54,
     "titleLineGap": 27,
     "titleWidthDesktop": 42,
@@ -330,7 +331,8 @@ window.practiceContent = {
   "footer": {
     "copyright": "© 2026 Carina Schmida, BA.pth.",
     "impressumLabel": "Impressum",
-    "privacyLabel": "Datenschutz"
+    "privacyLabel": "Datenschutz",
+    "links": []
   },
   "impressum": {
     "eyebrow": "Rechtliche Hinweise",

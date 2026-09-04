@@ -385,7 +385,7 @@
     const source = input && typeof input === 'object' ? clone(input) : {};
     const sections = Array.isArray(source.sections) ? source.sections : [];
     const heroSource = source.hero && typeof source.hero === 'object' ? source.hero : {};
-    const hero = mergeDefaults({ eyebrow: '', title: '', sentence: '', contactButton: 'Kontakt aufnehmen', titleSize: 90, titleLineGap: 0, titleWidthDesktop: 42, eyebrowTitleSpacingDesktop: 15, eyebrowTitleSpacingMobile: 15 }, heroSource);
+    const hero = mergeDefaults({ eyebrow: '', title: '', sentence: '', contactButton: 'Kontakt aufnehmen', availabilityHint: '', titleSize: 90, titleLineGap: 0, titleWidthDesktop: 42, eyebrowTitleSpacingDesktop: 15, eyebrowTitleSpacingMobile: 15 }, heroSource);
     const heroImage = mergeDefaults({ src: 'assets/carina_close2.JPG', alt: '', layout: 'portrait', blend: 'duotone', position: 'center top', mobileLayout: 'portrait', mobilePosition: 'center center', overlay: 'soft', blendWidthDesktop: 32, blendWidthMobile: 28 }, source.heroImage);
     const sectionSpacing = mergeDefaults({ desktop: 104,mobile: 64 },source.sectionSpacing);
     const legacyHeroTitleSize = heroTitleSizeLegacyValues[hero.titleSize];
@@ -415,6 +415,11 @@
     heroImage.blendWidthMobile = Math.min(80,Math.max(5,Number(heroImage.blendWidthMobile) || 28));
     sectionSpacing.desktop = Math.min(180,Math.max(48,Number(sectionSpacing.desktop) || 104));
     sectionSpacing.mobile = Math.min(120,Math.max(36,Number(sectionSpacing.mobile) || 64));
+    const footer = mergeDefaults({ copyright: '', impressumLabel: 'Impressum', privacyLabel: 'Datenschutz', links: [] }, source.footer);
+    footer.links = (Array.isArray(footer.links) ? footer.links : []).slice(0,12).map((link) => ({
+      label: String(link?.label || ''),
+      url: String(link?.url || '')
+    }));
     return {
       schemaVersion: 3,
       colorTheme: themes[source.colorTheme] ? source.colorTheme : 'wine',
@@ -434,7 +439,7 @@
       heroImage,
       sectionSpacing,
       sections: sections.map(normalizeSection),
-      footer: mergeDefaults({ copyright: '', impressumLabel: 'Impressum', privacyLabel: 'Datenschutz' }, source.footer),
+      footer,
       impressum: mergeDefaults({
         eyebrow: 'Rechtliche Hinweise',
         title: 'Impressum',

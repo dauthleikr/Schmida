@@ -310,6 +310,20 @@ test('includes the Cloudflare Web Analytics beacon on every HTML page', async ()
   }
 });
 
+test('adds arbitrary external links to the footer in the editor', async ({ page }) => {
+  await page.goto(editorUrl);
+  await page.locator('[data-footer-link-action="add"]').click();
+  const link = page.locator('#footer-editor .collection-item').last();
+  await link.locator('[data-path$=".label"]').fill('MatchYourTherapie');
+  await link.locator('[data-path$=".url"]').fill('https://www.matchyourtherapie.at/profile/carina-schmida');
+  await page.getByRole('button',{ name:'Vorschau Desktop' }).click();
+
+  const footerLink = page.frameLocator('#preview-frame').getByRole('link',{ name:'MatchYourTherapie' });
+  await expect(footerLink).toHaveAttribute('href','https://www.matchyourtherapie.at/profile/carina-schmida');
+  await expect(footerLink).toHaveAttribute('target','_blank');
+  await expect(footerLink).toHaveAttribute('rel','noreferrer');
+});
+
 test('publishes editable SEO metadata and LocalBusiness data from the content model', async ({ page }) => {
   await page.goto(siteUrl);
   const content = await page.evaluate(() => window.practiceContentModel.normalize(window.practiceContent));
@@ -739,6 +753,7 @@ test('hero image stays uncropped and all content remains above the ribbon', asyn
         ribbonTop:ribbon.top,
         ribbonBottom:ribbon.bottom,
         contentTop:firstText.top,
+        titleBottom:title.bottom,
         titleLeft:title.left,
         titleRight:title.right,
         titleWidth:title.width,
@@ -748,6 +763,7 @@ test('hero image stays uncropped and all content remains above the ribbon', asyn
         copyRight:copy.right,
         columnGap:parseFloat(getComputedStyle(document.querySelector('.hero-inner')!).columnGap) || 0,
         contactBottom:contact.bottom,
+        contactTop:contact.top,
         viewportWidth:document.documentElement.clientWidth
       };
     });
@@ -756,6 +772,7 @@ test('hero image stays uncropped and all content remains above the ribbon', asyn
     expect(layout.imageWidth / layout.imageHeight).toBeCloseTo(layout.naturalRatio,2);
     expect(layout.copyBottom).toBeLessThanOrEqual(layout.ribbonTop + 1);
     expect(layout.contactBottom).toBeLessThanOrEqual(layout.ribbonTop + 1);
+    expect(layout.contactTop - layout.titleBottom).toBeCloseTo(54,0);
 
     const expectedTopSpacing = Math.min(32,Math.max(20,viewport.width * .02));
     expect(layout.contentTop - layout.heroTop).toBeCloseTo(expectedTopSpacing,0);
@@ -1611,6 +1628,20 @@ test('sections can be reordered, removed and changed to another registered layou
   await expect(page.frameLocator('#preview-frame').locator('.content-section').first()).toHaveAttribute('data-layout','image');
 });
 
+test('shows availability below the hero contact button', async ({ page }) => {
+  await page.goto(siteUrl);
+
+  const contact = page.getByRole('link',{ name:'Erstgespräch vereinbaren',exact:true });
+  const availability = page.locator('.hero-availability');
+  await expect(contact).toBeVisible();
+  await expect(availability).toHaveText('Plätze verfügbar!');
+  await expect(availability).toBeVisible();
+  await expect(contact.locator('.hero-availability')).toHaveCount(0);
+  const positions = await Promise.all([contact,availability].map((element) => element.boundingBox()));
+  expect(positions[1]!.y).toBeGreaterThanOrEqual(positions[0]!.y + positions[0]!.height);
+  expect(positions[1]!.x).toBeCloseTo(positions[0]!.x,0);
+});
+
 test('rich-text controls and hero presentation remain editable', async ({ page }) => {
   await page.goto(editorUrl);
 
@@ -1668,6 +1699,7 @@ test('rich-text controls and hero presentation remain editable', async ({ page }
   await expect(page.locator('output[for="hero.titleWidthDesktop"]')).toHaveText('46%');
   await page.locator('.section-editor[data-section-id="psychotherapie"] [data-path$=".appearance.titleSize"]').selectOption('small');
   await page.locator('[data-path="hero.contactButton"]').fill('Erstgespräch anfragen');
+  await page.locator('[data-path="hero.availabilityHint"]').fill('Kurzfristig verfügbar');
   await page.getByRole('button',{ name:'Vorschau Desktop' }).click();
 
   const preview = page.frameLocator('#preview-frame');
@@ -1686,6 +1718,7 @@ test('rich-text controls and hero presentation remain editable', async ({ page }
   await expect(preview.locator('.hero')).toHaveCSS('--hero-blend-mobile','45%');
   await expect(preview.locator('#psychotherapie')).toHaveAttribute('data-title-size','small');
   await expect(preview.getByRole('link',{ name:'Erstgespräch anfragen' })).toHaveAttribute('href','#kontakt');
+  await expect(preview.locator('.hero-availability')).toHaveText('Kurzfristig verfügbar');
   await expect(preview.locator('h1 strong')).toHaveText('Ein neuer Titel');
 
   const backgroundBounds = await preview.locator('.hero-image-wrap').evaluate((element) => {

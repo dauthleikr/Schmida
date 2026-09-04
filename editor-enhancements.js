@@ -135,6 +135,7 @@
         ${fieldMarkup({ label:'Titelbreite Desktop',type:'range',min:30,max:55,step:1,unit:'%',help:'Breite der Textspalte bei seitlichen Desktop-Bildern. Der übrige Platz bleibt vollständig dem Bild vorbehalten.' },'hero.titleWidthDesktop',data.hero.titleWidthDesktop)}
         ${fieldMarkup({ label:'Einleitung',type:'rich',editorRows:4 },'hero.sentence',data.hero.sentence)}
         ${fieldMarkup({ label:'Kontakt-Button',type:'text' },'hero.contactButton',data.hero.contactButton)}
+        ${fieldMarkup({ label:'Verfügbarkeitshinweis',type:'text' },'hero.availabilityHint',data.hero.availabilityHint)}
         <div class="hero-settings grid-wide">
           <div class="grid">
             ${fieldMarkup({ label:'Bilddatei',type:'text' },'heroImage.src',image.src)}
@@ -211,7 +212,18 @@
 
   function renderFooter() {
     const panel = document.querySelector('#footer-editor');
-    panel.innerHTML = `${panelHeading('Footer','Der kompakte dunkle Abschluss bleibt fest bestehen.')}<div class="grid">${fieldMarkup({ label:'Copyright-Zeile',type:'text' },'footer.copyright',data.footer.copyright)}${fieldMarkup({ label:'Linkbeschriftung zum Impressum',type:'text' },'footer.impressumLabel',data.footer.impressumLabel)}${fieldMarkup({ label:'Linkbeschriftung zum Datenschutz',type:'text' },'footer.privacyLabel',data.footer.privacyLabel)}</div>`;
+    const links = data.footer.links || [];
+    panel.innerHTML = `${panelHeading('Footer','Der kompakte dunkle Abschluss bleibt fest bestehen.')}<div class="grid">
+      ${fieldMarkup({ label:'Copyright-Zeile',type:'text' },'footer.copyright',data.footer.copyright)}
+      ${fieldMarkup({ label:'Linkbeschriftung zum Impressum',type:'text' },'footer.impressumLabel',data.footer.impressumLabel)}
+      ${fieldMarkup({ label:'Linkbeschriftung zum Datenschutz',type:'text' },'footer.privacyLabel',data.footer.privacyLabel)}
+      <div class="collection grid-wide">
+        <div class="collection-head"><div><span class="field-label">Zusätzliche Links</span><span> · ${links.length} von 12</span></div><button class="button" type="button" data-footer-link-action="add" ${links.length >= 12 ? 'disabled' : ''}>Link hinzufügen</button></div>
+        <div class="collection-list">
+          ${links.map((link,index) => `<div class="collection-item"><div class="collection-fields" style="--item-columns:2">${fieldMarkup({ label:'Beschriftung',type:'text' },`footer.links.${index}.label`,link.label,{ compact:true })}${fieldMarkup({ label:'URL (inkl. https://)',type:'text' },`footer.links.${index}.url`,link.url,{ compact:true })}</div><button class="icon-button" type="button" data-footer-link-action="remove" data-footer-link-index="${index}" aria-label="Link entfernen">&times;</button></div>`).join('')}
+        </div>
+      </div>
+    </div>`;
   }
 
   function renderImpressum() {
@@ -367,6 +379,15 @@
       textarea.focus();
       textarea.setSelectionRange(start,start + replacement.length);
       textarea.dispatchEvent(new Event('input',{ bubbles:true }));
+      return;
+    }
+
+    const footerLinkAction = event.target.closest('[data-footer-link-action]')?.dataset.footerLinkAction;
+    if (footerLinkAction) {
+      if (footerLinkAction === 'add' && data.footer.links.length < 12) data.footer.links.push({ label:'',url:'' });
+      if (footerLinkAction === 'remove') data.footer.links.splice(Number(event.target.closest('[data-footer-link-index]').dataset.footerLinkIndex),1);
+      saveDraft();
+      renderFooter();
       return;
     }
 
