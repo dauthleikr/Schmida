@@ -123,12 +123,14 @@
     h1 { display:flex; width:100%; max-width:none; margin-bottom:26px; flex-direction:column; gap:var(--hero-title-line-gap); font-size:var(--hero-title-size); line-height:.9; }
     .hero-title-line { display:block; }
     .hero-statement { max-width:43ch; margin:0; color:rgba(255,255,255,.98); font-size:clamp(1rem,1.4vw,1.14rem); font-weight:500; text-shadow:0 2px 18px rgba(27,0,7,.84); }
-    .hero-actions { display:flex; align-items:flex-start; flex-direction:column; gap:9px; padding-top:28px; }
-    .hero-contact { display:inline-flex; align-items:center; justify-content:center; min-height:42px; padding:0 17px; border:1px solid var(--rose-300); color:#fff; font-size:.8rem; font-weight:700; letter-spacing:.03em; text-decoration:none; transition:background 180ms ease,color 180ms ease; }
+    .hero-actions { display:flex; padding-top:28px; }
+    .hero-contact { display:inline-flex; min-height:42px; align-items:center; justify-content:center; flex-direction:column; padding:0 17px; border:1px solid var(--rose-300); color:#fff; font-size:.8rem; font-weight:700; letter-spacing:.03em; line-height:1.3; text-decoration:none; transition:background 180ms ease,color 180ms ease; }
+    .hero-contact.has-availability { min-height:58px; padding-top:7px; padding-bottom:7px; }
     .hero-contact:hover,.hero-contact:focus-visible { background:var(--rose-300); color:var(--wine-950); }
-    .hero-availability { display:inline-flex; align-items:center; gap:7px; color:var(--rose-300); font-size:.72rem; font-weight:650; letter-spacing:.03em; line-height:1.3; white-space:nowrap; }
+    .hero-availability { display:inline-flex; align-items:center; gap:6px; margin-top:2px; color:var(--rose-300); font-size:.66rem; font-weight:550; letter-spacing:.025em; line-height:1.25; white-space:nowrap; transition:color 180ms ease; }
     .hero-availability[hidden] { display:none; }
     .hero-availability-dot { width:6px; height:6px; border-radius:50%; background:currentColor; box-shadow:0 0 0 3px rgba(225,145,162,.12); }
+    .hero-contact:hover .hero-availability,.hero-contact:focus-visible .hero-availability { color:var(--wine-950); }
     .hero-image-wrap { position:relative; align-self:stretch; min-height:500px; }
     .hero-image-wrap::after { position:absolute; z-index:1; inset:0; background:linear-gradient(90deg,var(--wine-950) 0%,transparent var(--hero-blend-desktop,32%)); content:""; pointer-events:none; }
     .hero-image { display:block; width:100%; height:100%; object-fit:cover; object-position:var(--hero-image-position,center top); filter:saturate(.78) contrast(.93); mix-blend-mode:luminosity; opacity:.96; }
@@ -571,8 +573,10 @@
           <h1 data-hero-field="title"></h1>
           <p class="hero-statement" data-hero-field="sentence"></p>
           <div class="hero-actions">
-            <a class="hero-contact" href="#" data-hero-field="contactButton"></a>
-            <span class="hero-availability"><span class="hero-availability-dot" aria-hidden="true"></span><span data-hero-field="availabilityHint"></span></span>
+            <a class="hero-contact" href="#">
+              <span data-hero-field="contactButton"></span>
+              <span class="hero-availability"><span class="hero-availability-dot" aria-hidden="true"></span><span data-hero-field="availabilityHint"></span></span>
+            </a>
           </div>
         </div>
         <div class="hero-image-wrap"><img class="hero-image" src="assets/carina_close2.JPG" alt="" fetchpriority="high"></div>
@@ -685,7 +689,9 @@
       document.querySelectorAll('[data-site-icon]').forEach((link) => { link.href = content.siteIcon; });
       const formatHeroTitle = (value) => String(value ?? '').split(/\r?\n/).map((line) => `<span class="hero-title-line">${format(line)}</span>`).join('');
       document.querySelectorAll('[data-hero-field]').forEach((element) => { element.innerHTML = element.dataset.heroField === 'title' ? formatHeroTitle(content.hero.title) : format(content.hero[element.dataset.heroField]); });
-      document.querySelector('.hero-availability').hidden = !String(content.hero.availabilityHint || '').trim();
+      const availabilityHint = document.querySelector('.hero-availability');
+      availabilityHint.hidden = !String(content.hero.availabilityHint || '').trim();
+      availabilityHint.closest('.hero-contact').classList.toggle('has-availability',!availabilityHint.hidden);
       document.querySelector('[data-footer-copyright]').textContent = content.footer.copyright;
       const impressumLink = document.querySelector('[data-impressum-link]');
       impressumLink.textContent = content.footer.impressumLabel;

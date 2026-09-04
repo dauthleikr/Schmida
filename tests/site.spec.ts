@@ -1628,18 +1628,15 @@ test('sections can be reordered, removed and changed to another registered layou
   await expect(page.frameLocator('#preview-frame').locator('.content-section').first()).toHaveAttribute('data-layout','image');
 });
 
-test('shows availability below the hero contact button', async ({ page }) => {
+test('shows availability inside the hero contact button', async ({ page }) => {
   await page.goto(siteUrl);
 
-  const contact = page.getByRole('link',{ name:'Erstgespräch vereinbaren',exact:true });
+  const contact = page.getByRole('link',{ name:'Erstgespräch vereinbaren Plätze verfügbar!',exact:true });
   const availability = page.locator('.hero-availability');
   await expect(contact).toBeVisible();
   await expect(availability).toHaveText('Plätze verfügbar!');
   await expect(availability).toBeVisible();
-  await expect(contact.locator('.hero-availability')).toHaveCount(0);
-  const positions = await Promise.all([contact,availability].map((element) => element.boundingBox()));
-  expect(positions[1]!.y).toBeGreaterThanOrEqual(positions[0]!.y + positions[0]!.height);
-  expect(positions[1]!.x).toBeCloseTo(positions[0]!.x,0);
+  await expect(contact.locator('.hero-availability')).toHaveCount(1);
 });
 
 test('rich-text controls and hero presentation remain editable', async ({ page }) => {
@@ -1717,7 +1714,7 @@ test('rich-text controls and hero presentation remain editable', async ({ page }
   await expect(preview.locator('.hero')).toHaveCSS('--hero-blend-desktop','55%');
   await expect(preview.locator('.hero')).toHaveCSS('--hero-blend-mobile','45%');
   await expect(preview.locator('#psychotherapie')).toHaveAttribute('data-title-size','small');
-  await expect(preview.getByRole('link',{ name:'Erstgespräch anfragen' })).toHaveAttribute('href','#kontakt');
+  await expect(preview.getByRole('link',{ name:'Erstgespräch anfragen Kurzfristig verfügbar' })).toHaveAttribute('href','#kontakt');
   await expect(preview.locator('.hero-availability')).toHaveText('Kurzfristig verfügbar');
   await expect(preview.locator('h1 strong')).toHaveText('Ein neuer Titel');
 
