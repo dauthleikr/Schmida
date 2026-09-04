@@ -1631,10 +1631,11 @@ test('sections can be reordered, removed and changed to another registered layou
 test('shows availability inside the hero contact button', async ({ page }) => {
   await page.goto(siteUrl);
 
-  const contact = page.getByRole('link',{ name:'Erstgespräch vereinbaren Plätze verfügbar!',exact:true });
+  const hero = await page.evaluate(() => window.practiceContentModel.normalize(window.practiceContent).hero);
+  const contact = page.getByRole('link',{ name:`${hero.contactButton} ${hero.availabilityHint}`,exact:true });
   const availability = page.locator('.hero-availability');
   await expect(contact).toBeVisible();
-  await expect(availability).toHaveText('Plätze verfügbar!');
+  await expect(availability).toHaveText(hero.availabilityHint);
   await expect(availability).toBeVisible();
   await expect(contact.locator('.hero-availability')).toHaveCount(1);
 });
